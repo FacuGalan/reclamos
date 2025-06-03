@@ -1,30 +1,52 @@
-# Laravel + Livewire Starter Kit
+Proyecto Laravel Livewire
+Requisitos previos
 
-## Introduction
+XAMPP (Apache, MySQL, PHP 8.1+)
+Composer
+Node.js y npm
+Git
 
-Our Laravel + [Livewire](https://livewire.laravel.com) starter kit provides a robust, modern starting point for building Laravel applications with a Livewire frontend.
+Instalación local
+1. Clonar el repositorio
+bashgit clone https://github.com/tu-usuario/nombre-repositorio.git
+cd nombre-repositorio
+2. Instalar dependencias de PHP
+bashcomposer install
+3. Instalar dependencias de Node.js
+bashnpm install
+4. Configurar el archivo de entorno
+bashcp .env.example .env
+5. Generar la clave de aplicación
+bashphp artisan key:generate
+6. Configurar la base de datos
 
-Livewire is a powerful way of building dynamic, reactive, frontend UIs using just PHP. It's a great fit for teams that primarily use Blade templates and are looking for a simpler alternative to JavaScript-driven SPA frameworks like React and Vue.
+Inicia XAMPP y activa Apache y MySQL
+Crea una base de datos en phpMyAdmin
+Edita el archivo .env con tus datos de conexión:
 
-This Livewire starter kit utilizes Livewire 3, Laravel Volt (optionally), TypeScript, Tailwind, and the [Flux UI](https://fluxui.dev) component library.
+envDB_DATABASE=nombre_tu_base_datos
+DB_USERNAME=root
+DB_PASSWORD=
+7. Ejecutar migraciones
+bashphp artisan migrate
+8. Compilar assets
+bashnpm run dev
+9. Iniciar el servidor de desarrollo
+bashphp artisan serve
+El proyecto estará disponible en http://localhost:8000
+Flujo de trabajo para colaboradores
+Antes de trabajar
+bashgit pull origin main
+composer install
+npm install
+Después de hacer cambios
+bashgit add .
+git commit -m "Descripción de los cambios"
+git push origin main
+Comandos útiles
 
-If you are looking for the alternate configurations of this starter kit, they can be found in the following branches:
-
-- [components](https://github.com/laravel/livewire-starter-kit/tree/components) - if Volt is not selected
-- [workos](https://github.com/laravel/livewire-starter-kit/tree/workos) - if WorkOS is selected for authentication
-
-## Official Documentation
-
-Documentation for all Laravel starter kits can be found on the [Laravel website](https://laravel.com/docs/starter-kits).
-
-## Contributing
-
-Thank you for considering contributing to our starter kit! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## License
-
-The Laravel + Livewire starter kit is open-sourced software licensed under the MIT license.
+php artisan serve - Iniciar servidor de desarrollo
+npm run dev - Compilar assets para desarrollo
+npm run build - Compilar assets para producción
+php artisan migrate:fresh - Recrear base de datos
+php artisan make:livewire NombreComponente - Crear componente Livewire
