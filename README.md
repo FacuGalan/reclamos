@@ -49,8 +49,5 @@ php artisan serve - Iniciar servidor de desarrollo
 npm run dev - Compilar assets para desarrollo
 npm run build - Compilar assets para producción
 php artisan migrate:fresh - Recrear base de datos
-<<<<<<< HEAD
-php artisan make:livewire NombreComponente - Crear componente Livewire
-=======
-php artisan make:livewire NombreComponente - Crear componente Livewire
->>>>>>> be74b89b73c63d03acf84a902214a6e5d9bdf09e
+# Descargar los cambios del repositorio remoto
+git pull origin main --allow-unrelated-histories
