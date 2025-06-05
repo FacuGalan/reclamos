@@ -20,4 +20,12 @@ class Area extends Model
     {
         return $this->belongsToMany(User::class, 'area_user');
     }
+
+    /**
+     * Relación uno a muchos con categorías
+     */
+    public function categorias()
+    {
+        return $this->hasMany(Categoria::class);
+    }
 }
