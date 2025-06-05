@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'telefono',
+        'rol_id',
         'password',
     ];
 
@@ -66,6 +67,15 @@ class User extends Authenticatable
     public function areas()
     {
         return $this->belongsToMany(Area::class, 'area_user');
+    }
+
+    /**
+     * Relación muchos a uno con rol
+     * Un usuario pertenece a un rol
+     */
+    public function rol()
+    {
+        return $this->belongsTo(UserRol::class, 'rol_id');
     }
 
     /**
