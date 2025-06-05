@@ -2,5 +2,10 @@
     <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
 </div>
 <div class="ms-1 grid flex-1 text-start text-sm">
-    <span class="mb-0.5 truncate leading-none font-semibold">Reclamos 147 (PRUEBA GIT)</span>
+    <span class="mb-0.5 truncate leading-none font-semibold">Reclamos 147</span>
+    @auth
+        <span class="text-xs text-zinc-500 dark:text-zinc-400 truncate">{{ auth()->user()->name }}</span>
+    @else
+        <span class="text-xs text-zinc-500 dark:text-zinc-400 truncate">(No autenticado)</span>
+    @endauth
 </div>

@@ -19,8 +19,10 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'dni',
         'name',
         'email',
+        'telefono',
         'password',
     ];
 
@@ -56,5 +58,21 @@ class User extends Authenticatable
             ->explode(' ')
             ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
+    }
+
+    /**
+     * Relación muchos a muchos con areas
+     */
+    public function areas()
+    {
+        return $this->belongsToMany(Area::class, 'area_user');
+    }
+
+    /**
+     * Override para usar DNI en lugar de email para autenticación
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'dni';
     }
 }
