@@ -24,4 +24,12 @@ class Reclamo extends Model
     {
         return $this->belongsTo(Categoria::class, 'categoria_id');
     }
+    public function responsable()
+    {
+        return $this->belongsTo(User::class, 'responsable_id');
+    }
+    public function movimientos()
+    {
+        return $this->hasMany(Movimiento::class, 'reclamo_id');
+    }
 }

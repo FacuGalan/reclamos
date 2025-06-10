@@ -20,4 +20,8 @@ class Movimiento extends Model
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
+    public function reclamo()
+    {
+        return $this->belongsTo(Reclamo::class, 'reclamo_id');
+    }
 }
