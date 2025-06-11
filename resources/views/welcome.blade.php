@@ -12,7 +12,9 @@
             </h1>
         </flux:header>
 
-        <main class="flex justify-start " >
+
+
+        <main class="flex items-center justify-center" >
             {!! $slot ?? 'Welcome to your application!' !!}
         </main>
 

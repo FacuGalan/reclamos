@@ -8,19 +8,21 @@ Route::get('/', function () {
     return view('welcome', ['slot' => view('home')]);
 })->name('home');
 
-// Rutas para las otras secciones (las crearemos después)
+// Ruta para nuevo reclamo que carga la vista nuevo-reclamo en el slot
 Route::get('/nuevo-reclamo', function () {
-    return view('welcome', ['slot' => view('nuevo-reclamo')]);
+    return view('welcome', ['slot' => view('reclamos/nuevo-reclamo')]);
 })->name('nuevo-reclamo');
 
-Route::get('/consultar-reclamo', function () {
-    return view('welcome', ['slot' => view('consultar-reclamo')]);
-})->name('consultar-reclamo');
+// Rutas para las otras secciones (las crearemos después)
+Route::get('/nuevo-reporte', function () {
+    return view('welcome', ['slot' => view('nuevo-reporte')]);
+})->name('nuevo-reporte');
 
-Route::get('/informacion', function () {
-    return view('welcome', ['slot' => view('informacion')]);
-})->name('informacion');
+Route::get('/tramites', function () {
+    return view('welcome', ['slot' => view('tramites')]);
+})->name('tramites');
 
+// Rutas del dashboard (área privada)
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -29,6 +31,7 @@ Route::view('reclamos', 'reclamos')
     ->middleware(['auth', 'verified'])
     ->name('reclamos');
 
+// Rutas de configuración
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
