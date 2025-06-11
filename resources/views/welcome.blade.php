@@ -12,8 +12,8 @@
             </h1>
         </flux:header>
 
-        <main class="flex items-center justify-center min-h-screen">
-            {{ $slot ?? 'Welcome to your application!' }}
+        <main class="flex  justify-start min-h-screen" >
+            {!! $slot ?? 'Welcome to your application!' !!}
         </main>
 
         @fluxScripts
