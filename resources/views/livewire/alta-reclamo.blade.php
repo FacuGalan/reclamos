@@ -48,7 +48,7 @@
         <!-- Formulario de creación -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Nuevo Reclamo</h1>
-            <p class="text-gray-600 dark:text-gray-300">Complete el formulario para registrar su reclamo</p>
+            <p class="text-gray-600 dark:text-gray-300">Complete los datos del formulario para registrar su reclamo</p>
         </div>
 
         <!-- Indicador de pasos -->
@@ -62,7 +62,7 @@
                             1
                         </div>
                         <span class="ml-2 text-sm {{ $step >= 1 ? 'text-blue-600 font-medium' : 'text-gray-500' }}">
-                            Datos personales
+                            Personales
                         </span>
                     </div>
                     
@@ -77,7 +77,7 @@
                         {{ $showPersonaForm ? '2' : '1' }}
                     </div>
                     <span class="ml-2 text-sm {{ $step >= 2 ? 'text-blue-600 font-medium' : 'text-gray-500' }}">
-                        Datos del reclamo
+                        Reclamo
                     </span>
                 </div>
                 
@@ -295,9 +295,8 @@
                     </div>
                 </div>
             @endif
-        </div>
 
-        <!-- Botones de navegación -->
+            <!-- Botones de navegación -->
         <div class="mt-8 flex justify-between">
             <div>
                 @if ($step > 1 && $showPersonaForm)
@@ -331,5 +330,8 @@
                 @endif
             </div>
         </div>
+        </div>
+
+        
     @endif
 </div>
