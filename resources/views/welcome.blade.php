@@ -4,10 +4,10 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:header class="border-b pt-10 pb-10 border-zinc-200 bg-slate-700 
-                        dark:border-zinc-700 dark:bg-slate-700 flex flex-col justify-center items-center">
+        <flux:header class="border-b pt-3 pb-3 border-zinc-200 bg-slate-700 
+                        dark:border-zinc-700 dark:bg-slate-700 flex flex-col justify-center items-center" >
             <x-app-logo-icon class="mb-2" />
-            <h1 class="text-3xl font-bold text-white">
+            <h1 class="text-2xl font-bold text-white">
                 Atención al ciudadano
             </h1>
         </flux:header>
@@ -28,7 +28,7 @@
                             <p class="text-sm text-gray-300">Ciudad de todos</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
                         <!--div class="text-center md:text-left">
                             <p class="text-white text-sm font-medium">Horarios de atención</p>

@@ -58,7 +58,7 @@ class AltaReclamo extends Component
     ];
 
     protected $messages = [
-        'persona_dni.required' => 'El DNI es obligatorio',
+        'persona_dni.required' => 'El DNI es obligatorio pone uno bueno',
         'persona_dni.numeric' => 'El DNI debe contener solo números',
         'persona_dni.digits_between' => 'El DNI debe tener entre 7 y 11 dígitos',
         'persona_nombre.required' => 'El nombre es obligatorio',
