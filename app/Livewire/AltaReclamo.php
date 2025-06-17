@@ -190,13 +190,6 @@ class AltaReclamo extends Component
 
     public function save()
     {
-        /*
-        // Validar todos los datos
-        if ($this->showPersonaForm) {
-            $this->validateStep1();
-        }
-        $this->validateStep2();
-        */
         try {
             DB::beginTransaction();
 
@@ -232,27 +225,17 @@ class AltaReclamo extends Component
                 ]);
             }
 
-            // Crear o actualizar 
-            /* LO GUARDO PARA VER EL UPDATEORCREATE
-            $domicilio = Domicilios::updateOrCreate(
-                [
-                    'persona_id' => $persona->id,
-                    'direccion' => $this->direccion,
-                ],
-                [
-                    'entre_calles' => $this->entre_calles,
-                    'coordenadas' => $this->coordenadas,
-                ]
-            );
-            */
-
-            // Obtener estado inicial (asumo que existe un estado "Pendiente" con ID 1)
+            // Obtener estado inicial
             $estadoInicial = Estado::where('nombre', 'Pendiente')->first();
             if (!$estadoInicial) {
-                $estadoInicial = Estado::first(); // Tomar el primer estado disponible
+                $estadoInicial = Estado::first();
             }
 
             $this->area_id = Categoria::find($this->categoria_id)->area_id ?? null;
+            
+            // Obtener el nombre de la categoría
+            $categoria = Categoria::find($this->categoria_id);
+            $nombreCategoria = $categoria ? $categoria->nombre : 'Sin categoría';
 
             // Crear el reclamo
             $this->reclamoCreado = Reclamo::create([
@@ -266,25 +249,22 @@ class AltaReclamo extends Component
                 'estado_id' => $estadoInicial->id,
                 'persona_id' => $persona->id,
                 'domicilio_id' => $domicilio->id,
-                'usuario_id' => Auth::id() ?? 1, // Si no hay usuario autenticado, usar ID 1 (admin por defecto)
+                'usuario_id' => Auth::id() ?? 1,
                 'responsable_id' => Auth::id() ?? 1,
             ]);
 
             DB::commit();
 
-            $this->showSuccess = true;
-            
-            // Emitir evento para notificar el éxito
-            $this->dispatch('reclamo-creado', [
+            // Emitir evento de JavaScript para mostrar notificación
+            $this->dispatch('reclamo-creado-exitoso', [
                 'id' => $this->reclamoCreado->id,
-                'message' => $this->successMessage
+                'fecha' => $this->reclamoCreado->fecha,
+                'nombre_completo' => $this->persona_nombre . ' ' . $this->persona_apellido,
+                'categoria' => $nombreCategoria
             ]);
 
-            // Si hay URL de redirección, redirigir después de unos segundos
-            if ($this->redirectAfterSave) {
-                session()->flash('success', $this->successMessage);
-                $this->redirect($this->redirectAfterSave, navigate: true);
-            }
+            // Redirigir al home después de un pequeño delay
+            $this->js('setTimeout(() => { window.location.href = "' . route('home') . '" }, 10000)');
 
         } catch (\Exception $e) {
             DB::rollBack();
