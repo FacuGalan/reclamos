@@ -7,7 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 class Reclamo extends Model
 {
     //
-    protected $fillable = ['fecha', 'observaciones', 'estado_id', 'coordenadas', 'usuario_id'];
+    protected $fillable = [
+        'fecha', 
+        'descripcion',        
+        'direccion',            
+        'entre_calles',         
+        'observaciones', 
+        'estado_id', 
+        'coordenadas', 
+        'usuario_id',
+        'area_id',          
+        'categoria_id',       
+        'responsable_id',      
+        'persona_id',           
+        'domicilio_id'          
+    ];
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id');
@@ -31,5 +45,15 @@ class Reclamo extends Model
     public function movimientos()
     {
         return $this->hasMany(Movimiento::class, 'reclamo_id');
+    }
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class, 'persona_id');
+    }
+
+    public function domicilio()
+    {
+        return $this->belongsTo(Domicilios::class, 'domicilio_id');
     }
 }

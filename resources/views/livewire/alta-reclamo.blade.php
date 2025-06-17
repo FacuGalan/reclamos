@@ -1,4 +1,5 @@
 <div class="max-w-4xl mx-auto p-6">
+    
     @if (session('error'))
         <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
             {{ session('error') }}
@@ -110,10 +111,13 @@
                         </label>
                         <input 
                             type="text" 
-                            wire:model="persona_dni"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            wire:model.live.debounce.300ms="persona_dni"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                                {{ $personaEncontrada ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : '' }}"
                             placeholder="Ingrese su DNI">
+
                         @error('persona_dni') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                      
                     </div>
                     
                     <div>
@@ -123,7 +127,9 @@
                         <input 
                             type="text" 
                             wire:model="persona_nombre"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                                {{ $personaEncontrada ? 'bg-gray-100 dark:bg-gray-600' : '' }}"
+                            {{ $personaEncontrada ? 'readonly' : '' }}
                             placeholder="Ingrese su nombre">
                         @error('persona_nombre') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -135,7 +141,9 @@
                         <input 
                             type="text" 
                             wire:model="persona_apellido"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                                {{ $personaEncontrada ? 'bg-gray-100 dark:bg-gray-600' : '' }}"
+                            {{ $personaEncontrada ? 'readonly' : '' }}
                             placeholder="Ingrese su apellido">
                         @error('persona_apellido') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -170,43 +178,17 @@
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos del Reclamo</h2>
                 
                 <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Descripción del reclamo *
-                        </label>
-                        <textarea 
-                            wire:model="descripcion"
-                            rows="4"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                            placeholder="Describa detalladamente su reclamo"></textarea>
-                        @error('descripcion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Área *
-                            </label>
-                            <select 
-                                wire:model.live="area_id"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                                <option value="">Seleccione un área</option>
-                                @foreach($areas as $area)
-                                    <option value="{{ $area->id }}">{{ $area->nombre }} ({{ $area->secretaria->nombre }})</option>
-                                @endforeach
-                            </select>
-                            @error('area_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Categoría *
+                                Motivo *
                             </label>
                             <select 
                                 wire:model="categoria_id"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                                 {{ empty($categorias) ? 'disabled' : '' }}>
-                                <option value="">{{ empty($categorias) ? 'Primero seleccione un área' : 'Seleccione una categoría' }}</option>
+                                <option value="">Seleccione un motivo</option>
                                 @foreach($categorias as $categoria)
                                     <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
                                 @endforeach
@@ -237,6 +219,18 @@
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                             placeholder="Entre qué calles se encuentra">
                         @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Descripción del reclamo *
+                        </label>
+                        <textarea 
+                            wire:model="descripcion"
+                            rows="4"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            placeholder="Describa detalladamente su reclamo"></textarea>
+                        @error('descripcion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
                     
                     <div>
@@ -273,15 +267,9 @@
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                         <h3 class="font-medium text-gray-800 dark:text-white mb-3">Datos del Reclamo</h3>
                         <div class="space-y-2 text-sm">
-                            <p><strong>Área:</strong> 
-                                @if($area_id)
-                                    {{ $areas->find($area_id)->nombre ?? 'Área no encontrada' }}
-                                    ({{ $areas->find($area_id)->secretaria->nombre ?? '' }})
-                                @endif
-                            </p>
-                            <p><strong>Categoría:</strong> 
+                            <p><strong>Motivo del reclamo:</strong> 
                                 @if($categoria_id)
-                                    {{ $categorias->find($categoria_id)->nombre ?? 'Categoría no encontrada' }}
+                                    {{ $categorias->find($categoria_id)->nombre ?? 'Motivo no encontrado' }}
                                 @endif
                             </p>
                             <p><strong>Dirección:</strong> {{ $direccion }}</p>
@@ -334,4 +322,5 @@
 
         
     @endif
+
 </div>

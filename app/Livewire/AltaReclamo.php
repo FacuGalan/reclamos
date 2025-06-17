@@ -35,13 +35,14 @@ class AltaReclamo extends Component
     public $reclamoCreado = null;
     
     // Datos para selects
-    public $areas = [];
     public $categorias = [];
     
     // Props para reutilización
     public $showPersonaForm = true; // Si false, usa el usuario autenticado
     public $redirectAfterSave = null; // URL de redirección después de guardar
     public $successMessage = 'Reclamo creado exitosamente';
+
+    public $personaEncontrada = false;
 
     protected $rules = [
         'persona_dni' => 'required|numeric|digits_between:7,11',
@@ -53,7 +54,6 @@ class AltaReclamo extends Component
         'direccion' => 'required|string|max:255',
         'entre_calles' => 'nullable|string|max:255',
         'coordenadas' => 'required|string',
-        'area_id' => 'required|exists:areas,id',
         'categoria_id' => 'required|exists:categorias,id',
     ];
 
@@ -69,13 +69,14 @@ class AltaReclamo extends Component
         'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
         'direccion.required' => 'La dirección es obligatoria',
         'coordenadas.required' => 'Las coordenadas son obligatorias',
-        'area_id.required' => 'Debe seleccionar un área',
         'categoria_id.required' => 'Debe seleccionar una categoría',
     ];
 
     public function mount()
     {
-        $this->areas = Area::with('secretaria')->orderBy('nombre')->get();
+        $this->categorias = Categoria::where('privada', false)
+            ->orderBy('nombre')
+            ->get();
         
         // Si el usuario está autenticado y no se quiere mostrar el form de persona
         if (!$this->showPersonaForm && Auth::check()) {
@@ -89,10 +90,60 @@ class AltaReclamo extends Component
         }
     }
 
-    public function updatedAreaId()
+    // DNI: Se ejecuta cuando cambia el DNI
+    public function updatedPersonaDni()
     {
-        $this->categoria_id = '';
-        $this->categorias = Categoria::where('area_id', $this->area_id)->orderBy('nombre')->get();
+        // Limpiar errores previos del DNI
+        $this->resetErrorBag('persona_dni');
+        
+        // Solo buscar si el DNI tiene al menos 7 dígitos y es numérico
+        if (strlen($this->persona_dni) >= 7 && is_numeric($this->persona_dni)) {
+            $this->buscarPersonaPorDni();
+        } else {
+            // Si el DNI no es válido, limpiar los campos
+            $this->limpiarDatosPersona();
+        }
+    }
+
+    // DNI: Buscar persona por DNI
+    public function buscarPersonaPorDni()
+    {
+        try {
+            $persona = Persona::where('dni', $this->persona_dni)->first();
+            
+            if ($persona) {
+                // Persona encontrada - completar campos automáticamente
+                $this->persona_nombre = $persona->nombre;
+                $this->persona_apellido = $persona->apellido;
+                $this->persona_telefono = $persona->telefono;
+                $this->persona_email = $persona->email;
+                $this->personaEncontrada = true;
+                
+                // Emitir evento de JavaScript para mostrar notificación
+                $this->dispatch('persona-encontrada', [
+                    'mensaje' => 'Persona encontrada en el sistema. Datos completados automáticamente.'
+                ]);
+                
+            } else {
+                // Persona no encontrada - limpiar campos
+                $this->limpiarDatosPersona();
+                $this->personaEncontrada = false;
+            }
+        } catch (\Exception $e) {
+            // En caso de error, limpiar campos
+            $this->limpiarDatosPersona();
+            $this->personaEncontrada = false;
+        }
+    }
+
+    // DNI: Limpiar datos de persona
+    private function limpiarDatosPersona()
+    {
+        $this->persona_nombre = '';
+        $this->persona_apellido = '';
+        $this->persona_telefono = '';
+        $this->persona_email = '';
+        $this->personaEncontrada = false;
     }
 
     public function nextStep()
@@ -133,7 +184,6 @@ class AltaReclamo extends Component
             'direccion' => $this->rules['direccion'],
             'entre_calles' => $this->rules['entre_calles'],
             'coordenadas' => $this->rules['coordenadas'],
-            'area_id' => $this->rules['area_id'],
             'categoria_id' => $this->rules['categoria_id'],
         ]);
     }
@@ -170,7 +220,19 @@ class AltaReclamo extends Component
                 ]);
             }
 
-            // Crear o actualizar domicilio
+            $domicilio = Domicilios::where('dni', $this->persona_dni)->first();
+            
+            if (!$domicilio) {
+                $domicilio = Domicilios::create([
+                    'persona_id' => $persona->id,
+                    'direccion' => $this->direccion,
+                    'entre_calles' => $this->entre_calles,
+                    'coordenadas' => $this->coordenadas,
+                ]);
+            }
+
+            // Crear o actualizar 
+            /* LO GUARDO PARA VER EL UPDATEORCREATE
             $domicilio = Domicilios::updateOrCreate(
                 [
                     'persona_id' => $persona->id,
@@ -181,6 +243,7 @@ class AltaReclamo extends Component
                     'coordenadas' => $this->coordenadas,
                 ]
             );
+            */
 
             // Obtener estado inicial (asumo que existe un estado "Pendiente" con ID 1)
             $estadoInicial = Estado::where('nombre', 'Pendiente')->first();
@@ -198,6 +261,8 @@ class AltaReclamo extends Component
                 'area_id' => $this->area_id,
                 'categoria_id' => $this->categoria_id,
                 'estado_id' => $estadoInicial->id,
+                'persona_id' => $persona->id,
+                'domicilio_id' => $domicilio->id,
                 'usuario_id' => Auth::id() ?? 1, // Si no hay usuario autenticado, usar ID 1 (admin por defecto)
                 'responsable_id' => Auth::id() ?? 1,
             ]);
