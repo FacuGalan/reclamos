@@ -100,7 +100,7 @@
 
         <!-- Contenido de los pasos -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            @if ($step == 1 && $showPersonaForm)
+            @if ($step == 1 )
                 <!-- Paso 1: Datos personales -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos Personales</h2>
                 
@@ -126,6 +126,7 @@
                         </label>
                         <input 
                             type="text" 
+                            id="persona_nombre"
                             wire:model="persona_nombre"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
                                 {{ $personaEncontrada ? 'bg-gray-100 dark:bg-gray-600' : '' }}"
@@ -140,6 +141,7 @@
                         </label>
                         <input 
                             type="text" 
+                            id="persona_apellido"
                             wire:model="persona_apellido"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
                                 {{ $personaEncontrada ? 'bg-gray-100 dark:bg-gray-600' : '' }}"
@@ -150,10 +152,11 @@
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Teléfono
+                            Teléfono *
                         </label>
                         <input 
                             type="text" 
+                            id="persona_telefono"
                             wire:model="persona_telefono"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                             placeholder="Ingrese su teléfono">
@@ -166,6 +169,7 @@
                         </label>
                         <input 
                             type="email" 
+                            id="persona_email"
                             wire:model="persona_email"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                             placeholder="Ingrese su email">
@@ -173,7 +177,7 @@
                     </div>
                 </div>
 
-            @elseif ($step == 2 || ($step == 1 && !$showPersonaForm))
+            @elseif ($step == 2 )
                 <!-- Paso 2: Datos del reclamo -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos del Reclamo</h2>
                 
@@ -247,7 +251,7 @@
                     </div>
                 </div>
 
-            @elseif ($step == 3 || ($step == 2 && !$showPersonaForm))
+            @elseif ($step == 3 )
                 <!-- Paso 3: Confirmación -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Confirmar Reclamo</h2>
                 
@@ -258,7 +262,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                 <p><strong>DNI:</strong> {{ $persona_dni }}</p>
                                 <p><strong>Nombre:</strong> {{ $persona_nombre }} {{ $persona_apellido }}</p>
-                                <p><strong>Teléfono:</strong> {{ $persona_telefono ?: 'No especificado' }}</p>
+                                <p><strong>Teléfono:</strong> {{ $persona_telefono }}</p>
                                 <p><strong>Email:</strong> {{ $persona_email ?: 'No especificado' }}</p>
                             </div>
                         </div>

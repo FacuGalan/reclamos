@@ -78,7 +78,16 @@ class AltaReclamo extends Component
             ->orderBy('nombre')
             ->get();
         
-    
+        // Si el usuario está autenticado y no se quiere mostrar el form de persona
+        if (!$this->showPersonaForm && Auth::check()) {
+            $user = Auth::user();
+            $this->persona_dni = $user->dni;
+            $this->persona_nombre = explode(' ', $user->name)[0] ?? '';
+            $this->persona_apellido = explode(' ', $user->name, 2)[1] ?? '';
+            $this->persona_telefono = $user->telefono;
+            $this->persona_email = $user->email;
+            $this->step = 2; // Saltar al paso 2
+        }
     }
 
     // DNI: Se ejecuta cuando cambia el DNI
@@ -169,7 +178,7 @@ class AltaReclamo extends Component
     }
 
     public function validateStep2()
-    {   
+    {
         $this->validate([
             'descripcion' => $this->rules['descripcion'],
             'direccion' => $this->rules['direccion'],
