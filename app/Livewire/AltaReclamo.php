@@ -190,12 +190,13 @@ class AltaReclamo extends Component
 
     public function save()
     {
+        /*
         // Validar todos los datos
         if ($this->showPersonaForm) {
             $this->validateStep1();
         }
         $this->validateStep2();
-
+        */
         try {
             DB::beginTransaction();
 
@@ -220,7 +221,7 @@ class AltaReclamo extends Component
                 ]);
             }
 
-            $domicilio = Domicilios::where('dni', $this->persona_dni)->first();
+            $domicilio = Domicilios::where('coordenadas', $this->coordenadas)->where('persona_id', $persona->id)->first();
             
             if (!$domicilio) {
                 $domicilio = Domicilios::create([
@@ -250,6 +251,8 @@ class AltaReclamo extends Component
             if (!$estadoInicial) {
                 $estadoInicial = Estado::first(); // Tomar el primer estado disponible
             }
+
+            $this->area_id = Categoria::find($this->categoria_id)->area_id ?? null;
 
             // Crear el reclamo
             $this->reclamoCreado = Reclamo::create([

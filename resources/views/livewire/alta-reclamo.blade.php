@@ -59,39 +59,39 @@
                     <!-- Paso 1: Datos personales -->
                     <div class="flex items-center">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                                    {{ $step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600' }}">
+                                    {{ $step >= 1 ? 'bg-[#77BF43] text-white' : 'bg-gray-200 text-gray-600' }}">
                             1
                         </div>
-                        <span class="ml-2 text-sm {{ $step >= 1 ? 'text-blue-600 font-medium' : 'text-gray-500' }}">
+                        <span class="ml-2 text-sm {{ $step >= 1 ? 'text-[#77BF43] font-medium' : 'text-gray-500' }}">
                             Personales
                         </span>
                     </div>
                     
                     <!-- Línea conectora -->
-                    <div class="w-12 h-0.5 {{ $step >= 2 ? 'bg-blue-600' : 'bg-gray-200' }}"></div>
+                    <div class="w-12 h-0.5 {{ $step >= 2 ? 'bg-[#77BF43]' : 'bg-gray-200' }}"></div>
                 @endif
                 
                 <!-- Paso 2: Datos del reclamo -->
                 <div class="flex items-center">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                                {{ $step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600' }}">
+                                {{ $step >= 2 ? 'bg-[#77BF43] text-white' : 'bg-gray-200 text-gray-600' }}">
                         {{ $showPersonaForm ? '2' : '1' }}
                     </div>
-                    <span class="ml-2 text-sm {{ $step >= 2 ? 'text-blue-600 font-medium' : 'text-gray-500' }}">
+                    <span class="ml-2 text-sm {{ $step >= 2 ? 'text-[#77BF43] font-medium' : 'text-gray-500' }}">
                         Reclamo
                     </span>
                 </div>
                 
                 <!-- Línea conectora -->
-                <div class="w-12 h-0.5 {{ $step >= 3 ? 'bg-blue-600' : 'bg-gray-200' }}"></div>
+                <div class="w-12 h-0.5 {{ $step >= 3 ? 'bg-[#77BF43]' : 'bg-gray-200' }}"></div>
                 
                 <!-- Paso 3: Confirmación -->
                 <div class="flex items-center">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                                {{ $step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600' }}">
+                                {{ $step >= 3 ? 'bg-[#77BF43] text-white' : 'bg-gray-200 text-gray-600' }}">
                         {{ $showPersonaForm ? '3' : '2' }}
                     </div>
-                    <span class="ml-2 text-sm {{ $step >= 3 ? 'text-blue-600 font-medium' : 'text-gray-500' }}">
+                    <span class="ml-2 text-sm {{ $step >= 3 ? 'text-[#77BF43] font-medium' : 'text-gray-500' }}">
                         Confirmación
                     </span>
                 </div>
@@ -290,13 +290,13 @@
                 @if ($step > 1 && $showPersonaForm)
                     <button 
                         wire:click="previousStep"
-                        class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        class="px-6 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer">
                         Anterior
                     </button>
                 @elseif ($step > 1 && !$showPersonaForm)
                     <button 
                         wire:click="previousStep"
-                        class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        class="px-6 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer">
                         Anterior
                     </button>
                 @endif
@@ -306,13 +306,13 @@
                 @if (($step < 3 && $showPersonaForm) || ($step < 2 && !$showPersonaForm))
                     <button 
                         wire:click="nextStep"
-                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        class="px-6 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer">
                         Siguiente
                     </button>
                 @else
                     <button 
                         wire:click="save"
-                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer">
                         Crear Reclamo
                     </button>
                 @endif
