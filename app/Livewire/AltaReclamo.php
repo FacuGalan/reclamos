@@ -48,7 +48,7 @@ class AltaReclamo extends Component
         'persona_dni' => 'required|numeric|digits_between:7,11',
         'persona_nombre' => 'required|string|max:255',
         'persona_apellido' => 'required|string|max:255',
-        'persona_telefono' => 'nullable|numeric|digits_between:10,15',
+        'persona_telefono' => 'required|numeric|digits_between:10,15',
         'persona_email' => 'nullable|email|max:255',
         'descripcion' => 'required|string|max:1000',
         'direccion' => 'required|string|max:255',
