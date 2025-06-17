@@ -18,8 +18,8 @@
             {!! $slot ?? 'Welcome to your application!' !!}
         </main>
 
-        <footer class="border-t border-zinc-200 bg-slate-700 dark:border-zinc-700 dark:bg-slate-700 py-4">
-            <div class="container mx-auto px-4 pt-4">
+        <footer class="border-t border-zinc-200 bg-slate-700 dark:border-zinc-700 dark:bg-slate-700 pt-2">
+            <div class="container mx-auto px-4 pt-2">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-2">
                         <img  src="{{ asset('logo-muni-m.svg') }}" alt="Logo Municipalidad" class="w-16 h-16">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
     
-                <p class="text-gray-400 text-xs text-center pb-4">
+                <p class="text-gray-400 text-xs text-center pb-0">
                     © {{ date('Y') }} Municipalidad de Mercedes. Todos los derechos reservados.
                 </p>
 

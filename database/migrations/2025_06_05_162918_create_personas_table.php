@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('personas', function (Blueprint $table) {
             $table->id();
             $table->integer('dni')->unique();
-            $table->string('nombre')->unique();
+            $table->string('nombre');
             $table->integer('telefono')->nullable();
-            $table->string('email')->unique()->nullable();
+            $table->string('email')->nullable();
             $table->timestamps();
         });
     }
