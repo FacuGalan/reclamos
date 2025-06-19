@@ -36,6 +36,7 @@ class AltaReclamo extends Component
     
     // Datos para selects
     public $categorias = [];
+    public $categoriasFiltradas = [];
     
     // Props para reutilización
     public $showPersonaForm = true; // Si false, usa el usuario autenticado
@@ -43,6 +44,11 @@ class AltaReclamo extends Component
     public $successMessage = 'Reclamo creado exitosamente';
 
     public $personaEncontrada = false;
+
+    // Nuevas propiedades para el searchable select
+    public $categoriaBusqueda = '';
+    public $mostrarDropdown = false;
+    public $categoriaSeleccionada = null;
 
     protected $rules = [
         'persona_dni' => 'required|numeric|digits_between:7,11',
@@ -77,6 +83,8 @@ class AltaReclamo extends Component
         $this->categorias = Categoria::where('privada', false)
             ->orderBy('nombre')
             ->get();
+
+        $this->categoriasFiltradas = $this->categorias;
         
         // Si el usuario está autenticado y no se quiere mostrar el form de persona
         if (!$this->showPersonaForm && Auth::check()) {
@@ -88,6 +96,51 @@ class AltaReclamo extends Component
             $this->persona_email = $user->email;
             $this->step = 2; // Saltar al paso 2
         }
+    }
+
+    // Método para filtrar categorías cuando se escribe en el input
+    public function updatedCategoriaBusqueda()
+    {
+        if (empty($this->categoriaBusqueda)) {
+            $this->categoriasFiltradas = $this->categorias;
+            $this->mostrarDropdown = false;
+            $this->categoria_id = '';
+            $this->categoriaSeleccionada = null;
+        } else {
+            $this->categoriasFiltradas = $this->categorias->filter(function ($categoria) {
+                return stripos($categoria->nombre, $this->categoriaBusqueda) !== false;
+            });
+            $this->mostrarDropdown = true;
+        }
+    }
+
+    // Método para seleccionar una categoría del dropdown
+    public function seleccionarCategoria($categoriaId)
+    {
+        $categoria = $this->categorias->find($categoriaId);
+        if ($categoria) {
+            $this->categoria_id = $categoria->id;
+            $this->categoriaBusqueda = $categoria->nombre;
+            $this->categoriaSeleccionada = $categoria;
+            $this->mostrarDropdown = false;
+            
+            // Limpiar errores de validación
+            $this->resetErrorBag('categoria_id');
+        }
+    }
+
+    // Método para mostrar todas las categorías cuando se hace clic en el input
+    public function mostrarTodasCategorias()
+    {
+        $this->categoriasFiltradas = $this->categorias;
+        $this->mostrarDropdown = true;
+    }
+
+    // Método para ocultar el dropdown
+    public function ocultarDropdown()
+    {
+        // Delay para permitir que se registre el click en una opción
+        $this->dispatch('delay-hide-dropdown');
     }
 
     // DNI: Se ejecuta cuando cambia el DNI

@@ -269,21 +269,86 @@
                 <div class="space-y-6">
                     
                     <div class="grid grid-cols-1 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Motivo *
-                            </label>
-                            <select 
-                                wire:model="categoria_id"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                {{ empty($categorias) ? 'disabled' : '' }}>
-                                <option value="">Seleccione un motivo</option>
-                                @foreach($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
-                                @endforeach
-                            </select>
-                            @error('categoria_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
+                        <div x-data="{
+                                search: '',
+                                open: false,
+                                selectedId: @entangle('categoria_id'),
+                                categorias: @js($categorias),
+                                
+                                get filteredCategorias() {
+                                    if (this.search === '') {
+                                        return this.categorias;
+                                    }
+                                    return this.categorias.filter(categoria => 
+                                        categoria.nombre.toLowerCase().includes(this.search.toLowerCase())
+                                    );
+                                },
+                                
+                                selectCategoria(categoria) {
+                                    this.selectedId = categoria.id;
+                                    this.search = categoria.nombre;
+                                    this.open = false;
+                                },
+                                
+                                get selectedCategoria() {
+                                    return this.categorias.find(c => c.id == this.selectedId);
+                                }
+                            }" 
+                            class="relative">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Motivo *
+                                </label>
+                                
+                                <!-- Input principal -->
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @click="open = true"
+                                        @blur="setTimeout(() => open = false, 150)"
+                                        class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                        placeholder="Busque o seleccione un motivo..."
+                                        autocomplete="off">
+                                    
+                                    <!-- Ícono de flecha -->
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400 transform transition-transform" 
+                                            :class="{ 'rotate-180': open }" 
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dropdown -->
+                                <div x-show="open" 
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="transform opacity-0 scale-95"
+                                    x-transition:enter-end="transform opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="transform opacity-100 scale-100"
+                                    x-transition:leave-end="transform opacity-0 scale-95"
+                                    class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    
+                                    <template x-for="categoria in filteredCategorias" :key="categoria.id">
+                                        <div @click="selectCategoria(categoria)"
+                                            class="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition-colors"
+                                            :class="{ 'bg-blue-100 dark:bg-blue-900': selectedId == categoria.id }"
+                                            x-text="categoria.nombre">
+                                        </div>
+                                    </template>
+                                    
+                                    <div x-show="filteredCategorias.length === 0" 
+                                        class="px-3 py-2 text-gray-500 dark:text-gray-400 text-center">
+                                        No se encontraron motivos que coincidan con su búsqueda
+                                    </div>
+                                </div>
+                                
+                                @error('categoria_id') 
+                                    <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                                @enderror
+                            </div>
                     </div>
                     
                     <div>
