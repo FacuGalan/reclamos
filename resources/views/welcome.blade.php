@@ -9,7 +9,9 @@
                         flex flex-col items-center justify-center
                         md:flex-row md:items-center md:relative" >
             <!-- Imagen: centrada arriba en móvil, izquierda en escritorio -->
-            <x-app-logo-icon class="w-40 mb-2 md:mb-0 md:absolute md:left-4" />
+            <a href="{{ route('home') }}" class="w-40 mb-2 md:mb-0 md:absolute md:left-4 hover:opacity-80 transition-opacity duration-200">
+    <x-app-logo-icon class="w-full" />
+</a>
             
             <!-- Título: centrado abajo en móvil, centrado en escritorio -->
             <h1 class="text-2xl font-bold text-white text-center md:flex-1">

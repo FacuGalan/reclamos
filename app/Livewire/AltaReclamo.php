@@ -12,6 +12,11 @@ use App\Models\Domicilios;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property Collection $categorias
+ * @property Collection $categoriasFiltradas
+ */
+
 class AltaReclamo extends Component
 {
     // Datos del reclamo
@@ -307,7 +312,7 @@ class AltaReclamo extends Component
             ]);
 
             DB::commit();
-
+            
             // Emitir evento de JavaScript para mostrar notificación
             $this->dispatch('reclamo-creado-exitoso', [
                 'id' => $this->reclamoCreado->id,

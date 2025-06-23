@@ -1,3 +1,3 @@
 <x-layouts.app :title="__('Reclamos')">
-   <livewire:reclamos />
+    <livewire:abm-reclamos />
 </x-layouts.app>
