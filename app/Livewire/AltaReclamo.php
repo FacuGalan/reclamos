@@ -47,6 +47,9 @@ class AltaReclamo extends Component
     public $showPersonaForm = true; // Si false, usa el usuario autenticado
     public $redirectAfterSave = null; // URL de redirección después de guardar
     public $successMessage = 'Reclamo creado exitosamente';
+    
+    // Nueva propiedad para determinar el contexto
+    public $isPrivateArea = false; // true cuando se llama desde el área privada
 
     public $personaEncontrada = false;
 
@@ -54,6 +57,9 @@ class AltaReclamo extends Component
     public $categoriaBusqueda = '';
     public $mostrarDropdown = false;
     public $categoriaSeleccionada = null;
+
+    // Nueva propiedad para el estado de guardado
+    public $isSaving = false;
 
     protected $rules = [
         'persona_dni' => 'required|numeric|digits_between:7,11',
@@ -248,6 +254,9 @@ class AltaReclamo extends Component
 
     public function save()
     {
+        // Activar estado de guardado
+        $this->isSaving = true;
+
         try {
             DB::beginTransaction();
 
@@ -313,19 +322,42 @@ class AltaReclamo extends Component
 
             DB::commit();
             
-            // Emitir evento de JavaScript para mostrar notificación
-            $this->dispatch('reclamo-creado-exitoso', [
-                'id' => $this->reclamoCreado->id,
-                'fecha' => $this->reclamoCreado->fecha,
-                'nombre_completo' => $this->persona_nombre . ' ' . $this->persona_apellido,
-                'categoria' => $nombreCategoria
-            ]);
+            // Comportamiento diferente según el contexto
+            if ($this->isPrivateArea) {
+                // Área privada: solo mostrar animación del botón y volver inmediatamente
+                $this->isSaving = false;
+                
+                // Emitir evento local para mostrar el botón de éxito
+                $this->dispatch('reclamo-creado-exitoso');
+                
+                // Volver al ABM con un mensaje de éxito que se mostrará allí
+                session()->flash('reclamo_creado', 'Reclamo creado exitosamente');
+                
+                // Redirección inmediata después de mostrar el botón de éxito brevemente
+                $this->js('
+                    setTimeout(() => { 
+                        window.location.href = "' . route('reclamos') . '";
+                    }, 800);
+                ');
+                
+            } else {
+                // Área pública: mostrar notificación completa y redirigir al home
+                $this->isSaving = false;
+                
+                $this->dispatch('reclamo-creado-exitoso', [
+                    'id' => $this->reclamoCreado->id,
+                    'fecha' => $this->reclamoCreado->fecha,
+                    'nombre_completo' => $this->persona_nombre . ' ' . $this->persona_apellido,
+                    'categoria' => $nombreCategoria
+                ]);
 
-            // Redirigir al home después de un pequeño delay
-            $this->js('setTimeout(() => { window.location.href = "' . route('home') . '" }, 10000)');
+                // Redirigir al home después de un delay
+                $this->js('setTimeout(() => { window.location.href = "' . route('home') . '" }, 10000)');
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();
+            $this->isSaving = false;
             session()->flash('error', 'Error al crear el reclamo: ' . $e->getMessage());
         }
     }
@@ -340,6 +372,7 @@ class AltaReclamo extends Component
         $this->step = $this->showPersonaForm ? 1 : 2;
         $this->showSuccess = false;
         $this->reclamoCreado = null;
+        $this->isSaving = false;
         $this->categorias = [];
     }
 

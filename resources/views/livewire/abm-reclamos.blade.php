@@ -1,4 +1,34 @@
 <div class="max-w-7xl mx-auto p-6 space-y-6">
+
+    <!-- Notificación flotante para reclamo creado (agregar al inicio de la vista abm-reclamos.blade.php) -->
+    @if(session('reclamo_creado'))
+        <div 
+            x-data="{ show: true }"
+            x-show="show"
+            x-init="setTimeout(() => show = false, 3000)"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform translate-x-full"
+            x-transition:enter-end="opacity-100 transform translate-x-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 transform translate-x-0"
+            x-transition:leave-end="opacity-0 transform translate-x-full"
+            class="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg shadow-lg max-w-sm">
+            <div class="flex items-center">
+                <svg class="h-6 w-6 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <p class="font-semibold">{{ session('reclamo_creado') }}</p>
+                    <p class="text-sm text-green-600">El reclamo se ha guardado correctamente</p>
+                </div>
+                <button @click="show = false" class="ml-4 text-green-400 hover:text-green-600">
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
     
     @if($currentView === 'list')
         <!-- Vista de Lista de Reclamos -->
@@ -263,7 +293,9 @@
         
         <livewire:alta-reclamo 
             :show-persona-form="true" 
-            :key="'alta-reclamo-' . now()" />
+            :is-private-area="true"
+            :key="'alta-reclamo-' . now()"
+            @reclamo-saved="$wire.volverALista()" />
 
     @elseif($currentView === 'edit')
         <!-- Vista de Editar Reclamo -->
@@ -341,6 +373,11 @@
                 setTimeout(() => {
                     @this.volverALista();
                 }, 3000);
+            });
+
+            // Escuchar evento específico para volver al ABM
+            Livewire.on('volver-al-abm', () => {
+                @this.volverALista();
             });
         });
     </script>
