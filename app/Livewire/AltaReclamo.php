@@ -324,7 +324,7 @@ class AltaReclamo extends Component
             
             // Comportamiento diferente según el contexto
             if ($this->isPrivateArea) {
-                // Área privada: solo mostrar animación del botón y volver inmediatamente
+                // Área privada: mostrar animación del botón y redirigir inmediatamente
                 $this->isSaving = false;
                 
                 // Emitir evento local para mostrar el botón de éxito
@@ -333,12 +333,8 @@ class AltaReclamo extends Component
                 // Volver al ABM con un mensaje de éxito que se mostrará allí
                 session()->flash('reclamo_creado', 'Reclamo creado exitosamente');
                 
-                // Redirección inmediata después de mostrar el botón de éxito brevemente
-                $this->js('
-                    setTimeout(() => { 
-                        window.location.href = "' . route('reclamos') . '";
-                    }, 800);
-                ');
+                // Redirección inmediata sin delay
+                $this->redirect(route('reclamos'), navigate: true);
                 
             } else {
                 // Área pública: mostrar notificación completa y redirigir al home

@@ -1,4 +1,22 @@
-<div class="max-w-4xl mx-auto p-6">
+<div class="max-w-4xl mx-auto p-1">
+
+     @if($isPrivateArea)
+        <span x-data="{ show: false }" 
+                x-show="show"
+                x-init="
+                $wire.on('reclamo-creado-exitoso', () => {
+                    show = true; 
+                    setTimeout(() => show = false, 500)
+                })
+                "
+                class="flex items-center"
+                style="display: none;">
+            <svg class="h-5 w-5 mr-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            ¡Guardado!
+        </span>
+    @endif
     
     <!-- Notificación de éxito centrada (solo para área pública) -->
     @if(!$isPrivateArea)
@@ -194,7 +212,7 @@
         </div>
 
         <!-- Contenido de los pasos -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
             @if ($step == 1 )
                 <!-- Paso 1: Datos personales -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos Personales</h2>
@@ -208,7 +226,9 @@
                             type="text" 
                             wire:model.live.debounce.300ms="persona_dni"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
-                                {{ $personaEncontrada ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : '' }}"
+                                {{ $personaEncontrada 
+                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                                : 'bg-white dark:bg-gray-700' }}"
                             placeholder="Ingrese su DNI">
 
                         @error('persona_dni') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -224,7 +244,9 @@
                             id="persona_nombre"
                             wire:model="persona_nombre"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
-                                {{ $personaEncontrada ? 'bg-gray-100 dark:bg-gray-600' : '' }}"
+                                {{ $personaEncontrada 
+                                ? 'bg-gray-100 dark:bg-gray-600'
+                                : 'bg-white dark:bg-gray-700' }}"
                             {{ $personaEncontrada ? 'readonly' : '' }}
                             placeholder="Ingrese su nombre">
                         @error('persona_nombre') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -239,7 +261,9 @@
                             id="persona_apellido"
                             wire:model="persona_apellido"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
-                                {{ $personaEncontrada ? 'bg-gray-100 dark:bg-gray-600' : '' }}"
+                                {{ $personaEncontrada 
+                                ? 'bg-gray-100 dark:bg-gray-600'
+                                : 'bg-white dark:bg-gray-700' }}"
                             {{ $personaEncontrada ? 'readonly' : '' }}
                             placeholder="Ingrese su apellido">
                         @error('persona_apellido') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -253,7 +277,7 @@
                             type="text" 
                             id="persona_telefono"
                             wire:model="persona_telefono"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                             placeholder="Ingrese su teléfono">
                         @error('persona_telefono') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -266,7 +290,7 @@
                             type="email" 
                             id="persona_email"
                             wire:model="persona_email"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                             placeholder="Ingrese su email">
                         @error('persona_email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -317,7 +341,7 @@
                                         @focus="open = true"
                                         @click="open = true"
                                         @blur="setTimeout(() => open = false, 150)"
-                                        class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                        class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                                         placeholder="Busque o seleccione un motivo..."
                                         autocomplete="off">
                                     
@@ -368,7 +392,7 @@
                         <input 
                             type="text" 
                             wire:model="direccion"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                             placeholder="Ingrese la dirección donde ocurrió el problema">
                         @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -380,7 +404,7 @@
                         <input 
                             type="text" 
                             wire:model="entre_calles"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                             placeholder="Entre qué calles se encuentra">
                         @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -392,7 +416,7 @@
                         <textarea 
                             wire:model="descripcion"
                             rows="4"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                             placeholder="Describa detalladamente su reclamo"></textarea>
                         @error('descripcion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -404,7 +428,7 @@
                         <input 
                             type="text" 
                             wire:model="coordenadas"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                             placeholder="Ej: -34.123456, -58.123456 o descripción específica">
                         @error('coordenadas') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         <p class="text-sm text-gray-500 mt-1">Puede ingresar coordenadas GPS o una descripción específica de la ubicación</p>

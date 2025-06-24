@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto p-6 space-y-6">
+<div class="max-w-7xl mx-auto p-6 pt-0 space-y-6">
 
     <!-- Notificación flotante para reclamo creado (agregar al inicio de la vista abm-reclamos.blade.php) -->
     @if(session('reclamo_creado'))
@@ -41,7 +41,7 @@
             </div>
             <button 
                 wire:click="nuevoReclamo"
-                class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2">
+                class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -220,16 +220,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
-                                        <!-- Ver detalle -->
-                                        <button 
-                                            wire:click="verReclamo({{ $reclamo->id }})"
-                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                            title="Ver detalle">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                            </svg>
-                                        </button>
+                       
 
                                         <!-- Editar -->
                                         <button 
@@ -280,10 +271,10 @@
 
     @elseif($currentView === 'create')
         <!-- Vista de Crear Reclamo -->
-        <div class="mb-6">
+        <div class="mb-0">
             <button 
                 wire:click="volverALista"
-                class="flex items-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 mb-4">
+                class="flex items-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 mb-4 cursor-pointer">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
@@ -294,8 +285,7 @@
         <livewire:alta-reclamo 
             :show-persona-form="true" 
             :is-private-area="true"
-            :key="'alta-reclamo-' . now()"
-            @reclamo-saved="$wire.volverALista()" />
+            :key="'alta-reclamo-' . now()" />
 
     @elseif($currentView === 'edit')
         <!-- Vista de Editar Reclamo -->
@@ -364,22 +354,5 @@
             </div>
         </div>
     @endif
-
-    <!-- Script para manejo de navegación automática -->
-    <script>
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('delay-return-to-list', () => {
-                // Esperar 3 segundos después del mensaje de éxito y volver a la lista
-                setTimeout(() => {
-                    @this.volverALista();
-                }, 3000);
-            });
-
-            // Escuchar evento específico para volver al ABM
-            Livewire.on('volver-al-abm', () => {
-                @this.volverALista();
-            });
-        });
-    </script>
 
 </div>

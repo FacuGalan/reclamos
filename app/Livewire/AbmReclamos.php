@@ -41,19 +41,12 @@ class AbmReclamos extends Component
         'currentView' => ['except' => 'list'],
     ];
 
-      protected $listeners = [
+      
+    protected $listeners = [
         'reclamo-saved' => 'volverALista',
         'reclamo-deleted' => 'volverALista',
-        'reclamo-creado-exitoso' => 'handleReclamoCreado',
         'reclamo-actualizado' => 'volverAListaConDelay',
-        'volver-al-abm' => 'volverALista',
     ];
-
-    public function handleReclamoCreado()
-    {
-        // Solo mostrar mensaje, no cambiar de vista aún
-        session()->flash('success', 'Reclamo creado exitosamente.');
-    }
 
     public function mount()
     {
