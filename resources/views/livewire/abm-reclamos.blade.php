@@ -51,9 +51,27 @@
 
         <!-- Filtros -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Filtros</h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
+                <button 
+                    wire:click="limpiarFiltros"
+                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Limpiar Filtros
+                </button>
+            </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+                <!-- Búsqueda por id -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Búsqueda ID</label>
+                    <input 
+                        type="text" 
+                        wire:model.live.debounce.300ms="busqueda_id"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="Buscar por ID">
+                </div>
+
                 <!-- Búsqueda general -->
                 <div class="lg:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Búsqueda</label>
@@ -61,7 +79,7 @@
                         type="text" 
                         wire:model.live.debounce.300ms="busqueda"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Buscar por ID, descripción, dirección, DNI o nombre...">
+                        placeholder="Buscar por descripción, dirección, DNI o nombre...">
                 </div>
 
                 <!-- Filtro por estado -->
@@ -121,14 +139,7 @@
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
                 </div>
 
-                <!-- Botón limpiar filtros -->
-                <div class="flex items-end">
-                    <button 
-                        wire:click="limpiarFiltros"
-                        class="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                        Limpiar Filtros
-                    </button>
-                </div>
+            
             </div>
         </div>
 
@@ -289,7 +300,7 @@
 
     @elseif($currentView === 'edit')
         <!-- Vista de Editar Reclamo -->
-        <div class="mb-6">
+        <!--div class="mb-6">
             <button 
                 wire:click="volverALista"
                 class="flex items-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 mb-4">
@@ -298,7 +309,7 @@
                 </svg>
                 Volver a la lista
             </button>
-        </div>
+        </div-->
         
         @if($selectedReclamoId)
             <livewire:modificar-reclamo 

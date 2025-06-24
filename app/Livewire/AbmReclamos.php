@@ -16,6 +16,7 @@ class AbmReclamos extends Component
 
     // Propiedades para filtros
     public $busqueda = '';
+    public $busqueda_id = '';
     public $filtro_estado = '';
     public $filtro_area = '';
     public $filtro_categoria = '';
@@ -55,6 +56,10 @@ class AbmReclamos extends Component
         $this->categorias = Categoria::orderBy('nombre')->get();
     }
 
+    public function placeholder(){
+        return view('livewire.placeholders.skeleton');
+    }
+
     public function updatingBusqueda()
     {
         $this->resetPage();
@@ -85,13 +90,17 @@ class AbmReclamos extends Component
             $query->where(function($q) {
                 $q->where('descripcion', 'like', '%' . $this->busqueda . '%')
                   ->orWhere('direccion', 'like', '%' . $this->busqueda . '%')
-                  ->orWhere('id', 'like', '%' . $this->busqueda . '%')
                   ->orWhereHas('persona', function($subQ) {
                       $subQ->where('nombre', 'like', '%' . $this->busqueda . '%')
                            ->orWhere('apellido', 'like', '%' . $this->busqueda . '%')
                            ->orWhere('dni', 'like', '%' . $this->busqueda . '%');
                   });
             });
+        }
+
+        // Aplicar filtro id
+        if ($this->busqueda_id) {
+            $query->where('id',$this->busqueda_id );
         }
 
         if ($this->filtro_estado) {
