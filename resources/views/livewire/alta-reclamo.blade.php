@@ -19,7 +19,7 @@
     @endif
     
     <!-- Notificación de éxito centrada (solo para área pública) -->
-    @if(!$isPrivateArea)
+    @if(Auth::guest())
         <div 
             x-data="{ show: false, reclamoData: {} }"
             x-show="show"
@@ -160,9 +160,9 @@
         <!-- Formulario de creación -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-                {{ $isPrivateArea ? 'Nuevo Reclamo' : 'Nuevo Reclamo' }}
+                {{ $isPrivateArea ? 'Nuevo Reclamo Interno' : 'Nuevo Reclamo' }}
             </h1>
-            <p class="text-gray-600 dark:text-gray-300">Complete los datos del formulario para registrar {{ $isPrivateArea ? 'el' : 'su' }} reclamo</p>
+            <p class="text-gray-600 dark:text-gray-300">Complete los datos del formulario para registrar {{ $isPrivateArea ? 'su' : 'el' }} reclamo</p>
         </div>
 
         <!-- Indicador de pasos -->
@@ -384,31 +384,33 @@
                                 @enderror
                             </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Dirección *
-                        </label>
-                        <input 
-                            type="text" 
-                            wire:model="direccion"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                            placeholder="Ingrese la dirección donde ocurrió el problema">
-                        @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Entre calles
-                        </label>
-                        <input 
-                            type="text" 
-                            wire:model="entre_calles"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                            placeholder="Entre qué calles se encuentra">
-                        @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
+        
+                    @if(!$isPrivateArea)
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Dirección *
+                            </label>
+                            <input 
+                                type="text" 
+                                wire:model="direccion"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                placeholder="Ingrese la dirección donde ocurrió el problema">
+                            @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+         
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Entre calles
+                            </label>
+                            <input 
+                                type="text" 
+                                wire:model="entre_calles"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                placeholder="Entre qué calles se encuentra">
+                            @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
+                 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Descripción del reclamo *
@@ -422,16 +424,13 @@
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Coordenadas / Ubicación *
-                        </label>
                         <input 
                             type="text" 
+                            hidden
                             wire:model="coordenadas"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                             placeholder="Ej: -34.123456, -58.123456 o descripción específica">
                         @error('coordenadas') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        <p class="text-sm text-gray-500 mt-1">Puede ingresar coordenadas GPS o una descripción específica de la ubicación</p>
                     </div>
                 </div>
 
@@ -460,11 +459,13 @@
                                     {{ $categorias->find($categoria_id)->nombre ?? 'Motivo no encontrado' }}
                                 @endif
                             </p>
-                            <p><strong>Dirección:</strong> {{ $direccion }}</p>
-                            @if($entre_calles)
-                                <p><strong>Entre calles:</strong> {{ $entre_calles }}</p>
+                            @if (!$isPrivateArea)
+                                <p><strong>Dirección:</strong> {{ $direccion }}</p>
+                                @if($entre_calles)
+                                    <p><strong>Entre calles:</strong> {{ $entre_calles }}</p>
+                                @endif
+                                <p><strong>Ubicación:</strong> {{ $coordenadas }}</p>       
                             @endif
-                            <p><strong>Ubicación:</strong> {{ $coordenadas }}</p>
                             <p><strong>Descripción:</strong></p>
                             <p class="bg-white dark:bg-gray-600 p-3 rounded border">{{ $descripcion }}</p>
                         </div>

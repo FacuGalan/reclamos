@@ -39,14 +39,44 @@
                 <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Reclamos</h1>
                 <p class="text-gray-600 dark:text-gray-300">Administra y da seguimiento a todos los reclamos del sistema</p>
             </div>
-            <button 
-                wire:click="nuevoReclamo"
-                class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Nuevo Reclamo
-            </button>
+            <!-- Dropdown Container -->
+            <div class="relative group">
+                <!-- Botón Principal -->
+                <button class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
+                    Nuevo Reclamo
+                    <!-- Flecha del dropdown -->
+                    <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform scale-95 group-hover:scale-100">
+                    
+                    <!-- Opción 1: Reclamo Normal -->
+                    <button 
+                        wire:click="nuevoReclamo"
+                        class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-t-lg">
+                        <svg class="w-5 h-5 text-[#77BF43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="font-medium">Reclamo</span>
+                    </button>
+                    
+                    <!-- Separador -->
+                    <div class="border-t border-gray-200 dark:border-gray-700"></div>
+                    
+                    <!-- Opción 2: Reclamo Privado -->
+                    <button 
+                        wire:click="nuevoReclamoInterno"
+                        class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-b-lg">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <span class="font-medium">Reclamo Interno</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Filtros -->
@@ -294,7 +324,7 @@
         
         <livewire:alta-reclamo 
             :show-persona-form="true" 
-            :is-private-area="true"
+            :is-private-area="$reclamoInterno"
             :key="'alta-reclamo-' . now()" />
 
     @elseif($currentView === 'edit')

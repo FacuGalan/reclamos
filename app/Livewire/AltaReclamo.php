@@ -68,9 +68,9 @@ class AltaReclamo extends Component
         'persona_telefono' => 'required|numeric|digits_between:10,15',
         'persona_email' => 'nullable|email|max:255',
         'descripcion' => 'required|string|max:1000',
-        'direccion' => 'required|string|max:255',
+        'direccion' => 'nullable|string|max:255',
         'entre_calles' => 'nullable|string|max:255',
-        'coordenadas' => 'required|string',
+        'coordenadas' => 'nullable|string',
         'categoria_id' => 'required|exists:categorias,id',
     ];
 
@@ -84,14 +84,12 @@ class AltaReclamo extends Component
         'persona_email.email' => 'Ingrese un email válido',
         'descripcion.required' => 'La descripción del reclamo es obligatoria',
         'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
-        'direccion.required' => 'La dirección es obligatoria',
-        'coordenadas.required' => 'Las coordenadas son obligatorias',
         'categoria_id.required' => 'Debe seleccionar una categoría',
     ];
 
     public function mount()
     {
-        $this->categorias = Categoria::orderBy('privada')->orderBy('nombre')
+        $this->categorias = Categoria::where('privada', $this->isPrivateArea)->orderBy('privada')->orderBy('nombre')
             ->get();
 
         $this->categoriasFiltradas = $this->categorias;
@@ -322,7 +320,7 @@ class AltaReclamo extends Component
             DB::commit();
             
             // Comportamiento diferente según el contexto
-            if ($this->isPrivateArea) {
+            if (Auth::check()) {
                 // Área privada: mostrar animación del botón y redirigir inmediatamente
                 $this->isSaving = false;
                 

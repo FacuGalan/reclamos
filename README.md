@@ -51,3 +51,8 @@ npm run build - Compilar assets para producción
 php artisan migrate:fresh - Recrear base de datos
 # Descargar los cambios del repositorio remoto (SI NO TE DEJA HACER EL PUSH POR DIFERENCIAS CON EL MAIN)
 git pull origin main --allow-unrelated-histories
+
+
+AGUSTINA
+git fetch origin
+git reset --hard origin/main

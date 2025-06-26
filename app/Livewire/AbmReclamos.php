@@ -28,6 +28,7 @@ class AbmReclamos extends Component
     public $selectedReclamoId = null;
     public $showDeleteModal = false;
     public $selectedReclamo = null;
+    public $reclamoInterno = false; // Para saber si es un reclamo interno o externo
     
     // Datos para los selects
     public $estados = [];
@@ -159,6 +160,14 @@ class AbmReclamos extends Component
     {
         $this->currentView = 'create';
         $this->selectedReclamoId = null;
+        $this->reclamoInterno = false; // Indicar que es un reclamo externo
+    }
+
+    public function nuevoReclamoInterno()
+    {
+        $this->currentView = 'create';
+        $this->selectedReclamoId = null;
+        $this->reclamoInterno = true; // Indicar que es un reclamo interno
     }
 
     public function editarReclamo($reclamoId)
