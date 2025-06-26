@@ -91,8 +91,7 @@ class AltaReclamo extends Component
 
     public function mount()
     {
-        $this->categorias = Categoria::where('privada', false)
-            ->orderBy('nombre')
+        $this->categorias = Categoria::orderBy('privada')->orderBy('nombre')
             ->get();
 
         $this->categoriasFiltradas = $this->categorias;

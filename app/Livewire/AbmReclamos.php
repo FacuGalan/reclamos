@@ -34,15 +34,19 @@ class AbmReclamos extends Component
     public $areas = [];
     public $categorias = [];
 
+    // ← ESTA ES LA CLAVE: agregar currentView y selectedReclamoId al queryString
     protected $queryString = [
         'busqueda' => ['except' => ''],
+        'busqueda_id' => ['except' => ''],
         'filtro_estado' => ['except' => ''],
         'filtro_area' => ['except' => ''],
         'filtro_categoria' => ['except' => ''],
-        'currentView' => ['except' => 'list'],
+        'filtro_fecha_desde' => ['except' => ''],
+        'filtro_fecha_hasta' => ['except' => ''],
+        'currentView' => ['except' => 'list'],              // ← AGREGAR ESTO
+        'selectedReclamoId' => ['except' => null, 'as' => 'reclamo'], // ← AGREGAR ESTO
     ];
 
-      
     protected $listeners = [
         'reclamo-saved' => 'volverALista',
         'reclamo-deleted' => 'volverALista',
@@ -54,9 +58,21 @@ class AbmReclamos extends Component
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::orderBy('nombre')->get();
         $this->categorias = Categoria::orderBy('nombre')->get();
+
+        // ← AGREGAR VALIDACIÓN: Si está en modo edit, verificar que el reclamo existe
+        if ($this->currentView === 'edit' && $this->selectedReclamoId) {
+            $reclamo = Reclamo::find($this->selectedReclamoId);
+            if (!$reclamo) {
+                // Si el reclamo no existe, volver a la lista
+                $this->currentView = 'list';
+                $this->selectedReclamoId = null;
+                session()->flash('error', 'El reclamo solicitado no existe.');
+            }
+        }
     }
 
-    public function placeholder(){
+    public function placeholder()
+    {
         return view('livewire.placeholders.skeleton');
     }
 
@@ -100,7 +116,7 @@ class AbmReclamos extends Component
 
         // Aplicar filtro id
         if ($this->busqueda_id) {
-            $query->where('id',$this->busqueda_id );
+            $query->where('id', $this->busqueda_id);
         }
 
         if ($this->filtro_estado) {
@@ -129,6 +145,7 @@ class AbmReclamos extends Component
     public function limpiarFiltros()
     {
         $this->busqueda = '';
+        $this->busqueda_id = '';
         $this->filtro_estado = '';
         $this->filtro_area = '';
         $this->filtro_categoria = '';
@@ -146,6 +163,13 @@ class AbmReclamos extends Component
 
     public function editarReclamo($reclamoId)
     {
+        // Validar que el reclamo existe antes de cambiar
+        $reclamo = Reclamo::find($reclamoId);
+        if (!$reclamo) {
+            session()->flash('error', 'El reclamo solicitado no existe.');
+            return;
+        }
+
         $this->selectedReclamoId = $reclamoId;
         $this->currentView = 'edit';
     }

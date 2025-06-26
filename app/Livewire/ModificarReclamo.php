@@ -9,6 +9,7 @@ use App\Models\Categoria;
 use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\Domicilios;
+use App\Models\Movimiento;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +29,7 @@ class ModificarReclamo extends Component
     public $entre_calles = '';
     public $coordenadas = '';
     public $area_id = '';
+    public $area_nombre = '';
     public $categoria_id = '';
     public $estado_id = '';
     
@@ -37,6 +39,9 @@ class ModificarReclamo extends Component
     public $persona_apellido = '';
     public $persona_telefono = '';
     public $persona_email = '';
+
+    //Historial
+    public $historial = [];
     
     // Control de flujo
     public $step = 1; // 1: datos persona, 2: datos reclamo, 3: confirmación
@@ -92,6 +97,11 @@ class ModificarReclamo extends Component
         $this->categoriasFiltradas = $this->categorias;
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::orderBy('nombre')->get();
+        $this->historial = Movimiento::where('reclamo_id', $this->reclamoId)
+            ->with(['tipoMovimiento', 'estado', 'usuario'])
+            ->orderBy('fecha', 'desc')
+            ->get();
+
         
         // Cargar datos del reclamo
         $this->cargarDatosReclamo();
@@ -114,6 +124,7 @@ class ModificarReclamo extends Component
         $this->coordenadas = $this->reclamo->coordenadas;
         $this->categoria_id = $this->reclamo->categoria_id;
         $this->area_id = $this->reclamo->area_id;
+        $this->area_nombre = $this->reclamo->area ? $this->reclamo->area->nombre : '';
         $this->estado_id = $this->reclamo->estado_id;
 
         // Configurar categoria seleccionada para el dropdown
@@ -164,6 +175,7 @@ class ModificarReclamo extends Component
             
             // Actualizar área automáticamente
             $this->area_id = $categoria->area_id;
+            $this->area_nombre = $categoria->area ? $categoria->area->nombre : '';
             
             // Limpiar errores de validación
             $this->resetErrorBag('categoria_id');
