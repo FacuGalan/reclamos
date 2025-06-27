@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tipo_movimiento extends Model
+class TipoMovimiento extends Model
 {
     //
     protected $fillable = ['nombre', 'area_id', 'estado_id'];

@@ -10,6 +10,7 @@ use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\Domicilios;
 use App\Models\Movimiento;
+use App\Models\TipoMovimiento;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -22,6 +23,16 @@ class ModificarReclamo extends Component
     // ID del reclamo a modificar
     public $reclamoId;
     public $reclamo;
+
+    public $mostrarModal = false;
+    public $nuevoMovimiento = false;
+    public $tiposMovimiento = '';
+    public $observaciones = '';
+    public $fechaMovimiento = '';
+    public $usuarioId = null; // ID del usuario que realiza el movimiento, se asigna automáticamente
+    public $estadoMovimiento = null; // Estado del reclamo al momento del movimiento
+    public $estadoMovimientoId = null; // ID del estado del reclamo al momento del movimiento
+
     
     // Datos del reclamo
     public $descripcion = '';
@@ -67,7 +78,7 @@ class ModificarReclamo extends Component
         'descripcion' => 'required|string|max:1000',
         'direccion' => 'required|string|max:255',
         'entre_calles' => 'nullable|string|max:255',
-        'coordenadas' => 'required|string',
+        'coordenadas' => 'nullable|string',
         'categoria_id' => 'required|exists:categorias,id',
         'estado_id' => 'required|exists:estados,id',
     ];
@@ -83,7 +94,6 @@ class ModificarReclamo extends Component
         'descripcion.required' => 'La descripción del reclamo es obligatoria',
         'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
         'direccion.required' => 'La dirección es obligatoria',
-        'coordenadas.required' => 'Las coordenadas son obligatorias',
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'estado_id.required' => 'Debe seleccionar un estado',
     ];
@@ -230,8 +240,17 @@ class ModificarReclamo extends Component
         ]);
     }
 
+    public function nuevoMovimiento1()
+    {
+        $this->tiposMovimiento = TipoMovimiento::where('area_id', $this->area_id)
+            ->orderBy('nombre')
+            ->get();
+        $this->mostrarModal = true;
+    }  
+
     public function save()
     {
+
         // Validar todos los campos
         $this->validate();
 
@@ -270,7 +289,7 @@ class ModificarReclamo extends Component
             ]);
 
             DB::commit();
-
+            /*
             // Emitir evento para notificar el éxito
             $this->dispatch('reclamo-actualizado', [
                 'id' => $this->reclamo->id,
@@ -281,12 +300,20 @@ class ModificarReclamo extends Component
             $this->dispatch('reclamo-saved');
 
             $this->showSuccess = true;
+            */
 
+            // Volver al ABM con un mensaje de éxito que se mostrará allí
+            session()->flash('reclamo_creado', 'Reclamo actualizado exitosamente');
+                
+            // Redirección inmediata sin delay
+            $this->redirect(route('reclamos'), navigate: true);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             session()->flash('error', 'Error al actualizar el reclamo: ' . $e->getMessage());
         }
     }
+ 
 
     public function render()
     {
