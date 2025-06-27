@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Movimiento extends Model
 {
     //
-    protected $fillable = ['tipo_movimiento_id', 'fecha', 'observaciones', 'estado_id', 'usuario_id'];
+    protected $fillable = ['tipo_movimiento_id', 'fecha', 'observaciones', 'estado_id', 'usuario_id','reclamo_id'];
     public function tipoMovimiento()
     {
-        return $this->belongsTo(Tipo_movimiento::class, 'tipo_movimiento_id');
+        return $this->belongsTo(TipoMovimiento::class, 'tipo_movimiento_id');
     }
     public function estado()
     {

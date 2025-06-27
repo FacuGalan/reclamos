@@ -27,6 +27,7 @@ class ModificarReclamo extends Component
     public $mostrarModal = false;
     public $nuevoMovimiento = false;
     public $tiposMovimiento = '';
+    public $tipoMovimientoId = null; // ID del tipo de movimiento seleccionado
     public $observaciones = '';
     public $fechaMovimiento = '';
     public $usuarioId = null; // ID del usuario que realiza el movimiento, se asigna automáticamente
@@ -248,6 +249,61 @@ class ModificarReclamo extends Component
         $this->mostrarModal = true;
     }  
 
+    public function cerrarModal()
+    {
+        $this->mostrarModal = false;
+        $this->nuevoMovimiento = false;
+        $this->tiposMovimiento = '';
+        $this->observaciones = '';
+        $this->fechaMovimiento = '';
+        $this->usuarioId = null;
+        $this->estadoMovimiento = null;
+        $this->estadoMovimientoId = null;
+    }
+
+    public function guardarMovimiento()
+    {
+        // Validar campos del movimiento
+        $this->validate([
+            'tipoMovimientoId' => 'required|exists:tipo_movimientos,id',
+            'observaciones' => 'nullable|string|max:1000'
+        ]);
+
+
+        $this->fechaMovimiento = date('Y-m-d'); // Asignar fecha actual si no se especifica
+        $this->usuarioId = Auth::id(); // Asignar el ID del usuario
+        $this->estadoMovimientoId = TipoMovimiento::where('id',$this->tipoMovimientoId)->first()->estado_id; // Obtener el estado del movimiento
+
+        try {
+            DB::beginTransaction();
+
+            // Crear el movimiento
+            Movimiento::create([
+                'reclamo_id' => $this->reclamoId,
+                'tipo_movimiento_id' => $this->tipoMovimientoId,
+                'observaciones' => $this->observaciones,
+                'fecha' => $this->fechaMovimiento,
+                'usuario_id' => $this->usuarioId,
+                'estado_id' => $this->estadoMovimientoId
+            ]);
+         
+
+            // Actualizar el reclamo
+            $this->reclamo->update([
+                'estado_id' => $this->estadoMovimientoId
+            ]);
+
+
+
+            DB::commit();
+            session()->flash('success', 'Movimiento guardado exitosamente');
+            $this->cerrarModal();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Error al guardar el movimiento: ' . $e->getMessage());
+        }
+    }
+
     public function save()
     {
 
@@ -317,6 +373,11 @@ class ModificarReclamo extends Component
 
     public function render()
     {
+        $this->historial = Movimiento::where('reclamo_id', $this->reclamoId)
+            ->with(['tipoMovimiento', 'estado', 'usuario'])
+            ->orderBy('fecha', 'desc')
+            ->get();
+            
         return view('livewire.modificar-reclamo');
     }
 }

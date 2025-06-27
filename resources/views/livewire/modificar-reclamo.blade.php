@@ -340,47 +340,41 @@
     
     <!-- Modal para nuevo movimiento -->
     @if($mostrarModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80" 
-        x-show="mostrarModal" 
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 scale-95"
-        x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95">
-        
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Nuevo Movimiento</h2>
-            <form wire:submit.prevent="guardarMovimiento">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Movimiento</label>
-                    <select wire:model="tipoMovimientoId" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
-                        <option value="">Seleccione un tipo de movimiento</option>
-                        @foreach($tiposMovimiento as $tipo)
-                            <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
-                        @endforeach
-                    </select>
-                    @error('tipoMovimientoId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>
-                    <textarea wire:model="observaciones" rows="3" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"></textarea>
-                    @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-                
-                <div class="flex justify-end">
-                    <button type="submit" class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors">
-                        Guardar Movimiento          
-                    </button>
-                    <button type="button" class="ml-2 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors" 
-                        @click="mostrarModal = false">
-                        Cancelar
-                    </button>
-                </div>  
-            </form>
-        </div>
-    </div>  
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Nuevo Movimiento</h2>
+                <form wire:submit.prevent="guardarMovimiento">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Movimiento</label>
+                        <select wire:model="tipoMovimientoId" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
+                            <option value="">Seleccione un tipo de movimiento</option>
+                            @foreach($tiposMovimiento as $tipo)
+                                <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                            @endforeach
+                        </select>
+                        @error('tipoMovimientoId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>
+                        <textarea wire:model="observaciones" rows="3" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"></textarea>
+                        @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+                    
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" 
+                            wire:click="cerrarModal"
+                            class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                            class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors">
+                            Guardar Movimiento          
+                        </button>
+                    </div>  
+                </form>
+            </div>
+        </div>  
     @endif
 
     <!-- Script para manejo de navegación automática -->
