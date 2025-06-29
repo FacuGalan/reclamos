@@ -28,7 +28,7 @@
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevrons-up-down"
-                    class="cursor-pointer bg-[#F2F2F2]"
+                    class="cursor-pointer bg-[#F2F2F2] dark:bg-[#1F2937] text-black dark:text-white"
                 />
 
                 <flux:menu class="w-[220px]">

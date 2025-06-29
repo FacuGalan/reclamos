@@ -341,7 +341,7 @@
         </div>
         
         @if($selectedReclamoId)
-            <livewire:modificar-reclamo 
+            <livewire:modificar-reclamo lazy
                 :reclamo-id="$selectedReclamoId"
                 :key="'modificar-reclamo-' . $selectedReclamoId" />
         @endif

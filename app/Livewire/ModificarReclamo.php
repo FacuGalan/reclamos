@@ -24,6 +24,13 @@ class ModificarReclamo extends Component
     public $reclamoId;
     public $reclamo;
 
+    public $isSaving = false; // Para controlar el estado de guardado
+
+    public $notificacionTimestamp = null;
+    public $mostrarNotificacion = false;
+    public $mensajeNotificacion = '';
+    public $tipoNotificacion = 'success'; // 'success' o 'error'
+
     public $mostrarModal = false;
     public $nuevoMovimiento = false;
     public $tiposMovimiento = '';
@@ -34,7 +41,6 @@ class ModificarReclamo extends Component
     public $estadoMovimiento = null; // Estado del reclamo al momento del movimiento
     public $estadoMovimientoId = null; // ID del estado del reclamo al momento del movimiento
 
-    
     // Datos del reclamo
     public $descripcion = '';
     public $direccion = '';
@@ -98,6 +104,11 @@ class ModificarReclamo extends Component
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'estado_id.required' => 'Debe seleccionar un estado',
     ];
+
+    public function placeholder()
+    {
+      return view('livewire.placeholders.skeleton');
+    }
 
     public function mount($reclamoId)
     {
@@ -306,6 +317,7 @@ class ModificarReclamo extends Component
 
     public function save()
     {
+        $this->isSaving = true; // Indicar que se está guardando
 
         // Validar todos los campos
         $this->validate();
@@ -358,18 +370,46 @@ class ModificarReclamo extends Component
             $this->showSuccess = true;
             */
 
-            // Volver al ABM con un mensaje de éxito que se mostrará allí
-            session()->flash('reclamo_creado', 'Reclamo actualizado exitosamente');
+            // Activar notificación
+            $this->mostrarNotificacionExito();
                 
             // Redirección inmediata sin delay
-            $this->redirect(route('reclamos'), navigate: true);
+            //$this->redirect(route('reclamos'), navigate: true);
+
+            $this->isSaving = false;
+
+            // Emitir evento local para mostrar el botón de éxito
+            $this->dispatch('reclamo-modificado-exitoso');
             
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Error al actualizar el reclamo: ' . $e->getMessage());
+            // Mostrar notificación de error
+            $this->mostrarNotificacionError('Error al actualizar el reclamo: ' . $e->getMessage());
         }
     }
- 
+
+    public function mostrarNotificacionExito($mensaje = 'Reclamo actualizado exitosamente')
+    {
+        $this->mostrarNotificacion = true;
+        $this->mensajeNotificacion = $mensaje;
+        $this->tipoNotificacion = 'success';
+        $this->notificacionTimestamp = microtime(true); // Esto fuerza que el blade se re-renderice
+    }
+
+    public function mostrarNotificacionError($mensaje)
+    {
+        $this->mostrarNotificacion = true;
+        $this->mensajeNotificacion = $mensaje;
+        $this->tipoNotificacion = 'error';
+        $this->notificacionTimestamp = microtime(true); // Esto fuerza que el blade se re-renderice
+    }
+
+    // También agrega esta función para limpiar la notificación cuando sea necesario
+    public function limpiarNotificacion()
+    {
+        $this->mostrarNotificacion = false;
+        $this->mensajeNotificacion = '';
+    }
 
     public function render()
     {
