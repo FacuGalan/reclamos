@@ -26,6 +26,7 @@ class AltaReclamo extends Component
     public $coordenadas = '';
     public $area_id = '';
     public $categoria_id = '';
+    public $userAreas = []; // Áreas del usuario autenticado
     
     // Datos de la persona
     public $persona_dni = '';
@@ -89,8 +90,19 @@ class AltaReclamo extends Component
 
     public function mount()
     {
-        $this->categorias = Categoria::where('privada', $this->isPrivateArea)->orderBy('privada')->orderBy('nombre')
-            ->get();
+        // Obtener las áreas del usuario logueado
+        $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
+
+        // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
+        if (empty($this->userAreas)) {
+            $this->userAreas = Area::pluck('id')->toArray();
+        }
+
+        $this->categorias = Categoria::where('privada', $this->isPrivateArea)
+                                    ->whereIn('area_id', $this->userAreas)
+                                    ->orderBy('privada')
+                                    ->orderBy('nombre')
+                                    ->get();
 
         $this->categoriasFiltradas = $this->categorias;
         

@@ -30,10 +30,13 @@ class AbmReclamos extends Component
     public $selectedReclamo = null;
     public $reclamoInterno = false; // Para saber si es un reclamo interno o externo
     
-    // Datos para los selects
+    // Datos para los selects (filtrados por áreas del usuario)
     public $estados = [];
     public $areas = [];
     public $categorias = [];
+
+    // Áreas del usuario logueado
+    public $userAreas = [];
 
     // ← ESTA ES LA CLAVE: agregar currentView y selectedReclamoId al queryString
     protected $queryString = [
@@ -56,18 +59,28 @@ class AbmReclamos extends Component
 
     public function mount()
     {
-        $this->estados = Estado::orderBy('nombre')->get();
-        $this->areas = Area::orderBy('nombre')->get();
-        $this->categorias = Categoria::orderBy('nombre')->get();
+        // Obtener las áreas del usuario logueado
+        $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
+        
 
-        // ← AGREGAR VALIDACIÓN: Si está en modo edit, verificar que el reclamo existe
+        // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
+        if (empty($this->userAreas)) {
+            $this->userAreas = Area::pluck('id')->toArray();
+        }
+
+        // Cargar datos filtrados por las áreas del usuario
+        $this->estados = Estado::orderBy('nombre')->get();
+        $this->areas = Area::whereIn('id', $this->userAreas)->orderBy('nombre')->get();
+        $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
+
+        // Validación: Si está en modo edit, verificar que el reclamo existe y pertenece a las áreas del usuario
         if ($this->currentView === 'edit' && $this->selectedReclamoId) {
-            $reclamo = Reclamo::find($this->selectedReclamoId);
+            $reclamo = Reclamo::whereIn('area_id', $this->userAreas)->find($this->selectedReclamoId);
             if (!$reclamo) {
-                // Si el reclamo no existe, volver a la lista
+                // Si el reclamo no existe o no pertenece a las áreas del usuario, volver a la lista
                 $this->currentView = 'list';
                 $this->selectedReclamoId = null;
-                session()->flash('error', 'El reclamo solicitado no existe.');
+                session()->flash('error', 'El reclamo solicitado no existe o no tienes permisos para acceder a él.');
             }
         }
     }
@@ -100,9 +113,10 @@ class AbmReclamos extends Component
     public function getReclamos()
     {
         $query = Reclamo::with(['persona', 'categoria', 'area', 'estado', 'usuario', 'responsable'])
+            ->whereIn('area_id', $this->userAreas) // ← FILTRO PRINCIPAL: Solo reclamos de áreas del usuario
             ->orderBy('created_at', 'desc');
 
-        // Aplicar filtros
+        // Aplicar filtros adicionales
         if ($this->busqueda) {
             $query->where(function($q) {
                 $q->where('descripcion', 'like', '%' . $this->busqueda . '%')
@@ -125,11 +139,18 @@ class AbmReclamos extends Component
         }
 
         if ($this->filtro_area) {
-            $query->where('area_id', $this->filtro_area);
+            // Verificar que el área filtrada esté dentro de las áreas permitidas del usuario
+            if (in_array($this->filtro_area, $this->userAreas)) {
+                $query->where('area_id', $this->filtro_area);
+            }
         }
 
         if ($this->filtro_categoria) {
-            $query->where('categoria_id', $this->filtro_categoria);
+            // Verificar que la categoría pertenezca a las áreas permitidas del usuario
+            $categoria = Categoria::whereIn('area_id', $this->userAreas)->find($this->filtro_categoria);
+            if ($categoria) {
+                $query->where('categoria_id', $this->filtro_categoria);
+            }
         }
 
         if ($this->filtro_fecha_desde) {
@@ -172,10 +193,10 @@ class AbmReclamos extends Component
 
     public function editarReclamo($reclamoId)
     {
-        // Validar que el reclamo existe antes de cambiar
-        $reclamo = Reclamo::find($reclamoId);
+        // Validar que el reclamo existe y pertenece a las áreas del usuario
+        $reclamo = Reclamo::whereIn('area_id', $this->userAreas)->find($reclamoId);
         if (!$reclamo) {
-            session()->flash('error', 'El reclamo solicitado no existe.');
+            session()->flash('error', 'El reclamo solicitado no existe o no tienes permisos para acceder a él.');
             return;
         }
 
@@ -199,27 +220,49 @@ class AbmReclamos extends Component
 
     public function verReclamo($reclamoId)
     {
-        $this->selectedReclamo = Reclamo::with(['persona', 'categoria', 'area', 'estado', 'usuario', 'responsable', 'domicilio', 'movimientos.tipoMovimiento', 'movimientos.estado', 'movimientos.usuario'])
+        // Verificar permisos antes de mostrar el detalle
+        $reclamo = Reclamo::with(['persona', 'categoria', 'area', 'estado', 'usuario', 'responsable', 'domicilio', 'movimientos.tipoMovimiento', 'movimientos.estado', 'movimientos.usuario'])
+            ->whereIn('area_id', $this->userAreas)
             ->find($reclamoId);
-        // Aquí podrías abrir un modal de detalle o redirigir a una vista específica
+            
+        if (!$reclamo) {
+            session()->flash('error', 'No tienes permisos para ver este reclamo.');
+            return;
+        }
+        
+        $this->selectedReclamo = $reclamo;
         $this->dispatch('mostrar-detalle-reclamo', ['reclamo' => $this->selectedReclamo]);
     }
 
     public function confirmarEliminacion($reclamoId)
     {
-        $this->selectedReclamo = Reclamo::find($reclamoId);
+        // Verificar permisos antes de eliminar
+        $reclamo = Reclamo::whereIn('area_id', $this->userAreas)->find($reclamoId);
+        if (!$reclamo) {
+            session()->flash('error', 'No tienes permisos para eliminar este reclamo.');
+            return;
+        }
+        
+        $this->selectedReclamo = $reclamo;
         $this->showDeleteModal = true;
     }
 
     public function eliminarReclamo()
     {
         if ($this->selectedReclamo) {
-            $this->selectedReclamo->delete();
-            $this->showDeleteModal = false;
-            $this->selectedReclamo = null;
-            
-            session()->flash('success', 'Reclamo eliminado exitosamente.');
-            $this->dispatch('reclamo-deleted');
+            // Verificar una vez más que el usuario tiene permisos
+            if (in_array($this->selectedReclamo->area_id, $this->userAreas)) {
+                $this->selectedReclamo->delete();
+                $this->showDeleteModal = false;
+                $this->selectedReclamo = null;
+                
+                session()->flash('success', 'Reclamo eliminado exitosamente.');
+                $this->dispatch('reclamo-deleted');
+            } else {
+                session()->flash('error', 'No tienes permisos para eliminar este reclamo.');
+                $this->showDeleteModal = false;
+                $this->selectedReclamo = null;
+            }
         }
     }
 
@@ -227,6 +270,17 @@ class AbmReclamos extends Component
     {
         $this->showDeleteModal = false;
         $this->selectedReclamo = null;
+    }
+
+    // Método para obtener información de áreas del usuario (útil para debugging)
+    public function getUserAreasInfo()
+    {
+        return [
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()->name,
+            'areas_count' => count($this->userAreas),
+            'areas_names' => Area::whereIn('id', $this->userAreas)->pluck('nombre')->toArray(),
+        ];
     }
 
     public function render()
