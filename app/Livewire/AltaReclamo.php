@@ -91,13 +91,16 @@ class AltaReclamo extends Component
     public function mount()
     {
         // Obtener las áreas del usuario logueado
-        $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
+        if (Auth::check()) {
+                $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
 
-        // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
-        if (empty($this->userAreas)) {
-            $this->userAreas = Area::pluck('id')->toArray();
+            // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
+            if (empty($this->userAreas)) {
+                $this->userAreas = Area::pluck('id')->toArray();
+            }
+        } else {
+            $this->userAreas = Area::pluck('id')->toArray(); // Todas las áreas si no está autenticado
         }
-
         $this->categorias = Categoria::where('privada', $this->isPrivateArea)
                                     ->whereIn('area_id', $this->userAreas)
                                     ->orderBy('privada')

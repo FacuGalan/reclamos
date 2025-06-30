@@ -23,6 +23,7 @@ class ModificarReclamo extends Component
     // ID del reclamo a modificar
     public $reclamoId;
     public $reclamo;
+    public $userAreas = []; // Áreas del usuario logueado
 
     public $isSaving = false; // Para controlar el estado de guardado
 
@@ -112,10 +113,19 @@ class ModificarReclamo extends Component
 
     public function mount($reclamoId)
     {
+        // Obtener las áreas del usuario logueado
+        $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
+
+        // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
+        if (empty($this->userAreas)) {
+            $this->userAreas = Area::pluck('id')->toArray();
+        }
+
         $this->reclamoId = $reclamoId;
         
         // Cargar datos para los selects
-        $this->categorias = Categoria::orderBy('nombre')->get();
+        $this->categorias = Categoria::whereIn('area_id', $this->userAreas)
+                                    ->orderBy('nombre')->get();
         $this->categoriasFiltradas = $this->categorias;
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::orderBy('nombre')->get();
