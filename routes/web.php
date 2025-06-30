@@ -31,6 +31,10 @@ Route::view('reclamos', 'reclamos')
     ->middleware(['auth', 'verified'])
     ->name('reclamos');
 
+Route::view('areas', 'areas')
+    ->middleware(['auth', 'verified'])
+    ->name('areas');
+
 // Rutas de configuración
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

@@ -41,7 +41,7 @@
             <div class="absolute inset-0 bg-black bg-opacity-50"></div>
             
             <!-- Modal centrado -->
-            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full mx-4 border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full mx-4 border border-black dark:border-gray-700 overflow-hidden">
                 
                 <!-- Header verde con ícono -->
                 <div class="bg-green-500 px-6 py-4">

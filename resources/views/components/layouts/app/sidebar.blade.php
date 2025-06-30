@@ -15,6 +15,7 @@
        
             <flux:navlist.group :heading="__('Menú')" class="grid">
                 <flux:navlist.item icon="home" :href="route('reclamos')" :current="request()->routeIs('reclamos')" wire:navigate>Reclamos</flux:navlist.item>
+                <flux:navlist.item icon="building-office" :href="route('areas')" :current="request()->routeIs('areas')" wire:navigate>Áreas</flux:navlist.item>
             </flux:navlist.group>
     
                   
