@@ -61,6 +61,7 @@ class ModificarReclamo extends Component
 
     //Historial
     public $historial = [];
+    public $historialTimestamp; // NUEVO: para forzar re-renderización
     
     // Control de flujo
     public $step = 1; // 1: datos persona, 2: datos reclamo, 3: confirmación
@@ -122,6 +123,7 @@ class ModificarReclamo extends Component
         }
 
         $this->reclamoId = $reclamoId;
+        $this->historialTimestamp = microtime(true); // Inicializar timestamp
         
         // Cargar datos para los selects
         $this->categorias = Categoria::whereIn('area_id', $this->userAreas)
@@ -129,14 +131,23 @@ class ModificarReclamo extends Component
         $this->categoriasFiltradas = $this->categorias;
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::orderBy('nombre')->get();
+        
+        // Cargar datos del reclamo
+        $this->cargarDatosReclamo();
+
+        // Cargar historial inicial
+        $this->cargarHistorial();
+    }
+
+    public function cargarHistorial()
+    {
         $this->historial = Movimiento::where('reclamo_id', $this->reclamoId)
             ->with(['tipoMovimiento', 'estado', 'usuario'])
             ->orderBy('fecha', 'desc')
             ->get();
-
         
-        // Cargar datos del reclamo
-        $this->cargarDatosReclamo();
+        // IMPORTANTE: Actualizar timestamp para forzar re-renderización
+        $this->historialTimestamp = microtime(true);
     }
 
     public function cargarDatosReclamo()
@@ -290,7 +301,6 @@ class ModificarReclamo extends Component
             'observaciones' => 'nullable|string|max:1000'
         ]);
 
-
         $this->fechaMovimiento = date('Y-m-d'); // Asignar fecha actual si no se especifica
         $this->usuarioId = Auth::id(); // Asignar el ID del usuario
         $this->estadoMovimientoId = TipoMovimiento::where('id',$this->tipoMovimientoId)->first()->estado_id; // Obtener el estado del movimiento
@@ -307,18 +317,21 @@ class ModificarReclamo extends Component
                 'usuario_id' => $this->usuarioId,
                 'estado_id' => $this->estadoMovimientoId
             ]);
-         
 
             // Actualizar el reclamo
             $this->reclamo->update([
                 'estado_id' => $this->estadoMovimientoId
             ]);
 
-
-
             DB::commit();
+
+            // IMPORTANTE: Recargar después del commit
+            $this->cargarHistorial();
+            $this->cargarDatosReclamo();
+
             session()->flash('success', 'Movimiento guardado exitosamente');
             $this->cerrarModal();
+            
         } catch (\Exception $e) {
             DB::rollBack();
             session()->flash('error', 'Error al guardar el movimiento: ' . $e->getMessage());
@@ -367,24 +380,9 @@ class ModificarReclamo extends Component
             ]);
 
             DB::commit();
-            /*
-            // Emitir evento para notificar el éxito
-            $this->dispatch('reclamo-actualizado', [
-                'id' => $this->reclamo->id,
-                'message' => 'Reclamo actualizado exitosamente'
-            ]);
-
-            // Emitir evento para cerrar modal si se usa desde el ABM
-            $this->dispatch('reclamo-saved');
-
-            $this->showSuccess = true;
-            */
 
             // Activar notificación
             $this->mostrarNotificacionExito();
-                
-            // Redirección inmediata sin delay
-            //$this->redirect(route('reclamos'), navigate: true);
 
             $this->isSaving = false;
 
@@ -423,11 +421,6 @@ class ModificarReclamo extends Component
 
     public function render()
     {
-        $this->historial = Movimiento::where('reclamo_id', $this->reclamoId)
-            ->with(['tipoMovimiento', 'estado', 'usuario'])
-            ->orderBy('fecha', 'desc')
-            ->get();
-            
         return view('livewire.modificar-reclamo');
     }
 }

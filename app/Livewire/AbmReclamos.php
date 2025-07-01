@@ -35,6 +35,8 @@ class AbmReclamos extends Component
     public $areas = [];
     public $categorias = [];
 
+    public $listaTimestamp; // NUEVO: para forzar re-renderización
+
     // Áreas del usuario logueado
     public $userAreas = [];
 
@@ -61,7 +63,8 @@ class AbmReclamos extends Component
     {
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
-        
+
+        $this->listaTimestamp = microtime(true); // Inicializar timestamp
 
         // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
         if (empty($this->userAreas)) {
@@ -160,6 +163,8 @@ class AbmReclamos extends Component
         if ($this->filtro_fecha_hasta) {
             $query->where('fecha', '<=', $this->filtro_fecha_hasta);
         }
+
+        $this->listaTimestamp = microtime(true);
 
         return $query->paginate(15);
     }

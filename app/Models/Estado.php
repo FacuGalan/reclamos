@@ -25,7 +25,7 @@ class Estado extends Model
             '#FEF3C7' => 'Amarillo (Pendiente)',
             '#DBEAFE' => 'Azul (En tramite)', 
             '#D1FAE5' => 'Verde (Finalizado)',
-            '#FEE2E2' => 'Rojo (Cancelado)',
+            '#FEE2E2' => 'Rojo (Cancelado)', // los definidos por nosotros
             '#F3F4F6' => 'Gris (Cerrado)',
             '#F3E8FF' => 'Púrpura (Revisión)',
             '#FDF2F8' => 'Rosa (Pendiente Aprobación)',

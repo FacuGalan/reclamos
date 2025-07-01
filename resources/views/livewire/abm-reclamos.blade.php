@@ -256,7 +256,9 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <livewire:estado-badge :estado-id="$reclamo->estado->id" size="small"  />
+                                    <livewire:estado-badge :estado-id="$reclamo->estado->id" 
+                                                           size="small"
+                                                           wire:key="estados-{{$reclamo->id}}-{{ $this->listaTimestamp }}"  />
                                
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
