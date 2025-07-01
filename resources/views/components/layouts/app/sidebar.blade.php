@@ -15,9 +15,13 @@
        
             <flux:navlist.group :heading="__('Menú')" class="grid">
                 <flux:navlist.item icon="home" :href="route('reclamos')" :current="request()->routeIs('reclamos')" wire:navigate>Reclamos</flux:navlist.item>
-                <flux:navlist.item icon="building-office" :href="route('areas')" :current="request()->routeIs('areas')" wire:navigate>Áreas</flux:navlist.item>
             </flux:navlist.group>
-    
+            <flux:navlist.group :heading="__('Mantenimiento')" class="grid">
+                <flux:navlist.item icon="building-office-2" :href="route('secretarias')" :current="request()->routeIs('secretarias')" wire:navigate>Secretarías</flux:navlist.item>
+                <flux:navlist.item icon="building-office" :href="route('areas')" :current="request()->routeIs('areas')" wire:navigate>Áreas</flux:navlist.item>
+                <flux:navlist.item icon="arrows-right-left" :href="route('tipos-movimiento')" :current="request()->routeIs('tipos-movimiento')" wire:navigate>Tipos de Movimiento</flux:navlist.item>
+                <flux:navlist.item icon="adjustments-horizontal" :href="route('estados')" :current="request()->routeIs('estados')" wire:navigate>Estados</flux:navlist.item>
+            </flux:navlist.group>
                   
 
             <flux:spacer />

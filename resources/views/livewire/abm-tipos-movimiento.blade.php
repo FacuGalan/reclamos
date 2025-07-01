@@ -43,14 +43,14 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Áreas</h1>
-            <p class="text-gray-600 dark:text-gray-300">Administra las áreas organizacionales del sistema</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Tipos de Movimiento</h1>
+            <p class="text-gray-600 dark:text-gray-300">Administra los tipos de movimiento para los reclamos</p>
         </div>
         
         <button 
-            wire:click="nuevaArea"
+            wire:click="nuevoTipoMovimiento"
             class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-            Nueva Área
+            Nuevo Tipo de Movimiento
         </button>
     </div>
 
@@ -65,7 +65,7 @@
             </button>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Búsqueda general -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Búsqueda</label>
@@ -73,25 +73,38 @@
                     type="text" 
                     wire:model.live.debounce.300ms="busqueda"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                    placeholder="Buscar por nombre de área...">
+                    placeholder="Buscar por nombre...">
             </div>
 
-            <!-- Filtro por secretaría -->
+            <!-- Filtro por área -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Secretaría</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
                 <select 
-                    wire:model.live="filtro_secretaria"
+                    wire:model.live="filtro_area"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                    <option value="">Todas las secretarías</option>
-                    @foreach($secretarias as $secretaria)
-                        <option value="{{ $secretaria->id }}">{{ $secretaria->nombre }}</option>
+                    <option value="">Todas las áreas</option>
+                    @foreach($areas as $area)
+                        <option value="{{ $area->id }}">{{ $area->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filtro por estado -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
+                <select 
+                    wire:model.live="filtro_estado"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                    <option value="">Todos los estados</option>
+                    @foreach($estados as $estado)
+                        <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
                     @endforeach
                 </select>
             </div>
         </div>
     </div>
 
-    <!-- Tabla de áreas -->
+    <!-- Tabla de tipos de movimiento -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         
         <!-- Flash messages -->
@@ -118,7 +131,10 @@
                             Nombre
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Secretaría
+                            Área
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Estado al que cambia
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Fecha Creación
@@ -129,33 +145,44 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse($areas as $area)
+                    @forelse($tiposMovimiento as $tipoMovimiento)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    #{{ $area->id }}
+                                    #{{ $tipoMovimiento->id }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $area->nombre }}
+                                    {{ $tipoMovimiento->nombre }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900 dark:text-white">
-                                    {{ $area->secretaria->nombre }}
+                                    {{ $tipoMovimiento->area->nombre }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                    @if($tipoMovimiento->estado->nombre == 'Pendiente') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                    @elseif($tipoMovimiento->estado->nombre == 'En Proceso') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                    @elseif($tipoMovimiento->estado->nombre == 'Resuelto') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                    @elseif($tipoMovimiento->estado->nombre == 'Cerrado') bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                    @endif">
+                                    {{ $tipoMovimiento->estado->nombre }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ \Carbon\Carbon::parse($area->created_at)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($tipoMovimiento->created_at)->format('d/m/Y') }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-2">
                                     <!-- Editar -->
                                     <button 
-                                        wire:click="editarArea({{ $area->id }})"
+                                        wire:click="editarTipoMovimiento({{ $tipoMovimiento->id }})"
                                         class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
                                         title="Editar">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +192,7 @@
 
                                     <!-- Eliminar -->
                                     <button 
-                                        wire:click="confirmarEliminacion({{ $area->id }})"
+                                        wire:click="confirmarEliminacion({{ $tipoMovimiento->id }})"
                                         class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                                         title="Eliminar">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,13 +204,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="text-gray-500 dark:text-gray-400">
                                     <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                     </svg>
-                                    <p class="text-lg font-medium">No se encontraron áreas</p>
-                                    <p class="text-sm">Intenta ajustar los filtros o crear una nueva área.</p>
+                                    <p class="text-lg font-medium">No se encontraron tipos de movimiento</p>
+                                    <p class="text-sm">Intenta ajustar los filtros o crear un nuevo tipo de movimiento.</p>
                                 </div>
                             </td>
                         </tr>
@@ -193,9 +220,9 @@
         </div>
 
         <!-- Paginación -->
-        @if($areas->hasPages())
+        @if($tiposMovimiento->hasPages())
             <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $areas->links() }}
+                {{ $tiposMovimiento->links() }}
             </div>
         @endif
     </div>
@@ -206,7 +233,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
-                        {{ $isEditing ? 'Editar Área' : 'Nueva Área' }}
+                        {{ $isEditing ? 'Editar Tipo de Movimiento' : 'Nuevo Tipo de Movimiento' }}
                     </h2>
                     <button 
                         wire:click="cerrarModal"
@@ -221,30 +248,46 @@
                     <!-- Nombre -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Nombre del Área *
+                            Nombre del Tipo de Movimiento *
                         </label>
                         <input 
                             type="text" 
                             wire:model="nombre"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
-                            placeholder="Ingrese el nombre del área">
+                            placeholder="Ingrese el nombre del tipo de movimiento">
                         @error('nombre') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Secretaría -->
+                    <!-- Área -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Secretaría *
+                            Área *
                         </label>
                         <select 
-                            wire:model="secretaria_id"
+                            wire:model="area_id"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
-                            <option value="">Seleccione una secretaría</option>
-                            @foreach($secretarias as $secretaria)
-                                <option value="{{ $secretaria->id }}">{{ $secretaria->nombre }}</option>
+                            <option value="">Seleccione un área</option>
+                            @foreach($areas as $area)
+                                <option value="{{ $area->id }}">{{ $area->nombre }}</option>
                             @endforeach
                         </select>
-                        @error('secretaria_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @error('area_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Estado -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Estado al que cambia *
+                        </label>
+                        <select 
+                            wire:model="estado_id"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
+                            <option value="">Seleccione un estado</option>
+                            @foreach($estados as $estado)
+                                <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
+                            @endforeach
+                        </select>
+                        @error('estado_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Botones -->
@@ -294,11 +337,17 @@
                     </div>
                     <div class="ml-3">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                            Eliminar Área
+                            Eliminar Tipo de Movimiento
                         </h3>
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            ¿Estás seguro de que deseas eliminar el área "{{ $selectedArea?->nombre }}"? Esta acción no se puede deshacer.
+                            ¿Estás seguro de que deseas eliminar el tipo de movimiento "{{ $selectedTipoMovimiento?->nombre }}"? Esta acción no se puede deshacer.
                         </p>
+                        @if($selectedTipoMovimiento)
+                            <div class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                                <p><strong>Área:</strong> {{ $selectedTipoMovimiento->area->nombre }}</p>
+                                <p><strong>Estado:</strong> {{ $selectedTipoMovimiento->estado->nombre }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 
@@ -310,7 +359,7 @@
                         Cancelar
                     </button>
                     <button 
-                        wire:click="eliminarArea" 
+                        wire:click="eliminarTipoMovimiento" 
                         type="button" 
                         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
                         Eliminar

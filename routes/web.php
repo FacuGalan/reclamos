@@ -31,9 +31,22 @@ Route::view('reclamos', 'reclamos')
     ->middleware(['auth', 'verified'])
     ->name('reclamos');
 
+Route::view('secretarias', 'secretarias')
+    ->middleware(['auth', 'verified'])
+    ->name('secretarias');
+    
 Route::view('areas', 'areas')
     ->middleware(['auth', 'verified'])
     ->name('areas');
+
+Route::view('tipos-movimiento', 'tipos-movimiento')
+    ->middleware(['auth', 'verified'])
+    ->name('tipos-movimiento');
+
+Route::view('estados', 'estados')
+    ->middleware(['auth', 'verified'])
+    ->name('estados');
+
 
 // Rutas de configuración
 Route::middleware(['auth'])->group(function () {

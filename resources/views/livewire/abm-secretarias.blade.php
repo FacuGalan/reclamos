@@ -43,14 +43,17 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Áreas</h1>
-            <p class="text-gray-600 dark:text-gray-300">Administra las áreas organizacionales del sistema</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Secretarías</h1>
+            <p class="text-gray-600 dark:text-gray-300">Administra las secretarías del municipio</p>
         </div>
         
         <button 
-            wire:click="nuevaArea"
+            wire:click="nuevaSecretaria"
             class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-            Nueva Área
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Nueva Secretaría
         </button>
     </div>
 
@@ -73,25 +76,12 @@
                     type="text" 
                     wire:model.live.debounce.300ms="busqueda"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                    placeholder="Buscar por nombre de área...">
-            </div>
-
-            <!-- Filtro por secretaría -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Secretaría</label>
-                <select 
-                    wire:model.live="filtro_secretaria"
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                    <option value="">Todas las secretarías</option>
-                    @foreach($secretarias as $secretaria)
-                        <option value="{{ $secretaria->id }}">{{ $secretaria->nombre }}</option>
-                    @endforeach
-                </select>
+                    placeholder="Buscar por nombre de secretaría...">
             </div>
         </div>
     </div>
 
-    <!-- Tabla de áreas -->
+    <!-- Tabla de secretarías -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         
         <!-- Flash messages -->
@@ -118,7 +108,7 @@
                             Nombre
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Secretaría
+                            Cantidad de Áreas
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Fecha Creación
@@ -129,33 +119,37 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse($areas as $area)
+                    @forelse($secretarias as $secretaria)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    #{{ $area->id }}
+                                    #{{ $secretaria->id }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $area->nombre }}
+                                    {{ $secretaria->nombre }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 dark:text-white">
-                                    {{ $area->secretaria->nombre }}
+                                <div class="flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        @if($secretaria->areas_count > 0) bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                        @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 @endif">
+                                        {{ $secretaria->areas_count }} {{ $secretaria->areas_count == 1 ? 'área' : 'áreas' }}
+                                    </span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ \Carbon\Carbon::parse($area->created_at)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($secretaria->created_at)->format('d/m/Y') }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-2">
                                     <!-- Editar -->
                                     <button 
-                                        wire:click="editarArea({{ $area->id }})"
+                                        wire:click="editarSecretaria({{ $secretaria->id }})"
                                         class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
                                         title="Editar">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +159,7 @@
 
                                     <!-- Eliminar -->
                                     <button 
-                                        wire:click="confirmarEliminacion({{ $area->id }})"
+                                        wire:click="confirmarEliminacion({{ $secretaria->id }})"
                                         class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                                         title="Eliminar">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,8 +176,8 @@
                                     <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                     </svg>
-                                    <p class="text-lg font-medium">No se encontraron áreas</p>
-                                    <p class="text-sm">Intenta ajustar los filtros o crear una nueva área.</p>
+                                    <p class="text-lg font-medium">No se encontraron secretarías</p>
+                                    <p class="text-sm">Intenta ajustar los filtros o crear una nueva secretaría.</p>
                                 </div>
                             </td>
                         </tr>
@@ -193,9 +187,9 @@
         </div>
 
         <!-- Paginación -->
-        @if($areas->hasPages())
+        @if($secretarias->hasPages())
             <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $areas->links() }}
+                {{ $secretarias->links() }}
             </div>
         @endif
     </div>
@@ -206,7 +200,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
-                        {{ $isEditing ? 'Editar Área' : 'Nueva Área' }}
+                        {{ $isEditing ? 'Editar Secretaría' : 'Nueva Secretaría' }}
                     </h2>
                     <button 
                         wire:click="cerrarModal"
@@ -221,30 +215,14 @@
                     <!-- Nombre -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Nombre del Área *
+                            Nombre de la Secretaría *
                         </label>
                         <input 
                             type="text" 
                             wire:model="nombre"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
-                            placeholder="Ingrese el nombre del área">
+                            placeholder="Ingrese el nombre de la secretaría">
                         @error('nombre') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <!-- Secretaría -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Secretaría *
-                        </label>
-                        <select 
-                            wire:model="secretaria_id"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
-                            <option value="">Seleccione una secretaría</option>
-                            @foreach($secretarias as $secretaria)
-                                <option value="{{ $secretaria->id }}">{{ $secretaria->nombre }}</option>
-                            @endforeach
-                        </select>
-                        @error('secretaria_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Botones -->
@@ -294,14 +272,26 @@
                     </div>
                     <div class="ml-3">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                            Eliminar Área
+                            Eliminar Secretaría
                         </h3>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            ¿Estás seguro de que deseas eliminar el área "{{ $selectedArea?->nombre }}"? Esta acción no se puede deshacer.
-                        </p>
                     </div>
                 </div>
-                
+                <div class="mb-2"> 
+                    @if($selectedSecretaria && $selectedSecretaria->areas_count > 0)
+                            <div class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                    ⚠️ Esta secretaría tiene {{ $selectedSecretaria->areas_count }} área(s) asociada(s). No se puede eliminar.
+                                </p>
+                            </div>
+                        @else
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                ¿Estás seguro de que deseas eliminar la secretaría "{{ $selectedSecretaria?->nombre }}"?
+                            </p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                Esta acción no se puede deshacer.
+                            </p>
+                        @endif
+                </div>
                 <div class="flex justify-end space-x-3">
                     <button 
                         wire:click="cerrarModalEliminacion" 
@@ -309,12 +299,14 @@
                         class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer">
                         Cancelar
                     </button>
-                    <button 
-                        wire:click="eliminarArea" 
-                        type="button" 
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
-                        Eliminar
-                    </button>
+                    @if(!$selectedSecretaria || $selectedSecretaria->areas_count == 0)
+                        <button 
+                            wire:click="eliminarSecretaria" 
+                            type="button" 
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
+                            Eliminar
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
