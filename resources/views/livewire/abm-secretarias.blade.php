@@ -63,7 +63,7 @@
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
             <button 
                 wire:click="limpiarFiltros"
-                class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer">
+                class="px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer">
                 Limpiar Filtros
             </button>
         </div>

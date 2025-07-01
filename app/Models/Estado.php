@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Estado extends Model
 {
-    protected $fillable = ['nombre', 'codigo_color', 'color_texto'];
+    protected $fillable = ['nombre', 'codigo_color', 'color_texto', 'de_cierre'];
 
     /**
      * Relación uno a muchos con tipos de movimiento

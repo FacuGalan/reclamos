@@ -2,9 +2,9 @@
     <img {{ $attributes }} src="{{ asset('logo-muni-M.svg') }}" alt="Logo Municipalidad" class="h-full">
 </div>
 <div class="ms-1 grid flex-1 text-start text-sm">
-    <span class="mb-0.5 truncate leading-none font-semibold">Reclamos</span>
+    <span class="mb-0.5 truncate leading-none font-semibold text-white">Reclamos</span>
     @auth
-        <span class="text-xs text-zinc-500 dark:text-zinc-400 truncate">147</span>
+        <span class="text-xs text-zinc-200 dark:text-zinc-400 truncate">147</span>
     @else
         <span class="text-xs text-zinc-500 dark:text-zinc-400 truncate">(No autenticado)</span>
     @endauth

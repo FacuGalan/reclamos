@@ -106,3 +106,22 @@ select:focus[data-flux-control] {
 input[readonly].campo-encontrado {
     @apply bg-gray-100 text-gray-600 cursor-not-allowed dark:bg-gray-600 dark:text-gray-300;
 }
+
+.flux-nav-custom {
+    color: rgb(215, 211, 211) !important;
+    transition: all 0.2s ease !important;
+}
+
+.flux-nav-custom:hover {
+    background-color: #314158 !important;
+    color: white !important;
+}
+
+.flux-nav-custom[data-current="true"],
+.flux-nav-custom:where([data-current]),
+[data-flux-navlist-item][data-current].flux-nav-custom {
+    background-color: #77BF43 !important; /* Verde para activo */
+    color: white !important;
+    font-weight: 600 !important;
+    border-left: 4px solid #5a9032 !important; /* Borde izquierdo */
+}

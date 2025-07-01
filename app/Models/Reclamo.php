@@ -18,7 +18,9 @@ class Reclamo extends Model
         'usuario_id',
         'area_id',          
         'categoria_id',       
-        'responsable_id',      
+        'responsable_id', 
+        'notificado',
+        'no_aplica',     
         'persona_id',           
         'domicilio_id'          
     ];

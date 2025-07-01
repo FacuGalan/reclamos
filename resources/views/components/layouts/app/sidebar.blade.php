@@ -5,7 +5,7 @@
     </head>
 
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-[#314158] dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a href="{{ route('reclamos') }}" class="-mb-6 -mt-2 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
@@ -13,15 +13,17 @@
             </a>
 
        
-            <flux:navlist.group :heading="__('Menú')" class="grid">
-                <flux:navlist.item icon="home" :href="route('reclamos')" :current="request()->routeIs('reclamos')" wire:navigate>Reclamos</flux:navlist.item>
-            </flux:navlist.group>
-            <flux:navlist.group :heading="__('Mantenimiento')" class="grid">
-                <flux:navlist.item icon="building-office-2" :href="route('secretarias')" :current="request()->routeIs('secretarias')" wire:navigate>Secretarías</flux:navlist.item>
-                <flux:navlist.item icon="building-office" :href="route('areas')" :current="request()->routeIs('areas')" wire:navigate>Áreas</flux:navlist.item>
-                <flux:navlist.item icon="arrows-right-left" :href="route('tipos-movimiento')" :current="request()->routeIs('tipos-movimiento')" wire:navigate>Tipos de Movimiento</flux:navlist.item>
-                <flux:navlist.item icon="adjustments-horizontal" :href="route('estados')" :current="request()->routeIs('estados')" wire:navigate>Estados</flux:navlist.item>
-            </flux:navlist.group>
+            <div class="bg-[#3F516A] rounded-lg p-2 mt-4">   
+                <flux:navlist.group :heading="__('Menú')" class="grid">
+                    <flux:navlist.item class="flux-nav-custom" icon="home" :href="route('reclamos')" :current="request()->routeIs('reclamos')" wire:navigate>Reclamos</flux:navlist.item>
+                </flux:navlist.group>
+                <flux:navlist.group :heading="__('Mantenimiento')" class="grid">
+                    <flux:navlist.item class="flux-nav-custom" icon="building-office-2" :href="route('secretarias')" :current="request()->routeIs('secretarias')" wire:navigate>Secretarías</flux:navlist.item>
+                    <flux:navlist.item class="flux-nav-custom" icon="building-office" :href="route('areas')" :current="request()->routeIs('areas')" wire:navigate>Áreas</flux:navlist.item>
+                    <flux:navlist.item class="flux-nav-custom" icon="arrows-right-left" :href="route('tipos-movimiento')" :current="request()->routeIs('tipos-movimiento')" wire:navigate>Tipos de Movimiento</flux:navlist.item>
+                    <flux:navlist.item class="flux-nav-custom" icon="adjustments-horizontal" :href="route('estados')" :current="request()->routeIs('estados')" wire:navigate>Estados</flux:navlist.item>
+                </flux:navlist.group>
+            </div>
                   
 
             <flux:spacer />
@@ -33,7 +35,7 @@
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevrons-up-down"
-                    class="cursor-pointer bg-[#F2F2F2] dark:bg-[#1F2937] text-black dark:text-white"
+                    class="cursor-pointer bg-[#3F516A] dark:bg-[#1F2937] dark:text-white"
                 />
 
                 <flux:menu class="w-[220px]">
