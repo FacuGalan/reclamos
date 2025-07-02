@@ -287,6 +287,15 @@
             </div>
         </div>    
         <div class="flex justify-end items-center pt-6 dark:border-gray-600" >
+                @if($reclamo->estado_id == 4)
+                    <label class="inline-flex items-center mr-4">
+                        <input type="checkbox" wire:model="noAplica" disabled
+                            @if($noAplica == 1 || $noAplica == '1' || $noAplica === true) checked @endif
+                            class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
+                    </label>
+                @endif
+
                 <button 
                     wire:click="save"
                     wire:loading.attr="disabled"
@@ -427,7 +436,7 @@
                 <form wire:submit.prevent="guardarMovimiento">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Movimiento</label>
-                        <select wire:model="tipoMovimientoId" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
+                        <select wire:model.live="tipoMovimientoId" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
                             <option value="">Seleccione un tipo de movimiento</option>
                             @foreach($tiposMovimiento as $tipo)
                                 <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
@@ -441,7 +450,16 @@
                         <textarea wire:model="observaciones" rows="3" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"></textarea>
                         @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
-                    
+
+                    @if($tipoMovimientoId == 4)
+                        <div class="mb-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" wire:model="noAplica" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
+                            </label>
+                        </div>
+                    @endif
+
                     <div class="flex justify-end space-x-2">
                         <button type="button" 
                             wire:click="cerrarModal"

@@ -33,6 +33,7 @@ class ModificarReclamo extends Component
     public $tipoNotificacion = 'success'; // 'success' o 'error'
 
     public $mostrarModal = false;
+    public $noAplica = false; // Para indicar si el movimiento no aplica
     public $nuevoMovimiento = false;
     public $tiposMovimiento = '';
     public $tipoMovimientoId = null; // ID del tipo de movimiento seleccionado
@@ -152,14 +153,12 @@ class ModificarReclamo extends Component
 
     public function cargarDatosReclamo()
     {
-        $this->reclamo = Reclamo::with(['persona', 'domicilio', 'categoria', 'estado', 'area'])
-            ->find($this->reclamoId);
+        $this->reclamo = Reclamo::find($this->reclamoId);
         
         if (!$this->reclamo) {
             session()->flash('error', 'Reclamo no encontrado.');
             return;
         }
-
         // Cargar datos del reclamo
         $this->descripcion = $this->reclamo->descripcion;
         $this->direccion = $this->reclamo->direccion;
@@ -169,7 +168,8 @@ class ModificarReclamo extends Component
         $this->area_id = $this->reclamo->area_id;
         $this->area_nombre = $this->reclamo->area ? $this->reclamo->area->nombre : '';
         $this->estado_id = $this->reclamo->estado_id;
-
+        $this->noAplica = $this->reclamo->no_aplica;
+         
         // Configurar categoria seleccionada para el dropdown
         if ($this->categoria_id) {
             $categoria = $this->categorias->find($this->categoria_id);
@@ -275,7 +275,13 @@ class ModificarReclamo extends Component
 
     public function nuevoMovimiento1()
     {
-        $this->tiposMovimiento = TipoMovimiento::where('area_id', $this->area_id)
+        $this->tiposMovimiento = TipoMovimiento::
+            where(function($query) {
+                $query->where('area_id', $this->area_id)->orWhere('area_id', null);
+            })
+            ->where(function($query) {
+                $query->where('id', 2)->orWhere('id', '>', 3);
+            })
             ->orderBy('nombre')
             ->get();
         $this->mostrarModal = true;
@@ -320,7 +326,9 @@ class ModificarReclamo extends Component
 
             // Actualizar el reclamo
             $this->reclamo->update([
-                'estado_id' => $this->estadoMovimientoId
+                'estado_id' => $this->estadoMovimientoId,
+                'responsable_id' => Auth::id(), // Asignar el usuario actual como responsable
+                'no_aplica' => $this->noAplica // Actualizar el campo no_aplica
             ]);
 
             DB::commit();

@@ -21,7 +21,7 @@ new class extends Component {
     public function getSizeClasses(): string
     {
         return match($this->size) {
-            'small' => 'px-2 py-1 text-xs',
+            'small' => 'px-2 py-1 text-sm',
             'large' => 'px-4 py-2 text-base',
             default => 'px-2 py-1 text-xs', // normal
         };
