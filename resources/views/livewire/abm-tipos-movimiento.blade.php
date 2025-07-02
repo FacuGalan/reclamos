@@ -163,15 +163,9 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                    @if($tipoMovimiento->estado->nombre == 'Pendiente') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                    @elseif($tipoMovimiento->estado->nombre == 'En Proceso') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                                    @elseif($tipoMovimiento->estado->nombre == 'Resuelto') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                    @elseif($tipoMovimiento->estado->nombre == 'Cerrado') bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
-                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                    @endif">
-                                    {{ $tipoMovimiento->estado->nombre }}
-                                </span>
+                                <livewire:estado-badge :estado-id="$tipoMovimiento->estado_id" 
+                                                           size="small"
+                                                           wire:key="estados-{{$tipoMovimiento->id}}-{{ $this->listaTimestamp }}"  />
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -179,27 +173,29 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center gap-2">
-                                    <!-- Editar -->
-                                    <button 
-                                        wire:click="editarTipoMovimiento({{ $tipoMovimiento->id }})"
-                                        class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
-                                        title="Editar">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
+                                @if($tipoMovimiento->id >4)
+                                    <div class="flex items-center gap-2">
+                                        <!-- Editar -->
+                                        <button 
+                                            wire:click="editarTipoMovimiento({{ $tipoMovimiento->id }})"
+                                            class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
+                                            title="Editar">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
 
-                                    <!-- Eliminar -->
-                                    <button 
-                                        wire:click="confirmarEliminacion({{ $tipoMovimiento->id }})"
-                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                        title="Eliminar">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </div>
+                                        <!-- Eliminar -->
+                                        <button 
+                                            wire:click="confirmarEliminacion({{ $tipoMovimiento->id }})"
+                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                            title="Eliminar">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -272,22 +268,6 @@
                             @endforeach
                         </select>
                         @error('area_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <!-- Estado -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Estado al que cambia *
-                        </label>
-                        <select 
-                            wire:model="estado_id"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
-                            <option value="">Seleccione un estado</option>
-                            @foreach($estados as $estado)
-                                <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
-                            @endforeach
-                        </select>
-                        @error('estado_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Botones -->

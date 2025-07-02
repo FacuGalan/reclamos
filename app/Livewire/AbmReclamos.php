@@ -139,6 +139,8 @@ class AbmReclamos extends Component
 
         if ($this->filtro_estado) {
             $query->where('estado_id', $this->filtro_estado);
+        }else{
+            $query->whereNot('estado_id', 5);
         }
 
         if ($this->filtro_area) {
@@ -257,7 +259,10 @@ class AbmReclamos extends Component
         if ($this->selectedReclamo) {
             // Verificar una vez más que el usuario tiene permisos
             if (in_array($this->selectedReclamo->area_id, $this->userAreas)) {
-                $this->selectedReclamo->delete();
+                //$this->selectedReclamo->delete();
+                $this->selectedReclamo->update([
+                    'estado_id' => 5 // Asumiendo que el estado 5 es "Cancelado"
+                ]);
                 $this->showDeleteModal = false;
                 $this->selectedReclamo = null;
                 

@@ -17,6 +17,7 @@ class AbmTiposMovimiento extends Component
     public $busqueda = '';
     public $filtro_area = '';
     public $filtro_estado = '';
+    public $listaTimestamp = null; // Para forzar la actualización de la lista
     
     // Propiedades para modales
     public $selectedTipoMovimientoId = null;
@@ -51,7 +52,6 @@ class AbmTiposMovimiento extends Component
     protected $rules = [
         'nombre' => 'required|string|max:255|unique:tipo_movimientos,nombre',
         'area_id' => 'required|exists:areas,id',
-        'estado_id' => 'required|exists:estados,id',
     ];
 
     protected $messages = [
@@ -59,8 +59,6 @@ class AbmTiposMovimiento extends Component
         'nombre.unique' => 'Ya existe un tipo de movimiento con este nombre',
         'area_id.required' => 'Debe seleccionar un área',
         'area_id.exists' => 'El área seleccionada no es válida',
-        'estado_id.required' => 'Debe seleccionar un estado',
-        'estado_id.exists' => 'El estado seleccionado no es válido',
     ];
 
     public function mount()
@@ -76,6 +74,8 @@ class AbmTiposMovimiento extends Component
         // Cargar datos filtrados por las áreas del usuario
         $this->areas = Area::whereIn('id', $this->userAreas)->orderBy('nombre')->get();
         $this->estados = Estado::orderBy('nombre')->get();
+
+        $this->listaTimestamp = microtime(true);
     }
 
     public function placeholder()
@@ -102,7 +102,7 @@ class AbmTiposMovimiento extends Component
     {
         $query = TipoMovimiento::with(['area', 'estado'])
             ->whereIn('area_id', $this->userAreas) // Solo tipos de movimiento de áreas del usuario
-            ->orderBy('nombre');
+            ->orderBy('id');
 
         // Aplicar filtros
         if ($this->busqueda) {
@@ -119,6 +119,8 @@ class AbmTiposMovimiento extends Component
         if ($this->filtro_estado) {
             $query->where('estado_id', $this->filtro_estado);
         }
+
+        $this->listaTimestamp = microtime(true);
 
         return $query->paginate(15);
     }
@@ -241,7 +243,7 @@ class AbmTiposMovimiento extends Component
                 TipoMovimiento::create([
                     'nombre' => $this->nombre,
                     'area_id' => $this->area_id,
-                    'estado_id' => $this->estado_id,
+                    'estado_id' => 2 //$this->estado_id,
                 ]);
                 
                 $mensaje = 'Tipo de movimiento creado exitosamente';
@@ -258,7 +260,7 @@ class AbmTiposMovimiento extends Component
                 $tipoMovimiento->update([
                     'nombre' => $this->nombre,
                     'area_id' => $this->area_id,
-                    'estado_id' => $this->estado_id,
+                    'estado_id' => 2 //$this->estado_id,
                 ]);
                 
                 $mensaje = 'Tipo de movimiento actualizado exitosamente';

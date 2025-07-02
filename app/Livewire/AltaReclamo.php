@@ -329,7 +329,7 @@ class AltaReclamo extends Component
                 'persona_id' => $persona->id,
                 'domicilio_id' => $domicilio->id,
                 'usuario_id' => Auth::id() ?? 1,
-                'responsable_id' => Auth::id() ?? 1,
+                'responsable_id' => null //Auth::id() ?? 1,
             ]);
 
             DB::commit();

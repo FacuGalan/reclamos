@@ -222,7 +222,13 @@
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($reclamos as $reclamo)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <tr class="
+                                    {{ is_null($reclamo->responsable_id) 
+                                        ? 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30' 
+                                        : 'hover:bg-gray-200 dark:hover:bg-gray-700' 
+                                    }} 
+                                    transition-colors
+                                ">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">
                                         #{{ $reclamo->id }}
