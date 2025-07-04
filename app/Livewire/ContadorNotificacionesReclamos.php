@@ -11,6 +11,7 @@ class ContadorNotificacionesReclamos extends Component
     public $conteoReclamos = 0;
     public $userAreas = [];
     public $ultimaActualizacion = '';
+    protected $listeners = ['nuevo-reclamo-detectado' => 'actualizarConteo'];
 
     public function mount()
     {

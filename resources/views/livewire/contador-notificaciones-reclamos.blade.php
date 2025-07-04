@@ -1,4 +1,4 @@
-<div wire:poll.30s="polling" 
+<div wire:poll.10s="polling" 
      x-data="{ 
         pulso: false,
         init() {

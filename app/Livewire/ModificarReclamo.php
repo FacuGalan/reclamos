@@ -34,8 +34,12 @@ class ModificarReclamo extends Component
 
     public $mostrarModal = false;
     public $noAplica = false; // Para indicar si el movimiento no aplica
+    public $notificado = false; // Para indicar si se notificará al vecino
     public $nuevoMovimiento = false;
+    public $derivar = false; // Para indicar si se está derivando el reclamo
     public $tiposMovimiento = '';
+    public $areasDerivacion = [];
+    public $nuevaArea = ''; // Área a la que se derivará el reclamo
     public $tipoMovimientoId = null; // ID del tipo de movimiento seleccionado
     public $observaciones = '';
     public $fechaMovimiento = '';
@@ -169,6 +173,7 @@ class ModificarReclamo extends Component
         $this->area_nombre = $this->reclamo->area ? $this->reclamo->area->nombre : '';
         $this->estado_id = $this->reclamo->estado_id;
         $this->noAplica = $this->reclamo->no_aplica;
+        $this->notificado = $this->reclamo->notificado; // Asignar valor de notificado si existe
          
         // Configurar categoria seleccionada para el dropdown
         if ($this->categoria_id) {
@@ -285,13 +290,23 @@ class ModificarReclamo extends Component
             ->orderBy('nombre')
             ->get();
         $this->mostrarModal = true;
+        $this->nuevoMovimiento = true;
     }  
+
+    public function derivarReclamo()
+    {
+
+        $this->areasDerivacion = Area::get();
+        $this->derivar = true;
+        $this->mostrarModal = true;
+    }
 
     public function cerrarModal()
     {
         $this->mostrarModal = false;
         $this->nuevoMovimiento = false;
         $this->tiposMovimiento = '';
+        $this->derivar = false;
         $this->observaciones = '';
         $this->fechaMovimiento = '';
         $this->usuarioId = null;
@@ -328,10 +343,13 @@ class ModificarReclamo extends Component
             $this->reclamo->update([
                 'estado_id' => $this->estadoMovimientoId,
                 'responsable_id' => Auth::id(), // Asignar el usuario actual como responsable
-                'no_aplica' => $this->noAplica // Actualizar el campo no_aplica
+                'no_aplica' => $this->noAplica, // Actualizar el campo no_aplica
+                'notificado' => $this->notificado // Actualizar el campo notificado
             ]);
 
             DB::commit();
+
+            $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
 
             // IMPORTANTE: Recargar después del commit
             $this->cargarHistorial();
@@ -343,6 +361,53 @@ class ModificarReclamo extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             session()->flash('error', 'Error al guardar el movimiento: ' . $e->getMessage());
+        }
+    }
+
+    public function guardarDerivacion()
+    {
+        // Validar campos de derivación
+        $this->validate([
+            'nuevaArea' => 'required|exists:areas,id',
+        ]);
+
+        $areaDerivada = Area::where('id',$this->nuevaArea)->get()->first();
+
+        try {
+            DB::beginTransaction();
+
+            // Crear el movimiento de derivación
+            Movimiento::create([
+                'reclamo_id' => $this->reclamoId,
+                'tipo_movimiento_id' => 3, // ID del tipo de movimiento "Derivación"
+                'observaciones' => 'De '.$this->area_nombre.' a '.$areaDerivada->nombre.': ' . $this->observaciones,
+                'fecha' => date('Y-m-d'),
+                'usuario_id' => Auth::id(),
+                'estado_id' => 3
+            ]);
+
+            // Actualizar el reclamo
+            $this->reclamo->update([
+                'area_id' => $this->nuevaArea,
+                'estado_id' => 3, // Cambiar estado a "Derivado"
+                'responsable_id' => NULL, // resetear el responsable al derivar
+            ]);
+
+            DB::commit();
+
+            $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
+            
+            session()->flash('success', 'Reclamo derivado exitosamente');
+            $this->cerrarModal();
+
+            // Volver al ABM con un mensaje de éxito que se mostrará allí
+            session()->flash('reclamo_derivado', 'Reclamo derivado a '.$areaDerivada->nombre.' exitosamente');
+
+            $this->redirect(route('reclamos'), navigate: true);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Error al derivar el reclamo: ' . $e->getMessage());
         }
     }
 
@@ -388,6 +453,8 @@ class ModificarReclamo extends Component
             ]);
 
             DB::commit();
+
+            $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
 
             // Activar notificación
             $this->mostrarNotificacionExito();

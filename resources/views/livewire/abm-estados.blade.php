@@ -348,7 +348,7 @@ new class extends Component {
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                @if($estado->id > 5)
+                                @if($estado->id > 5 || auth()->user()->rol_id === 1)
                                     <div class="flex items-center gap-2">
                                         <!-- Editar -->
                                         <button 

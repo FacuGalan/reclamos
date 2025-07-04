@@ -140,7 +140,7 @@ class AbmReclamos extends Component
         if ($this->filtro_estado) {
             $query->where('estado_id', $this->filtro_estado);
         }else{
-            $query->whereNot('estado_id', 5);
+            $query->whereNot('estado_id', 5)->whereNot('estado_id', 4); // Excluir estados "Cancelado" y "Finalizado"
         }
 
         if ($this->filtro_area) {
@@ -261,10 +261,13 @@ class AbmReclamos extends Component
             if (in_array($this->selectedReclamo->area_id, $this->userAreas)) {
                 //$this->selectedReclamo->delete();
                 $this->selectedReclamo->update([
-                    'estado_id' => 5 // Asumiendo que el estado 5 es "Cancelado"
+                    'estado_id' => 5, // Asumiendo que el estado 5 es "Cancelado"
+                    'responsable_id' => Auth::id(), // Asignar el usuario que elimina
                 ]);
                 $this->showDeleteModal = false;
                 $this->selectedReclamo = null;
+
+                $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
                 
                 session()->flash('success', 'Reclamo eliminado exitosamente.');
                 $this->dispatch('reclamo-deleted');

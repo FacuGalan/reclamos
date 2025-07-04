@@ -286,52 +286,59 @@
                 </div>
             </div>
         </div>    
-        <div class="flex justify-end items-center pt-6 dark:border-gray-600" >
-                @if($reclamo->estado_id == 4)
-                    <label class="inline-flex items-center mr-4">
-                        <input type="checkbox" wire:model="noAplica" disabled
-                            @if($noAplica == 1 || $noAplica == '1' || $noAplica === true) checked @endif
-                            class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
-                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
-                    </label>
-                @endif
+        <div class="flex items-center justify-between pt-6 dark:border-gray-600" >
+            <button
+                wire:click="derivarReclamo"
+                @if($reclamo->estado->id == 4) disabled @endif
+                class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white dark:text-gray-200 rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
+                <span>
+                    Derivar Reclamo
+                </span>
+            </button>
 
-                <button 
-                    wire:click="save"
-                    wire:loading.attr="disabled"
-                    wire:target="save"
-                    x-data="{ showSuccess: false }"
-                    x-init="
-                        $wire.on('reclamo-modificado-exitoso', () => {
-                            showSuccess = true; 
-                            setTimeout(() => showSuccess = false, 800)
-                        })
-                    "
-                    class="px-8 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors font-medium cursor-pointer relative min-h-[2.5rem] flex items-center justify-center">
+            @if($noAplica == 1)
+                <label class="inline-flex items-center mr-4 text-red-500 font-bold">
+                    Este reclamo no aplica
+                </label>
+            @endif
 
-                    <!-- Estado normal -->
-                    <span wire:loading.remove wire:target="save" x-show="!showSuccess" class="flex items-center whitespace-nowrap">
-                        Actualizar Reclamo
-                    </span>
-                    
-                    <!-- Estado guardando -->
-                    <span wire:loading wire:target="save">
-                        <div  class="flex items-center whitespace-nowrap space-x-2">
-                        <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Guardando...
-                        </div>
-                    </span>
+            <button 
+                wire:click="save"
+                wire:loading.attr="disabled"
+                wire:target="save"
+                x-data="{ showSuccess: false }"
+                x-init="
+                    $wire.on('reclamo-modificado-exitoso', () => {
+                        showSuccess = true; 
+                        setTimeout(() => showSuccess = false, 800)
+                    })
+                "
+                @if($reclamo->estado->id == 4) disabled @endif
+                class="px-8 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors font-medium cursor-pointer relative min-h-[2.5rem] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
+                <!-- Estado normal -->
+                <span wire:loading.remove wire:target="save" x-show="!showSuccess" class="flex items-center whitespace-nowrap">
+                    Actualizar Reclamo
+                </span>
+                
+                <!-- Estado guardando -->
+                <span wire:loading wire:target="save">
+                    <div  class="flex items-center whitespace-nowrap space-x-2">
+                    <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Guardando...
+                    </div>
+                </span>
 
-                    <!-- Estado éxito -->
-                    <span x-show="showSuccess" class="flex items-center whitespace-nowrap">
-                        ¡Reclamo Actualizado!
-                    </span>
-                </button>
+                <!-- Estado éxito -->
+                <span x-show="showSuccess" class="flex items-center whitespace-nowrap">
+                    ¡Reclamo Actualizado!
+                </span>
+            </button>
         </div>
     </div>
+
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-6">
         <div class="grid grid-cols-2 gap-10 bg-gray-50 dark:bg-gray-800 ">
@@ -345,7 +352,8 @@
                 <button 
                     wire:click="nuevoMovimiento1"
                     wire:target="nuevoMovimiento1"
-                    class="px-8 py-2 bg-[#91D5E2] text-white rounded-lg hover:bg-[#5AB1BF] transition-colors flex items-center font-medium cursor-pointer">
+                    @if($reclamo->estado->id == 4) disabled @endif
+                    class="px-8 py-2 bg-[#4CB4DC] text-white rounded-lg hover:bg-[#31A0CD] transition-colors flex items-center font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
                     Nuevo Movimiento
                 </button>
             </div>
@@ -430,50 +438,94 @@
     
     <!-- Modal para nuevo movimiento -->
     @if($mostrarModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Nuevo Movimiento</h2>
-                <form wire:submit.prevent="guardarMovimiento">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Movimiento</label>
-                        <select wire:model.live="tipoMovimientoId" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
-                            <option value="">Seleccione un tipo de movimiento</option>
-                            @foreach($tiposMovimiento as $tipo)
-                                <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
-                            @endforeach
-                        </select>
-                        @error('tipoMovimientoId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>
-                        <textarea wire:model="observaciones" rows="3" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"></textarea>
-                        @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    @if($tipoMovimientoId == 4)
+        @if($nuevoMovimiento)
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Nuevo Movimiento</h2>
+                    <form wire:submit.prevent="guardarMovimiento">
                         <div class="mb-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" wire:model="noAplica" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
-                            </label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Movimiento</label>
+                            <select wire:model.live="tipoMovimientoId" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
+                                <option value="">Seleccione un tipo de movimiento</option>
+                                @foreach($tiposMovimiento as $tipo)
+                                    <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('tipoMovimientoId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
-                    @endif
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>
+                            <textarea wire:model="observaciones" rows="3" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"></textarea>
+                            @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div class="flex justify-end space-x-2">
-                        <button type="button" 
-                            wire:click="cerrarModal"
-                            class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors cursor-pointer">
-                            Cancelar
-                        </button>
-                        <button type="submit" 
-                            class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer">
-                            Guardar Movimiento          
-                        </button>
-                    </div>  
-                </form>
-            </div>
-        </div>  
+                        @if($tipoMovimientoId == 4)
+                            <div class="mb-4">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" wire:model="noAplica" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
+                                </label>
+                                <label class="inline-flex items-center ml-4">
+                                    <input type="checkbox" wire:model="notificado" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
+                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Notificar al vecino</span>
+                                </label>
+                            </div>
+                        @endif
+
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" 
+                                wire:click="cerrarModal"
+                                class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors cursor-pointer">
+                                Cancelar
+                            </button>
+                            <button type="submit" 
+                                class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer">
+                                Guardar Movimiento          
+                            </button>
+                        </div>  
+                    </form>
+                </div>
+            </div>  
+        @endif
+         <!-- Modal para Derivar -->
+        @if($derivar)
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Derivar Reclamo</h2>
+                    <form wire:submit.prevent="guardarDerivacion">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
+                            <select wire:model="nuevaArea" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
+                                <option value="">Seleccione Área a derivar</option>
+                                @foreach($areas as $area)
+                                    <option value="{{ $area->id }}">{{ $area->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('nuevaArea') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>
+                            <textarea wire:model="observaciones" rows="3" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"></textarea>
+                            @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" 
+                                wire:click="cerrarModal"
+                                class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors cursor-pointer">
+                                Cancelar
+                            </button>
+                            <button type="submit" 
+                                class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer">
+                                Derivar Reclamo          
+                            </button>
+                        </div>  
+                    </form>
+                </div>
+            </div>  
+        @endif
     @endif
 
     <!-- Script para manejo de navegación automática -->

@@ -333,6 +333,8 @@ class AltaReclamo extends Component
             ]);
 
             DB::commit();
+
+            $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
             
             // Comportamiento diferente según el contexto
             if (Auth::check()) {

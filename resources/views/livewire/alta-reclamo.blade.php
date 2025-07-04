@@ -284,7 +284,8 @@
                     
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Email
+                            Email 
+                            <span class="text-gray-500 dark:text-gray-400 text-sm">(opcional, deberá ingresarlo si quiere recibir novedades de su reclamo)</span>
                         </label>
                         <input 
                             type="email" 
