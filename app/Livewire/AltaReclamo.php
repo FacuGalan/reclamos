@@ -9,6 +9,7 @@ use App\Models\Categoria;
 use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\Domicilios;
+use App\Models\Movimiento;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +28,13 @@ class AltaReclamo extends Component
     public $area_id = '';
     public $categoria_id = '';
     public $userAreas = []; // Áreas del usuario autenticado
+
+    // Nueva propiedad para el historial de reclamos
+    public $reclamosPersona = [];
+    public $personaId = null; // ID de la persona encontrada
+    public $mostrarModalDetalle = false;
+    public $reclamoDetalle = null;
+    public $movimientosDetalle = [];
     
     // Datos de la persona
     public $persona_dni = '';
@@ -194,6 +202,10 @@ class AltaReclamo extends Component
                 $this->persona_telefono = $persona->telefono;
                 $this->persona_email = $persona->email;
                 $this->personaEncontrada = true;
+                $this->personaId = $persona->id; // Guardar el ID de la persona
+                
+                // Cargar historial de reclamos de esta persona
+                $this->cargarReclamosPersona($persona->id);
                 
                 // Emitir evento de JavaScript para mostrar notificación
                 $this->dispatch('persona-encontrada', [
@@ -204,12 +216,25 @@ class AltaReclamo extends Component
                 // Persona no encontrada - limpiar campos
                 $this->limpiarDatosPersona();
                 $this->personaEncontrada = false;
+                $this->personaId = null;
+                $this->reclamosPersona = []; // Limpiar historial
             }
         } catch (\Exception $e) {
             // En caso de error, limpiar campos
             $this->limpiarDatosPersona();
             $this->personaEncontrada = false;
+            $this->personaId = null;
+            $this->reclamosPersona = [];
         }
+    }
+
+    public function cargarReclamosPersona($personaId)
+    {
+        $this->reclamosPersona = Reclamo::where('persona_id', $personaId)
+            ->with(['categoria', 'area', 'estado']) // Cargar relaciones
+            ->orderBy('created_at', 'desc') // Más recientes primero
+            ->limit(10) // Limitar a los últimos 10 reclamos
+            ->get();
     }
 
     // DNI: Limpiar datos de persona
@@ -220,6 +245,46 @@ class AltaReclamo extends Component
         $this->persona_telefono = '';
         $this->persona_email = '';
         $this->personaEncontrada = false;
+        $this->personaId = null;
+        $this->reclamosPersona = []; // Limpiar historial
+    }
+
+
+    public function verDetalleReclamo($reclamoId)
+    {
+        // Cargar reclamo con todas sus relaciones
+        $this->reclamoDetalle = Reclamo::with([
+            'categoria', 
+            'area', 
+            'estado', 
+            'persona',
+            'usuario', // Usuario que creó el reclamo
+            'responsable' // Usuario responsable actual
+        ])->find($reclamoId);
+        
+        if ($this->reclamoDetalle) {
+            // Cargar movimientos del reclamo con sus relaciones
+            $this->movimientosDetalle = \App\Models\Movimiento::where('reclamo_id', $reclamoId)
+                ->with([
+                    'tipoMovimiento',
+                    'estado', 
+                    'usuario'
+                ])
+                ->orderBy('fecha', 'desc') // Más recientes primero
+                ->orderBy('created_at', 'desc')
+                ->get();
+                
+            $this->mostrarModalDetalle = true;
+        }
+    }
+
+
+    // NUEVA FUNCIÓN: Cerrar modal de detalle
+    public function cerrarModalDetalle()
+    {
+        $this->mostrarModalDetalle = false;
+        $this->reclamoDetalle = null;
+        $this->movimientosDetalle = []; // Limpiar movimientos
     }
 
     public function nextStep()
@@ -391,6 +456,15 @@ class AltaReclamo extends Component
         $this->reclamoCreado = null;
         $this->isSaving = false;
         $this->categorias = [];
+    }
+
+    public function irAModificarReclamo($reclamoId)
+    {
+        // Cerrar el modal antes de navegar
+        $this->cerrarModalDetalle();
+        
+        // Navegar usando Route::view con parámetros
+        return $this->redirect(route('modificar-reclamo', ['reclamo' => $reclamoId]), navigate: true);
     }
 
     public function render()

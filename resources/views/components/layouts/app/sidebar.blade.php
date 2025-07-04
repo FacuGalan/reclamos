@@ -19,7 +19,8 @@
        
             <div class="bg-[#3F516A] rounded-lg p-2 mt-4">   
                 <flux:navlist.group :heading="__('Menú')" class="grid">
-                    <flux:navlist.item class="flux-nav-custom" icon="home" :href="route('reclamos')" :current="request()->routeIs('reclamos')" wire:navigate>
+                    <flux:navlist.item class="flux-nav-custom" icon="home" :href="route('reclamos')" 
+                                       :current="request()->routeIs(['reclamos', 'modificar-reclamo'])" wire:navigate>
                         <span class="flex items-center justify-between w-full">
                             <span>Reclamos</span>
                             <livewire:contador-notificaciones-reclamos />

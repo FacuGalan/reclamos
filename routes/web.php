@@ -13,6 +13,15 @@ Route::get('/nuevo-reclamo', function () {
     return view('welcome', ['slot' => view('reclamos/nuevo-reclamo')]);
 })->name('nuevo-reclamo');
 
+Route::view('reclamos', 'reclamos')
+    ->middleware(['auth', 'verified'])
+    ->name('reclamos');
+
+// Ruta para modificar reclamo, recibe el ID del reclamo y un parámetro opcional editable
+Route::view('modificar-reclamo/{reclamo}', 'modificar-reclamo')
+    ->middleware(['auth', 'verified'])
+    ->name('modificar-reclamo');
+
 // Rutas para las otras secciones (las crearemos después)
 Route::get('/nuevo-reporte', function () {
     return view('welcome', ['slot' => view('nuevo-reporte')]);

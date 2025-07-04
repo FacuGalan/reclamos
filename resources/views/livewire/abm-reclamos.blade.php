@@ -183,10 +183,10 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Descripción
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Estado
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Acciones
                             </th>
                         </tr>
@@ -233,12 +233,14 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <livewire:estado-badge :estado-id="$reclamo->estado->id" 
-                                                           size="small"
-                                                           wire:key="estados-{{$reclamo->id}}-{{ $this->listaTimestamp }}"  />
+                                    <div class="flex items-center align-center space-x-2 justify-center">
+                                        <livewire:estado-badge :estado-id="$reclamo->estado->id" 
+                                                            size="small"
+                                                            wire:key="estados-{{$reclamo->id}}-{{ $this->listaTimestamp }}"  />
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center align-center space-x-2 justify-center">
                        
                                         @if(($reclamo->estado_id < 4 || $reclamo->estado_id > 5) && Auth::user()->rol_id != 5 )
                                             <!-- Editar -->

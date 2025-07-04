@@ -297,6 +297,135 @@
                     </div>
                 </div>
 
+                <!-- NUEVA SECCIÓN: Historial de reclamos -->
+                @if($personaEncontrada && count($reclamosPersona) > 0)
+                    <div class="mt-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                                Historial de Reclamos
+                            </h3>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ count($reclamosPersona) }} reclamo{{ count($reclamosPersona) > 1 ? 's' : '' }} encontrado{{ count($reclamosPersona) > 1 ? 's' : '' }}
+                            </span>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                                    <thead class="bg-gray-50 dark:bg-gray-800">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                ID / Fecha
+                                            </th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Categoría
+                                            </th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Descripción
+                                            </th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Estado
+                                            </th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Acciones
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
+                                        @foreach($reclamosPersona as $reclamo)
+                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                        #{{ $reclamo->id }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                        {{ \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y') }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                    <div class="text-sm text-gray-900 dark:text-white">
+                                                        {{ $reclamo->categoria->nombre ?? 'Sin categoría' }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                        {{ $reclamo->area->nombre ?? 'Sin área' }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="text-sm text-gray-900 dark:text-white max-w-xs truncate">
+                                                        {{ $reclamo->descripcion }}
+                                                    </div>
+                                                    @if($reclamo->direccion)
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                            {{ $reclamo->direccion }}
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                    @if($reclamo->estado)
+                                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                                            @switch($reclamo->estado->id)
+                                                                @case(1) bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 @break
+                                                                @case(2) bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 @break
+                                                                @case(3) bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 @break
+                                                                @case(4) bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 @break
+                                                                @case(5) bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 @break
+                                                                @default bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400
+                                                            @endswitch">
+                                                            {{ $reclamo->estado->nombre }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-gray-500 dark:text-gray-400">Sin estado</span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                                    <button 
+                                                        wire:click="verDetalleReclamo({{ $reclamo->id }})"
+                                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                        title="Ver">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje informativo -->
+                        <div class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center">
+                                <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Se muestran los últimos {{ count($reclamosPersona) }} reclamos de esta persona.</span>
+                            </p>
+                        </div>
+                    </div>
+                @elseif($personaEncontrada && count($reclamosPersona) == 0)
+                    <!-- Mensaje cuando no hay reclamos -->
+                    <div class="mt-8">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-800 dark:text-white">
+                                        Primera vez creando un reclamo
+                                    </h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        Esta persona no tiene reclamos previos en el sistema.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
             @elseif ($step == 2 )
                 <!-- Paso 2: Datos del reclamo -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos del Reclamo</h2>
@@ -540,6 +669,209 @@
                             @endif
                         </button>
                     @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if($mostrarModalDetalle && $reclamoDetalle)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Overlay -->
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="cerrarModalDetalle"></div>
+
+                <!-- Modal más grande para acomodar la tabla -->
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+                    <!-- Header -->
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                                Detalle del Reclamo #{{ $reclamoDetalle->id }}
+                            </h3>
+                            <button 
+                                wire:click="cerrarModalDetalle"
+                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 max-h-[80vh] overflow-y-auto">
+                        <!-- Información básica del reclamo -->
+                        <div class="mb-6">
+                            <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-4">Información del Reclamo</h4>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <div>
+                                        <label class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Creación</label>
+                                        <p class="text-sm text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($reclamoDetalle->fecha)->format('d/m/Y') }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">Estado Actual</label>
+                                        <p class="text-sm text-gray-900 dark:text-white">
+                                            {{ $reclamoDetalle->estado->nombre ?? 'Sin estado' }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <!-- Dirección -->
+                                        @if($reclamoDetalle->direccion)
+                                            <div>
+                                                <label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">Dirección</label>
+                                                <p class="text-sm text-gray-900 dark:text-white">{{ $reclamoDetalle->direccion }}
+                                                @if($reclamoDetalle->entre_calles)
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">Entre: {{ $reclamoDetalle->entre_calles }}</span>
+                                                    
+                                                @endif
+                                                </p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <div>
+                                        <label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">Categoría</label>
+                                        <p class="text-sm text-gray-900 dark:text-white">{{ $reclamoDetalle->categoria->nombre ?? 'Sin categoría' }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">Área</label>
+                                        <p class="text-sm text-gray-900 dark:text-white">{{ $reclamoDetalle->area->nombre ?? 'Sin área' }}</p>
+                                    </div>
+                                    <!-- Descripción -->
+                                    <div>
+                                        <label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">Descripción</label>
+                                       <p class="text-sm text-gray-900 dark:text-white">
+                                            {{ $reclamoDetalle->descripcion }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                
+                            </div>
+                        </div>
+
+                        <!-- Historial de Movimientos -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-md font-semibold text-gray-800 dark:text-white">
+                                    Historial de Movimientos
+                                </h4>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ count($movimientosDetalle) }} movimiento{{ count($movimientosDetalle) != 1 ? 's' : '' }}
+                                </span>
+                            </div>
+
+                            @if(count($movimientosDetalle) > 0)
+                                <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Fecha
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Usuario
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Tipo de Movimiento
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Observaciones
+                                                    </th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                        Estado
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
+                                                @foreach($movimientosDetalle as $movimiento)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                                        <td class="px-4 py-3 whitespace-nowrap">
+                                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                {{ \Carbon\Carbon::parse($movimiento->fecha)->format('d/m/Y') }}
+                                                            </div>
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                                {{ \Carbon\Carbon::parse($movimiento->created_at)->format('H:i') }}
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3 whitespace-nowrap">
+                                                            <div class="text-sm text-gray-900 dark:text-white">
+                                                                {{ $movimiento->usuario->name ?? 'Usuario no encontrado' }}
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3 whitespace-nowrap">
+                                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                {{ $movimiento->tipoMovimiento->nombre ?? 'Tipo no encontrado' }}
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <div class="text-sm text-gray-900 dark:text-white max-w-xs">
+                                                                {{ $movimiento->observaciones ?: 'Sin observaciones' }}
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3 whitespace-nowrap">
+                                                            @if($movimiento->estado)
+                                                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                                                    @switch($movimiento->estado->id)
+                                                                        @case(1) bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 @break
+                                                                        @case(2) bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 @break
+                                                                        @case(3) bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 @break
+                                                                        @case(4) bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 @break
+                                                                        @case(5) bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 @break
+                                                                        @default bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400
+                                                                    @endswitch">
+                                                                    {{ $movimiento->estado->nombre }}
+                                                                </span>
+                                                            @else
+                                                                <span class="text-gray-500 dark:text-gray-400 text-xs">Sin estado</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @else
+                                <!-- Mensaje cuando no hay movimientos -->
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-6 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">Sin movimientos</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Este reclamo aún no tiene movimientos registrados.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-t border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center">
+                            <!-- Botón Modificar (izquierda) -->
+                            <button 
+                                wire:click="irAModificarReclamo({{ $reclamoDetalle->id }})"
+                                type="button" 
+                                class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer text-base font-medium  sm:text-sm">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Modificar
+                            </button>
+                            
+                            <!-- Botón Cerrar (derecha) -->
+                            <button 
+                                wire:click="cerrarModalDetalle"
+                                type="button" 
+                                class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-500 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
