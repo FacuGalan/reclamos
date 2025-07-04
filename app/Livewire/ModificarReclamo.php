@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\DB;
  */
 class ModificarReclamo extends Component
 {
+    public $editable = true;
+
     // ID del reclamo a modificar
     public $reclamoId;
     public $reclamo;
@@ -117,8 +119,9 @@ class ModificarReclamo extends Component
       return view('livewire.placeholders.skeleton');
     }
 
-    public function mount($reclamoId)
+    public function mount($reclamoId, $editable = true)
     {
+        $this->editable = $editable;
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
 
@@ -355,8 +358,13 @@ class ModificarReclamo extends Component
             $this->cargarHistorial();
             $this->cargarDatosReclamo();
 
-            session()->flash('success', 'Movimiento guardado exitosamente');
             $this->cerrarModal();
+
+            $this->dispatch('mensaje-toast', [
+                'icon' => 'success',
+                'text' => 'Nuevo movimiento creado',
+            ]);
+
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -397,13 +405,19 @@ class ModificarReclamo extends Component
 
             $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
             
-            session()->flash('success', 'Reclamo derivado exitosamente');
+            //session()->flash('success', 'Reclamo derivado exitosamente');
             $this->cerrarModal();
 
             // Volver al ABM con un mensaje de éxito que se mostrará allí
-            session()->flash('reclamo_derivado', 'Reclamo derivado a '.$areaDerivada->nombre.' exitosamente');
+            //session()->flash('reclamo_derivado', 'Reclamo derivado a '.$areaDerivada->nombre.' exitosamente');
 
-            $this->redirect(route('reclamos'), navigate: true);
+            //$this->redirect(route('reclamos'), navigate: true);
+
+             // Emitir evento que manejará el toast y la redirección
+            $this->dispatch('reclamo-guardado-con-redirect', [
+                'mensaje' => 'Reclamo derivado a '.$areaDerivada->nombre,
+                'redirect_url' => route('reclamos')
+            ]);
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -457,12 +471,16 @@ class ModificarReclamo extends Component
             $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
 
             // Activar notificación
-            $this->mostrarNotificacionExito();
+            //$this->mostrarNotificacionExito();
 
             $this->isSaving = false;
 
             // Emitir evento local para mostrar el botón de éxito
             $this->dispatch('reclamo-modificado-exitoso');
+            $this->dispatch('mensaje-toast', [
+                'icon' => 'success',
+                'text' => 'Reclamo actualizado',
+            ]);
             
         } catch (\Exception $e) {
             DB::rollBack();

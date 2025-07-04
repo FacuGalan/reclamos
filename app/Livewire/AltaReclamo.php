@@ -345,10 +345,17 @@ class AltaReclamo extends Component
                 $this->dispatch('reclamo-creado-exitoso');
                 
                 // Volver al ABM con un mensaje de éxito que se mostrará allí
-                session()->flash('reclamo_creado', 'Reclamo creado exitosamente');
+                // session()->flash('reclamo_creado', 'Reclamo creado exitosamente');
+
                 
-                // Redirección inmediata sin delay
-                $this->redirect(route('reclamos'), navigate: true);
+                // Área privada: emitir evento con información de redirección
+                $this->isSaving = false;
+                
+                // Emitir evento que manejará el toast y la redirección
+                $this->dispatch('reclamo-guardado-con-redirect', [
+                    'mensaje' => 'Reclamo creado exitosamente',
+                    'redirect_url' => route('reclamos')
+                ]);
                 
             } else {
                 // Área pública: mostrar notificación completa y redirigir al home

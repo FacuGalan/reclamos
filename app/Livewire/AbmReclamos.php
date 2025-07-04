@@ -25,6 +25,7 @@ class AbmReclamos extends Component
     
     // Propiedades para navegación entre vistas
     public $currentView = 'list'; // 'list', 'create', 'edit'
+    public $reclamoEditable = true; // Para saber si se está editando un reclamo
     public $selectedReclamoId = null;
     public $showDeleteModal = false;
     public $selectedReclamo = null;
@@ -198,7 +199,7 @@ class AbmReclamos extends Component
         $this->reclamoInterno = true; // Indicar que es un reclamo interno
     }
 
-    public function editarReclamo($reclamoId)
+    public function editarReclamo($reclamoId,$edita)
     {
         // Validar que el reclamo existe y pertenece a las áreas del usuario
         $reclamo = Reclamo::whereIn('area_id', $this->userAreas)->find($reclamoId);
@@ -208,6 +209,7 @@ class AbmReclamos extends Component
         }
 
         $this->selectedReclamoId = $reclamoId;
+        $this->reclamoEditable = $edita;
         $this->currentView = 'edit';
     }
 

@@ -2,6 +2,10 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
         @include('partials.head')
+        <!-- CSS de SweetAlert2 -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <!-- JavaScript de SweetAlert2 - AGREGAR ESTA LÍNEA -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
 
     <body class="min-h-screen bg-white dark:bg-zinc-800">
@@ -133,6 +137,70 @@
         </flux:header>
 
         {{ $slot }}
+
+        <script>
+            window.addEventListener('mensaje-confirma', (event) => {
+                console.log(event);
+                Swal.fire({
+                    title: event.detail[0].title || '',
+                    text: event.detail[0].text || '',
+                    icon: event.detail[0].icon || null,
+                    iconColor: event.detail[0].iconColor || 'blue' ,
+                    showCancelButton: event.detail[0].showCancelButton || true,
+                    confirmButtonColor: event.detail[0].confirmButtonColor || false,
+                    cancelButtonColor: event.detail[0].cancelButtonColor || '#d33',
+                    confirmButtonText: event.detail[0].confirmButtonText || 'Ok',
+                    cancelButtonText: event.detail[0].cancelButtonText || 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Livewire.dispatch(event.detail[0].evento,  [event.detail[0].id || null] );
+                    }
+                });
+            });
+            
+            window.addEventListener('mensaje-toast', (event) => {
+                Swal.fire({
+                    title: event.detail[0].title || '',
+                    text: event.detail[0].text  || '',
+                    icon: event.detail[0].icon  || '',
+                    iconColor: event.detail[0].iconColor  || '',
+                    toast: event.detail[0].toast  || true,
+                    position: event.detail[0].position  || 'top-end',
+                    showConfirmButton: event.detail[0].showConfirmButton || false,
+                    timer: event.detail[0].timer || 3000
+                });
+            });
+            window.addEventListener('mensaje-error', (event) => {
+                Swal.fire({
+                    title: event.detail[0].title || 'Error',
+                    text: event.detail[0].text || 'Ha ocurrido un error',
+                    icon: event.detail[0].icon || 'error',
+                    confirmButtonColor: event.detail[0].confirmButtonColor || 'blue',
+                });
+            });
+
+            window.addEventListener('reclamo-guardado-con-redirect', (event) => {
+                if (typeof Swal !== 'undefined') {
+                    // Mostrar el toast
+                    Swal.fire({
+                        title: '',
+                        text: event.detail[0].mensaje,
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Después de que termine el toast, redirigir
+                        window.location.href = event.detail[0].redirect_url;
+                    });
+                } else {
+                    // Si no hay SweetAlert, redirigir inmediatamente
+                    window.location.href = event.detail[0].redirect_url;
+                }
+            });
+        </script>
 
         @fluxScripts
     </body>

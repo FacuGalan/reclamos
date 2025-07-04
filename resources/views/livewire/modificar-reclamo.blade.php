@@ -56,7 +56,7 @@
     <div class="mb-2">
         <div class="flex items-center gap-3">
             <h1 class="text-3xl p-0 font-bold text-gray-800 dark:text-white">
-                Modificar Reclamo #{{ $reclamo->id ?? $reclamoId }}
+                {{ $editable ?? true ? 'Modificar' : 'Ver' }} Reclamo #{{ $reclamo->id ?? $reclamoId }}
             </h1>
             <!-- CLAVE CORREGIDA: Incluye estado actual para actualizarse cuando cambie -->
             <livewire:estado-badge 
@@ -289,7 +289,7 @@
         <div class="flex items-center justify-between pt-6 dark:border-gray-600" >
             <button
                 wire:click="derivarReclamo"
-                @if($reclamo->estado->id == 4) disabled @endif
+                @if($reclamo->estado->id == 4 || !$editable) disabled @endif
                 class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white dark:text-gray-200 rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
                 <span>
                     Derivar Reclamo
@@ -313,7 +313,7 @@
                         setTimeout(() => showSuccess = false, 800)
                     })
                 "
-                @if($reclamo->estado->id == 4) disabled @endif
+                @if($reclamo->estado->id == 4 || !$editable) disabled @endif
                 class="px-8 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors font-medium cursor-pointer relative min-h-[2.5rem] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
                 <!-- Estado normal -->
                 <span wire:loading.remove wire:target="save" x-show="!showSuccess" class="flex items-center whitespace-nowrap">
@@ -352,7 +352,7 @@
                 <button 
                     wire:click="nuevoMovimiento1"
                     wire:target="nuevoMovimiento1"
-                    @if($reclamo->estado->id == 4) disabled @endif
+                    @if($reclamo->estado->id == 4 || !$editable) disabled @endif
                     class="px-8 py-2 bg-[#4CB4DC] text-white rounded-lg hover:bg-[#31A0CD] transition-colors flex items-center font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
                     Nuevo Movimiento
                 </button>
@@ -499,6 +499,9 @@
                             <select wire:model="nuevaArea" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
                                 <option value="">Seleccione Área a derivar</option>
                                 @foreach($areas as $area)
+                                    @if($area->id == $reclamo->area_id)
+                                        <option value="{{ $area->id }}" selected disabled>{{ $area->nombre }} (Actual)</option>
+                                    @endif
                                     <option value="{{ $area->id }}">{{ $area->nombre }}</option>
                                 @endforeach
                             </select>

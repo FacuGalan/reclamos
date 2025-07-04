@@ -1,64 +1,6 @@
 <div class="max-w-7xl mx-auto p-6 pt-0 space-y-6">
 
-    <!-- Notificación flotante para reclamo creado (agregar al inicio de la vista abm-reclamos.blade.php) -->
-    @if(session('reclamo_creado'))
-        <div 
-            x-data="{ show: true }"
-            x-show="show"
-            x-init="setTimeout(() => show = false, 3000)"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-x-full"
-            x-transition:enter-end="opacity-100 transform translate-x-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-x-0"
-            x-transition:leave-end="opacity-0 transform translate-x-full"
-            class="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg shadow-lg max-w-sm">
-            <div class="flex items-center">
-                <svg class="h-6 w-6 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <p class="font-semibold">{{ session('reclamo_creado') }}</p>
-                    <p class="text-sm text-green-600">El reclamo se ha guardado correctamente</p>
-                </div>
-                <button @click="show = false" class="ml-4 text-green-400 hover:text-green-600">
-                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    @endif
-
-        @if(session('reclamo_derivado'))
-        <div 
-            x-data="{ show: true }"
-            x-show="show"
-            x-init="setTimeout(() => show = false, 3000)"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-x-full"
-            x-transition:enter-end="opacity-100 transform translate-x-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-x-0"
-            x-transition:leave-end="opacity-0 transform translate-x-full"
-            class="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg shadow-lg max-w-sm">
-            <div class="flex items-center">
-                <svg class="h-6 w-6 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <p class="font-semibold">{{ session('reclamo_derivado') }}</p>
-                    <p class="text-sm text-green-600">El reclamo se ha guardado correctamente</p>
-                </div>
-                <button @click="show = false" class="ml-4 text-green-400 hover:text-green-600">
-                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    @endif
-    
+   
     @if($currentView === 'list')
         <!-- Vista de Lista de Reclamos -->
         
@@ -298,10 +240,10 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
                        
-                                        @if($reclamo->estado_id < 4 || $reclamo->estado_id > 5)
+                                        @if(($reclamo->estado_id < 4 || $reclamo->estado_id > 5) && Auth::user()->rol_id != 5 )
                                             <!-- Editar -->
                                             <button 
-                                                wire:click="editarReclamo({{ $reclamo->id }})"
+                                                wire:click="editarReclamo({{ $reclamo->id}},true)"
                                                 class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
                                                 title="Editar">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,6 +258,17 @@
                                                 title="Eliminar">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        @else
+
+                                            <button 
+                                                wire:click="editarReclamo({{ $reclamo->id}}, false)"
+                                                class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                title="Ver">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                                 </svg>
                                             </button>
                                         @endif
@@ -380,6 +333,7 @@
         @if($selectedReclamoId)
             <livewire:modificar-reclamo lazy
                 :reclamo-id="$selectedReclamoId"
+                :editable="$reclamoEditable"
                 :key="'modificar-reclamo-' . $selectedReclamoId" />
         @endif
 
