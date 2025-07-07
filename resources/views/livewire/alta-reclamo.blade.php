@@ -323,11 +323,11 @@
                                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                                 Descripción
                                             </th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                                 Estado
                                             </th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Acciones
+                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Ver
                                             </th>
                                         </tr>
                                     </thead>
@@ -360,33 +360,30 @@
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                <td class="px-4 py-3 whitespace-nowrap ">
+                                                    <div class="flex items-center align-center space-x-2 justify-center">
                                                     @if($reclamo->estado)
-                                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                                            @switch($reclamo->estado->id)
-                                                                @case(1) bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 @break
-                                                                @case(2) bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 @break
-                                                                @case(3) bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 @break
-                                                                @case(4) bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 @break
-                                                                @case(5) bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 @break
-                                                                @default bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400
-                                                            @endswitch">
+                                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                                            style="background-color: {{ $reclamo->estado->codigo_color }}; color: {{ $reclamo->estado->getColorTexto() }};">
                                                             {{ $reclamo->estado->nombre }}
                                                         </span>
                                                     @else
                                                         <span class="text-gray-500 dark:text-gray-400">Sin estado</span>
                                                     @endif
+                                                    </div>
                                                 </td>
                                                 <td class="px-4 py-3 whitespace-nowrap text-sm">
-                                                    <button 
-                                                        wire:click="verDetalleReclamo({{ $reclamo->id }})"
-                                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
-                                                        title="Ver">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                        </svg>
-                                                    </button>
+                                                    <div class="flex items-center align-center space-x-2 justify-center">
+                                                        <button 
+                                                            wire:click="verDetalleReclamo({{ $reclamo->id }})"
+                                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                            title="Ver">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -851,7 +848,16 @@
 
                     <!-- Footer -->
                     <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-t border-gray-200 dark:border-gray-600">
-                        <div class="flex justify-between items-center">
+                        <div class="flex items-center justify-end space-x-4">
+                            
+                            <!-- Botón Cerrar (derecha) -->
+                            <button 
+                                wire:click="cerrarModalDetalle"
+                                type="button" 
+                                class="cursor-pointer inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-500 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
+                                Cerrar
+                            </button>
+
                             <!-- Botón Modificar (izquierda) -->
                             <button 
                                 wire:click="irAModificarReclamo({{ $reclamoDetalle->id }})"
@@ -861,14 +867,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
                                 Modificar
-                            </button>
-                            
-                            <!-- Botón Cerrar (derecha) -->
-                            <button 
-                                wire:click="cerrarModalDetalle"
-                                type="button" 
-                                class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-500 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
-                                Cerrar
                             </button>
                         </div>
                     </div>
