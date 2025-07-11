@@ -402,7 +402,7 @@
                             </p>
                         </div>
                     </div>
-                @elseif($personaEncontrada && count($reclamosPersona) == 0)
+                @elseif($personaEncontrada && count($reclamosPersona) == 0 && $isPrivateArea)
                     <!-- Mensaje cuando no hay reclamos -->
                     <div class="mt-8">
                         <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
@@ -513,29 +513,88 @@
                     </div>
         
                     @if(!$isPrivateArea)
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Dirección *
-                            </label>
-                            <input 
-                                type="text" 
-                                wire:model="direccion"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                                placeholder="Ingrese la dirección donde ocurrió el problema">
-                            @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Dirección *
+                                </label>
+                                <div class="flex gap-2">
+                                    <div class="flex-1 relative">
+                                        <input 
+                                            type="text" 
+                                            id="direccion-autocomplete"
+                                            wire:model="direccion"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                            placeholder="Busque y seleccione una dirección..."
+                                            autocomplete="off">
+                                        
+                                        <!-- Indicador de validación -->
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                            <div id="direccion-status" class="hidden">
+                                                <!-- Icono de éxito -->
+                                                <svg id="direccion-success" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                <!-- Icono de error -->
+                                                <svg id="direccion-error" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        type="button"
+                                        wire:click="abrirMapa"
+                                        class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
+                                        title="Seleccionar en el mapa">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                
+                                <!-- Mensaje de estado de la dirección -->
+                                <div id="direccion-mensaje" class="mt-2 text-sm hidden">
+                                    <div id="direccion-validada" class="text-green-600 dark:text-green-400 flex items-center hidden">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span>Dirección validada</span>
+                                    </div>
+                                    <div id="direccion-no-validada" class="text-amber-600 dark:text-amber-400 flex items-center hidden">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                        <span>Dirección no validada - Use el mapa para mayor precisión</span>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Entre calles
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model="entre_calles"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                    placeholder="Entre qué calles se encuentra">
+                                @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
                         </div>
-         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Entre calles
-                            </label>
-                            <input 
-                                type="text" 
-                                wire:model="entre_calles"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                                placeholder="Entre qué calles se encuentra">
-                            @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
+
+                        @if($coordenadas)
+                            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                                <p class="text-sm text-green-700 dark:text-green-300 flex items-center">
+                                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Ubicación confirmada: {{ $direccionCompleta ?: $direccion }} {{ $coordenadas }}
+                                </p>
+                            </div>
+                        @endif
                     @endif
                  
                     <div>
@@ -875,11 +934,512 @@
         </div>
     @endif
 
+     <!-- Modal del Mapa -->
+    @if($mostrarMapa)
+        <div class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+                <!-- Overlay -->
+                <div class="fixed inset-0 bg-black bg-opacity-50" wire:click="cerrarMapa"></div>
+
+                <!-- Modal del mapa -->
+                <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-auto z-[10000]">
+                    <!-- Header -->
+                    <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600 rounded-t-lg">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                                Seleccionar Ubicación Exacta
+                            </h3>
+                            <button 
+                                wire:click="cerrarMapa"
+                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">
+                                <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenido del mapa -->
+                    <div class="px-6 py-4">
+                        <!-- Contenedor del mapa -->
+                        <div id="mapa-container" class="w-full h-96 bg-gray-200 dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></div>
+                        
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                            <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center">
+                                <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Haga clic en el mapa para seleccionar la ubicación exacta del reclamo. El marcador se puede arrastrar para ajustar la posición.</span>
+                            </p>
+                        </div>
+
+                        <!-- Información de ubicación seleccionada -->
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ubicación seleccionada:</p>
+                            <p id="direccion-seleccionada" class="text-sm text-gray-600 dark:text-gray-400">
+                                Seleccione una ubicación en el mapa
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Footer con botones -->
+                    <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
+                        <div class="flex justify-end space-x-3">
+                            <button 
+                                wire:click="cerrarMapa"
+                                type="button" 
+                                class="px-4 py-2 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 rounded-md cursor-pointer transition-colors">
+                                Cancelar
+                            </button>
+                            <button 
+                                id="btn-confirmar-ubicacion"
+                                type="button" 
+                                onclick="confirmarUbicacionSeleccionada()"
+                                disabled
+                                class="px-4 py-2 bg-gray-300 text-white rounded-md cursor-not-allowed transition-colors">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Confirmar Ubicación
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+  @push('scripts')
+<script>
+    // Variables globales para control de inicialización
+    let mapa;
+    let marcador;
+    let geocoder;
+    let autocompleteFormulario;
+    let ubicacionSeleccionada = null;
+    let mapaInicializado = false;
+    let googleMapsLoaded = false;
+    let googleMapsLoading = false;
+    let livewireListenersInitialized = false;
+
+    function inicializarMapa() {
+        const mapaContainer = document.getElementById('mapa-container');
+        if (!mapaContainer) {
+            console.error('Contenedor del mapa no encontrado');
+            return;
+        }
+
+        if (mapaInicializado) {
+            console.log('Mapa ya inicializado');
+            return;
+        }
+
+        console.log('Iniciando mapa...');
+        
+        try {
+            const centroMercedes = { lat: -34.6549, lng: -59.4307 };
+            
+            mapaContainer.innerHTML = '';
+            
+            mapa = new google.maps.Map(mapaContainer, {
+                zoom: 14,
+                center: centroMercedes,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            mapa.addListener('click', function(evento) {
+                console.log('Click en mapa:', evento.latLng.lat(), evento.latLng.lng());
+                agregarMarcador(evento.latLng);
+                geocodificarPosicion(evento.latLng);
+            });
+
+            obtenerUbicacionActual();
+            mapaInicializado = true;
+            console.log('Mapa inicializado correctamente');
+            
+        } catch (error) {
+            console.error('Error al inicializar mapa:', error);
+        }
+    }
+
+    function inicializarAutocompleteFormulario() {
+        const input = document.getElementById('direccion-autocomplete');
+        if (!input) {
+            console.log('Input de dirección no encontrado');
+            return false;
+        }
+
+        // Verificar si ya está inicializado
+        if (input.hasAttribute('data-autocomplete-ready')) {
+            console.log('Autocomplete ya inicializado en este input');
+            return true;
+        }
+
+        try {
+            // Limpiar autocomplete anterior si existe
+            if (autocompleteFormulario) {
+                google.maps.event.clearInstanceListeners(autocompleteFormulario);
+            }
+
+            autocompleteFormulario = new google.maps.places.Autocomplete(input, {
+                bounds: new google.maps.LatLngBounds(
+                    new google.maps.LatLng(-34.7549, -59.5307),
+                    new google.maps.LatLng(-34.5549, -59.3307)
+                ),
+                strictBounds: false,
+                componentRestrictions: { country: 'ar' },
+                types: ['address'],
+                fields: ['geometry', 'formatted_address', 'address_components', 'name']
+            });
+
+            autocompleteFormulario.addListener('place_changed', function() {
+                const place = autocompleteFormulario.getPlace();
+                
+                if (!place.geometry || !place.geometry.location) {
+                    console.log('No se encontró información de ubicación');
+                    mostrarEstadoDireccion('error');
+                    return;
+                }
+
+                const location = place.geometry.location;
+                const direccionCompleta = place.formatted_address;
+                
+                // Actualizar Livewire
+                @this.set('direccion', direccionCompleta);
+                @this.set('coordenadas', location.lat() + ',' + location.lng());
+                @this.set('direccionCompleta', direccionCompleta);
+
+                mostrarEstadoDireccion('success');
+                console.log('Dirección actualizada:', direccionCompleta);
+            });
+
+            // Manejar cambios manuales
+            let timeoutId;
+            input.addEventListener('input', function(e) {
+                clearTimeout(timeoutId);
+                
+                if (!e.target.value.trim()) {
+                    mostrarEstadoDireccion('reset');
+                    return;
+                }
+                
+                timeoutId = setTimeout(() => {
+                    if (!autocompleteFormulario.getPlace() || !autocompleteFormulario.getPlace().geometry) {
+                        mostrarEstadoDireccion('warning');
+                    }
+                }, 1000);
+            });
+
+            // Marcar como inicializado
+            input.setAttribute('data-autocomplete-ready', 'true');
+            console.log('Autocomplete inicializado correctamente');
+            return true;
+
+        } catch (error) {
+            console.error('Error al inicializar autocomplete:', error);
+            return false;
+        }
+    }
+
+    function mostrarEstadoDireccion(estado) {
+        const statusDiv = document.getElementById('direccion-status');
+        const mensajeDiv = document.getElementById('direccion-mensaje');
+        const successIcon = document.getElementById('direccion-success');
+        const errorIcon = document.getElementById('direccion-error');
+        const validadaMsg = document.getElementById('direccion-validada');
+        const noValidadaMsg = document.getElementById('direccion-no-validada');
+
+        // Resetear todos los estados
+        [statusDiv, successIcon, errorIcon, validadaMsg, noValidadaMsg, mensajeDiv].forEach(el => {
+            if (el) el.classList.add('hidden');
+        });
+
+        if (estado === 'success') {
+            if (statusDiv) statusDiv.classList.remove('hidden');
+            if (successIcon) successIcon.classList.remove('hidden');
+            if (mensajeDiv) mensajeDiv.classList.remove('hidden');
+            if (validadaMsg) validadaMsg.classList.remove('hidden');
+        } else if (estado === 'error' || estado === 'warning') {
+            if (statusDiv) statusDiv.classList.remove('hidden');
+            if (errorIcon) errorIcon.classList.remove('hidden');
+            if (mensajeDiv) mensajeDiv.classList.remove('hidden');
+            if (noValidadaMsg) noValidadaMsg.classList.remove('hidden');
+        }
+    }
+
+    function obtenerUbicacionActual() {
+        if (navigator.geolocation) {
+            const opciones = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            };
+            
+            navigator.geolocation.getCurrentPosition(
+                function(posicion) {
+                    const { latitude, longitude } = posicion.coords;
+                    const ubicacionActual = new google.maps.LatLng(latitude, longitude);
+                    
+                    mapa.setCenter(ubicacionActual);
+                    mapa.setZoom(17);
+                    agregarMarcador(ubicacionActual);
+                    geocodificarPosicion(ubicacionActual);
+                },
+                function(error) {
+                    console.warn('Error al obtener ubicación:', error.message);
+                },
+                opciones
+            );
+        }
+    }
+
+    function agregarMarcador(posicion, direccion = null) {
+        if (marcador) {
+            marcador.setMap(null);
+        }
+
+        marcador = new google.maps.Marker({
+            position: posicion,
+            map: mapa,
+            draggable: true,
+            title: 'Ubicación del reclamo - Arrastra para ajustar',
+            animation: google.maps.Animation.DROP
+        });
+
+        ubicacionSeleccionada = {
+            lat: posicion.lat(),
+            lng: posicion.lng(),
+            direccion: direccion
+        };
+
+        const btnConfirmar = document.getElementById('btn-confirmar-ubicacion');
+        if (btnConfirmar) {
+            btnConfirmar.disabled = false;
+            btnConfirmar.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            btnConfirmar.classList.add('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
+        }
+        
+        if (direccion) {
+            mostrarDireccionSeleccionada(direccion);
+        } else {
+            geocodificarPosicion(posicion);
+        }
+
+        marcador.addListener('dragend', function() {
+            const nuevaPosicion = marcador.getPosition();
+            ubicacionSeleccionada.lat = nuevaPosicion.lat();
+            ubicacionSeleccionada.lng = nuevaPosicion.lng();
+            geocodificarPosicion(nuevaPosicion);
+        });
+    }
+
+    function geocodificarPosicion(posicion) {
+        geocoder.geocode({ location: posicion }, function(resultados, estado) {
+            if (estado === 'OK' && resultados[0]) {
+                const direccion = resultados[0].formatted_address;
+                ubicacionSeleccionada.direccion = direccion;
+                mostrarDireccionSeleccionada(direccion);
+            } else {
+                const coordenadas = `Lat: ${posicion.lat().toFixed(6)}, Lng: ${posicion.lng().toFixed(6)}`;
+                ubicacionSeleccionada.direccion = coordenadas;
+                mostrarDireccionSeleccionada(coordenadas);
+            }
+        });
+    }
+
+    function mostrarDireccionSeleccionada(direccion) {
+        const elemento = document.getElementById('direccion-seleccionada');
+        if (elemento) {
+            elemento.textContent = direccion;
+        }
+    }
+
+    function limpiarFormularioBusqueda() {
+        const btnConfirmar = document.getElementById('btn-confirmar-ubicacion');
+        if (btnConfirmar) {
+            btnConfirmar.disabled = true;
+            btnConfirmar.classList.add('bg-gray-300', 'cursor-not-allowed');
+            btnConfirmar.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
+        }
+        
+        const direccionSeleccionada = document.getElementById('direccion-seleccionada');
+        if (direccionSeleccionada) {
+            direccionSeleccionada.textContent = 'Seleccione una ubicación en el mapa';
+        }
+        
+        ubicacionSeleccionada = null;
+    }
+
+    function confirmarUbicacionSeleccionada() {
+        if (ubicacionSeleccionada) {
+            Livewire.dispatch('confirmar-ubicacion-mapa', {
+                lat: ubicacionSeleccionada.lat,
+                lng: ubicacionSeleccionada.lng,
+                direccion: ubicacionSeleccionada.direccion
+            });
+        } else {
+            alert('Por favor, seleccione una ubicación en el mapa');
+        }
+    }
+
+    function cargarGoogleMaps() {
+        if (googleMapsLoaded) {
+            return Promise.resolve();
+        }
+
+        if (googleMapsLoading) {
+            return new Promise((resolve) => {
+                const checkLoaded = setInterval(() => {
+                    if (googleMapsLoaded) {
+                        clearInterval(checkLoaded);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            googleMapsLoaded = true;
+            return Promise.resolve();
+        }
+
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+        if (existingScript) {
+            googleMapsLoading = true;
+            return new Promise((resolve) => {
+                const checkGlobalGoogle = setInterval(() => {
+                    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                        clearInterval(checkGlobalGoogle);
+                        googleMapsLoaded = true;
+                        googleMapsLoading = false;
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+
+        googleMapsLoading = true;
+        
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyArpDAi1ugbTSLT4wlr4T_qMmBZLouBfxo&libraries=places,marker&loading=async`;
+            script.async = true;
+            script.defer = true;
+            
+            script.onload = function() {
+                googleMapsLoaded = true;
+                googleMapsLoading = false;
+                resolve();
+            };
+            
+            script.onerror = function() {
+                googleMapsLoading = false;
+                reject(new Error('Error al cargar Google Maps API'));
+            };
+            
+            if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+                document.head.appendChild(script);
+            }
+        });
+    }
+
+    function inicializarEventListeners() {
+        if (livewireListenersInitialized) {
+            return;
+        }
+
+        livewireListenersInitialized = true;
+        
+        Livewire.on('inicializar-mapa', () => {
+            cargarGoogleMaps().then(() => {
+                setTimeout(() => {
+                    if (document.getElementById('mapa-container')) {
+                        inicializarMapa();
+                    }
+                }, 500);
+            });
+        });
+
+        Livewire.on('ubicacion-confirmada', (event) => {
+            if (marcador) {
+                marcador.setMap(null);
+                marcador = null;
+            }
+            ubicacionSeleccionada = null;
+            mostrarEstadoDireccion('success');
+        });
+
+        // Hook simplificado para detectar cambios
+        Livewire.hook('morph.updated', () => {
+            setTimeout(() => {
+                const input = document.getElementById('direccion-autocomplete');
+                
+                if (input && googleMapsLoaded && !input.hasAttribute('data-autocomplete-ready')) {
+                    console.log('Nuevo campo de dirección detectado - inicializando autocomplete');
+                    inicializarAutocompleteFormulario();
+                }
+            }, 150);
+        });
+    }
+
+    function initializeApp() {
+        if (window.googleMapsAppInitialized) {
+            return;
+        }
+        
+        window.googleMapsAppInitialized = true;
+        
+        cargarGoogleMaps().then(() => {
+            const input = document.getElementById('direccion-autocomplete');
+            if (input) {
+                inicializarAutocompleteFormulario();
+            }
+        });
+        
+        inicializarEventListeners();
+    }
+
+    // Inicialización
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
+    
+    document.addEventListener('livewire:init', () => {
+        if (!window.googleMapsAppInitialized) {
+            initializeApp();
+        }
+    });
+    
+    document.addEventListener('livewire:navigated', () => {
+        setTimeout(() => {
+            const input = document.getElementById('direccion-autocomplete');
+            if (input && googleMapsLoaded && !input.hasAttribute('data-autocomplete-ready')) {
+                inicializarAutocompleteFormulario();
+            }
+        }, 200);
+    });
+
+    // Función global
+    window.confirmarUbicacionSeleccionada = confirmarUbicacionSeleccionada;
+</script>
+@endpush
     <style>
     @keyframes progress {
         from { width: 100%; }
         to { width: 0%; }
     }
+    /* Asegurar que el modal esté encima de todo */
+.modal-mapa {
+    z-index: 9999 !important;
+}
+
+.modal-mapa .modal-content {
+    z-index: 10000 !important;
+}
     </style>
 
 </div>

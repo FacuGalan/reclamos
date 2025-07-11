@@ -70,6 +70,17 @@ class AltaReclamo extends Component
     // Nueva propiedad para el estado de guardado
     public $isSaving = false;
 
+    // Propiedades para el mapa
+    public $mostrarMapa = false;
+    public $latitud = null;
+    public $longitud = null;
+    public $direccionCompleta = '';
+
+    // Agregar esta propiedad a tu clase
+    protected $listeners = [
+        'confirmar-ubicacion-mapa' => 'confirmarUbicacionMapa'
+    ];
+
     protected $rules = [
         'persona_dni' => 'required|numeric|digits_between:7,11',
         'persona_nombre' => 'required|string|max:255',
@@ -127,6 +138,52 @@ class AltaReclamo extends Component
             $this->persona_email = $user->email;
             $this->step = 2; // Saltar al paso 2
         }
+    }
+
+    // Método para abrir el mapa
+    public function abrirMapa()
+    {
+        $this->mostrarMapa = true;
+        
+        // Esperar un ciclo de renderizado antes de disparar el evento
+        $this->dispatch('inicializar-mapa');
+    }
+
+    
+
+    // Método para cerrar el mapa
+    public function cerrarMapa()
+    {
+        $this->mostrarMapa = false;
+
+    }
+
+    #[Livewire\Attributes\On('confirmar-ubicacion-mapa')]
+    public function confirmarUbicacionMapa($lat, $lng, $direccion)
+    {
+        $this->confirmarUbicacion($lat, $lng, $direccion);
+    }
+
+     // Método para confirmar la ubicación del mapa
+    public function confirmarUbicacion($latitud, $longitud, $direccion)
+    {
+        $this->latitud = $latitud;
+        $this->longitud = $longitud;
+        $this->direccionCompleta = $direccion;
+        $this->coordenadas = $latitud . ',' . $longitud;
+        
+        // Actualizar la dirección si es mejor que la actual
+        if (empty($this->direccion) || strlen($direccion) > strlen($this->direccion)) {
+            $this->direccion = $direccion;
+        }
+        
+        $this->mostrarMapa = false;
+
+        
+        $this->dispatch('ubicacion-confirmada', [
+            'direccion' => $direccion,
+            'coordenadas' => $this->coordenadas
+        ]);
     }
 
     // Método para filtrar categorías cuando se escribe en el input
@@ -205,7 +262,10 @@ class AltaReclamo extends Component
                 $this->personaId = $persona->id; // Guardar el ID de la persona
                 
                 // Cargar historial de reclamos de esta persona
-                $this->cargarReclamosPersona($persona->id);
+                if (Auth::check()){
+                    $this->cargarReclamosPersona($persona->id);
+                }
+                
                 
                 // Emitir evento de JavaScript para mostrar notificación
                 $this->dispatch('persona-encontrada', [

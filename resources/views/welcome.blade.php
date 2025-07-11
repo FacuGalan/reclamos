@@ -4,6 +4,8 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800" >
+        <div class="min-h-screen flex flex-col">
+
         <flux:header class="border-b py-8 border-zinc-200 bg-slate-700 
                         dark:border-zinc-700 dark:bg-slate-700 
                         flex flex-col items-center justify-center
@@ -19,7 +21,7 @@
             </h1>
         </flux:header>
 
-        <main class="flex items-center justify-center" >
+        <main class="flex-1 flex items-center justify-center" >
             {!! $slot ?? 'Welcome to your application!' !!}
         </main>
 
@@ -59,7 +61,8 @@
                 </p>
             </div>
         </footer>
-
+        </div>
+        @stack('scripts')
         @fluxScripts
     </body>
 </html>

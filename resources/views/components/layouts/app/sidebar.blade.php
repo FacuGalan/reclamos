@@ -203,6 +203,7 @@
             });
         </script>
 
+        @stack('scripts')
         @fluxScripts
     </body>
 </html>
