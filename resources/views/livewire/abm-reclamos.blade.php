@@ -32,27 +32,29 @@
                 <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform scale-95 group-hover:scale-100">
                     
                     <!-- Opción 1: Reclamo Normal -->
-                    <button 
-                        wire:click="nuevoReclamo"
+                    <a 
+                        href="{{ route('reclamos.create') }}"
+                        wire:navigate
                         class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-t-lg cursor-pointer">
                         <svg class="w-5 h-5 text-[#77BF43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                         <span class="font-medium">Reclamo</span>
-                    </button>
+                    </a>
                     
                     <!-- Separador -->
                     <div class="border-t border-gray-200 dark:border-gray-700"></div>
-                    
+
                     <!-- Opción 2: Reclamo Privado -->
-                    <button 
-                        wire:click="nuevoReclamoInterno"
+                    <a 
+                        href="{{ route('reclamos.create.interno') }}"
+                        wire:navigate
                         class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-b-lg cursor-pointer">
                         <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                         </svg>
                         <span class="font-medium">Reclamo Interno</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -301,23 +303,6 @@
                 </div>
             @endif
         </div>
-
-    @elseif($currentView === 'create')
-        <div class="mb-6">
-            <button 
-                wire:click="volverALista"
-                class="flex items-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 mb-4 cursor-pointer">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                Volver a la lista
-            </button>
-        </div>
-        
-        <livewire:alta-reclamo 
-            :show-persona-form="true" 
-            :is-private-area="$reclamoInterno"
-            :key="'alta-reclamo-' . now()" />
 
     @elseif($currentView === 'edit')
         

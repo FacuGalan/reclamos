@@ -184,21 +184,6 @@ class AbmReclamos extends Component
         $this->resetPage();
     }
 
-    // Navegación entre vistas
-    public function nuevoReclamo()
-    {
-        $this->currentView = 'create';
-        $this->selectedReclamoId = null;
-        $this->reclamoInterno = false; // Indicar que es un reclamo externo
-    }
-
-    public function nuevoReclamoInterno()
-    {
-        $this->currentView = 'create';
-        $this->selectedReclamoId = null;
-        $this->reclamoInterno = true; // Indicar que es un reclamo interno
-    }
-
     public function editarReclamo($reclamoId,$edita)
     {
         // Validar que el reclamo existe y pertenece a las áreas del usuario

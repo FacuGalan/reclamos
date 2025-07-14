@@ -140,22 +140,51 @@ class AltaReclamo extends Component
         }
     }
 
-    // Método para abrir el mapa
     public function abrirMapa()
     {
+        // Limpiar estado anterior parcialmente (mantener coordenadas si existen)
+        if (empty($this->coordenadas)) {
+            $this->latitud = null;
+            $this->longitud = null;
+            $this->direccionCompleta = '';
+        }
+        
         $this->mostrarMapa = true;
         
-        // Esperar un ciclo de renderizado antes de disparar el evento
+        // Debugging: log que se está abriendo el mapa
+        logger('Abriendo mapa modal - Coordenadas actuales: ' . $this->coordenadas);
+        
+        // Disparar evento después de que el modal se renderice
         $this->dispatch('inicializar-mapa');
     }
 
-    
-
-    // Método para cerrar el mapa
     public function cerrarMapa()
     {
         $this->mostrarMapa = false;
+        
+        // Debugging: log que se está cerrando el mapa
+        logger('Cerrando mapa modal');
+    }
 
+    // AGREGAR este método nuevo para debugging
+    public function testMapa()
+    {
+        logger('Test del mapa ejecutado');
+        $this->dispatch('test-mapa');
+    }
+
+    public function syncronizarPosicionMapa()
+    {
+        // Este método puede ser llamado desde JavaScript para obtener las coordenadas actuales
+        if (!empty($this->coordenadas)) {
+            //$this->direccion = $this->direccionCompleta;
+            return [
+                'coordenadas' => $this->coordenadas,
+                'direccion' => $this->direccion,
+                'direccionCompleta' => $this->direccionCompleta
+            ];
+        }
+        return null;
     }
 
     #[Livewire\Attributes\On('confirmar-ubicacion-mapa')]
@@ -173,9 +202,9 @@ class AltaReclamo extends Component
         $this->coordenadas = $latitud . ',' . $longitud;
         
         // Actualizar la dirección si es mejor que la actual
-        if (empty($this->direccion) || strlen($direccion) > strlen($this->direccion)) {
+        //if (empty($this->direccion) || strlen($direccion) > strlen($this->direccion)) {
             $this->direccion = $direccion;
-        }
+        //}
         
         $this->mostrarMapa = false;
 

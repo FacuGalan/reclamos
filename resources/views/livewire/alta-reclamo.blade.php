@@ -591,7 +591,7 @@
                                     <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Ubicación confirmada: {{ $direccionCompleta ?: $direccion }} {{ $coordenadas }}
+                                    Ubicación confirmada: {{ $direccionCompleta ?: $direccion }} 
                                 </p>
                             </div>
                         @endif
@@ -1010,422 +1010,524 @@
     @endif
 
   @push('scripts')
-<script>
-    // Variables globales para control de inicialización
-    let mapa;
-    let marcador;
-    let geocoder;
-    let autocompleteFormulario;
-    let ubicacionSeleccionada = null;
-    let mapaInicializado = false;
-    let googleMapsLoaded = false;
-    let googleMapsLoading = false;
-    let livewireListenersInitialized = false;
+    <script>
+        // Variables globales para control de inicialización
+        let mapa;
+        let marcador;
+        let geocoder;
+        let autocompleteFormulario;
+        let ubicacionSeleccionada = null;
+        let mapaInicializado = false;
+        let googleMapsLoaded = false;
+        let googleMapsLoading = false;
+        let livewireListenersInitialized = false;
+        let ultimaPosicionConocida = { lat: -34.6549, lng: -59.4307 }; // Mercedes por defecto
 
-    function inicializarMapa() {
-        const mapaContainer = document.getElementById('mapa-container');
-        if (!mapaContainer) {
-            console.error('Contenedor del mapa no encontrado');
-            return;
-        }
 
-        if (mapaInicializado) {
-            console.log('Mapa ya inicializado');
-            return;
-        }
-
-        console.log('Iniciando mapa...');
-        
-        try {
-            const centroMercedes = { lat: -34.6549, lng: -59.4307 };
+        function inicializarMapa() {
             
+            const mapaContainer = document.getElementById('mapa-container');
+            if (!mapaContainer) {
+                console.error('Contenedor del mapa no encontrado');
+                return;
+            }
+
+            // SIEMPRE limpiar y recrear, sin verificar si ya está inicializado
             mapaContainer.innerHTML = '';
             
-            mapa = new google.maps.Map(mapaContainer, {
-                zoom: 14,
-                center: centroMercedes,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            });
-
-            geocoder = new google.maps.Geocoder();
-
-            mapa.addListener('click', function(evento) {
-                console.log('Click en mapa:', evento.latLng.lat(), evento.latLng.lng());
-                agregarMarcador(evento.latLng);
-                geocodificarPosicion(evento.latLng);
-            });
-
-            obtenerUbicacionActual();
-            mapaInicializado = true;
-            console.log('Mapa inicializado correctamente');
-            
-        } catch (error) {
-            console.error('Error al inicializar mapa:', error);
-        }
-    }
-
-    function inicializarAutocompleteFormulario() {
-        const input = document.getElementById('direccion-autocomplete');
-        if (!input) {
-            console.log('Input de dirección no encontrado');
-            return false;
-        }
-
-        // Verificar si ya está inicializado
-        if (input.hasAttribute('data-autocomplete-ready')) {
-            console.log('Autocomplete ya inicializado en este input');
-            return true;
-        }
-
-        try {
-            // Limpiar autocomplete anterior si existe
-            if (autocompleteFormulario) {
-                google.maps.event.clearInstanceListeners(autocompleteFormulario);
-            }
-
-            autocompleteFormulario = new google.maps.places.Autocomplete(input, {
-                bounds: new google.maps.LatLngBounds(
-                    new google.maps.LatLng(-34.7549, -59.5307),
-                    new google.maps.LatLng(-34.5549, -59.3307)
-                ),
-                strictBounds: false,
-                componentRestrictions: { country: 'ar' },
-                types: ['address'],
-                fields: ['geometry', 'formatted_address', 'address_components', 'name']
-            });
-
-            autocompleteFormulario.addListener('place_changed', function() {
-                const place = autocompleteFormulario.getPlace();
-                
-                if (!place.geometry || !place.geometry.location) {
-                    console.log('No se encontró información de ubicación');
-                    mostrarEstadoDireccion('error');
-                    return;
-                }
-
-                const location = place.geometry.location;
-                const direccionCompleta = place.formatted_address;
-                
-                // Actualizar Livewire
-                @this.set('direccion', direccionCompleta);
-                @this.set('coordenadas', location.lat() + ',' + location.lng());
-                @this.set('direccionCompleta', direccionCompleta);
-
-                mostrarEstadoDireccion('success');
-                console.log('Dirección actualizada:', direccionCompleta);
-            });
-
-            // Manejar cambios manuales
-            let timeoutId;
-            input.addEventListener('input', function(e) {
-                clearTimeout(timeoutId);
-                
-                if (!e.target.value.trim()) {
-                    mostrarEstadoDireccion('reset');
-                    return;
-                }
-                
-                timeoutId = setTimeout(() => {
-                    if (!autocompleteFormulario.getPlace() || !autocompleteFormulario.getPlace().geometry) {
-                        mostrarEstadoDireccion('warning');
-                    }
-                }, 1000);
-            });
-
-            // Marcar como inicializado
-            input.setAttribute('data-autocomplete-ready', 'true');
-            console.log('Autocomplete inicializado correctamente');
-            return true;
-
-        } catch (error) {
-            console.error('Error al inicializar autocomplete:', error);
-            return false;
-        }
-    }
-
-    function mostrarEstadoDireccion(estado) {
-        const statusDiv = document.getElementById('direccion-status');
-        const mensajeDiv = document.getElementById('direccion-mensaje');
-        const successIcon = document.getElementById('direccion-success');
-        const errorIcon = document.getElementById('direccion-error');
-        const validadaMsg = document.getElementById('direccion-validada');
-        const noValidadaMsg = document.getElementById('direccion-no-validada');
-
-        // Resetear todos los estados
-        [statusDiv, successIcon, errorIcon, validadaMsg, noValidadaMsg, mensajeDiv].forEach(el => {
-            if (el) el.classList.add('hidden');
-        });
-
-        if (estado === 'success') {
-            if (statusDiv) statusDiv.classList.remove('hidden');
-            if (successIcon) successIcon.classList.remove('hidden');
-            if (mensajeDiv) mensajeDiv.classList.remove('hidden');
-            if (validadaMsg) validadaMsg.classList.remove('hidden');
-        } else if (estado === 'error' || estado === 'warning') {
-            if (statusDiv) statusDiv.classList.remove('hidden');
-            if (errorIcon) errorIcon.classList.remove('hidden');
-            if (mensajeDiv) mensajeDiv.classList.remove('hidden');
-            if (noValidadaMsg) noValidadaMsg.classList.remove('hidden');
-        }
-    }
-
-    function obtenerUbicacionActual() {
-        if (navigator.geolocation) {
-            const opciones = {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000
-            };
-            
-            navigator.geolocation.getCurrentPosition(
-                function(posicion) {
-                    const { latitude, longitude } = posicion.coords;
-                    const ubicacionActual = new google.maps.LatLng(latitude, longitude);
-                    
-                    mapa.setCenter(ubicacionActual);
-                    mapa.setZoom(17);
-                    agregarMarcador(ubicacionActual);
-                    geocodificarPosicion(ubicacionActual);
-                },
-                function(error) {
-                    console.warn('Error al obtener ubicación:', error.message);
-                },
-                opciones
-            );
-        }
-    }
-
-    function agregarMarcador(posicion, direccion = null) {
-        if (marcador) {
-            marcador.setMap(null);
-        }
-
-        marcador = new google.maps.Marker({
-            position: posicion,
-            map: mapa,
-            draggable: true,
-            title: 'Ubicación del reclamo - Arrastra para ajustar',
-            animation: google.maps.Animation.DROP
-        });
-
-        ubicacionSeleccionada = {
-            lat: posicion.lat(),
-            lng: posicion.lng(),
-            direccion: direccion
-        };
-
-        const btnConfirmar = document.getElementById('btn-confirmar-ubicacion');
-        if (btnConfirmar) {
-            btnConfirmar.disabled = false;
-            btnConfirmar.classList.remove('bg-gray-300', 'cursor-not-allowed');
-            btnConfirmar.classList.add('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
-        }
-        
-        if (direccion) {
-            mostrarDireccionSeleccionada(direccion);
-        } else {
-            geocodificarPosicion(posicion);
-        }
-
-        marcador.addListener('dragend', function() {
-            const nuevaPosicion = marcador.getPosition();
-            ubicacionSeleccionada.lat = nuevaPosicion.lat();
-            ubicacionSeleccionada.lng = nuevaPosicion.lng();
-            geocodificarPosicion(nuevaPosicion);
-        });
-    }
-
-    function geocodificarPosicion(posicion) {
-        geocoder.geocode({ location: posicion }, function(resultados, estado) {
-            if (estado === 'OK' && resultados[0]) {
-                const direccion = resultados[0].formatted_address;
-                ubicacionSeleccionada.direccion = direccion;
-                mostrarDireccionSeleccionada(direccion);
-            } else {
-                const coordenadas = `Lat: ${posicion.lat().toFixed(6)}, Lng: ${posicion.lng().toFixed(6)}`;
-                ubicacionSeleccionada.direccion = coordenadas;
-                mostrarDireccionSeleccionada(coordenadas);
-            }
-        });
-    }
-
-    function mostrarDireccionSeleccionada(direccion) {
-        const elemento = document.getElementById('direccion-seleccionada');
-        if (elemento) {
-            elemento.textContent = direccion;
-        }
-    }
-
-    function limpiarFormularioBusqueda() {
-        const btnConfirmar = document.getElementById('btn-confirmar-ubicacion');
-        if (btnConfirmar) {
-            btnConfirmar.disabled = true;
-            btnConfirmar.classList.add('bg-gray-300', 'cursor-not-allowed');
-            btnConfirmar.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
-        }
-        
-        const direccionSeleccionada = document.getElementById('direccion-seleccionada');
-        if (direccionSeleccionada) {
-            direccionSeleccionada.textContent = 'Seleccione una ubicación en el mapa';
-        }
-        
-        ubicacionSeleccionada = null;
-    }
-
-    function confirmarUbicacionSeleccionada() {
-        if (ubicacionSeleccionada) {
-            Livewire.dispatch('confirmar-ubicacion-mapa', {
-                lat: ubicacionSeleccionada.lat,
-                lng: ubicacionSeleccionada.lng,
-                direccion: ubicacionSeleccionada.direccion
-            });
-        } else {
-            alert('Por favor, seleccione una ubicación en el mapa');
-        }
-    }
-
-    function cargarGoogleMaps() {
-        if (googleMapsLoaded) {
-            return Promise.resolve();
-        }
-
-        if (googleMapsLoading) {
-            return new Promise((resolve) => {
-                const checkLoaded = setInterval(() => {
-                    if (googleMapsLoaded) {
-                        clearInterval(checkLoaded);
-                        resolve();
-                    }
-                }, 100);
-            });
-        }
-
-        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-            googleMapsLoaded = true;
-            return Promise.resolve();
-        }
-
-        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-        if (existingScript) {
-            googleMapsLoading = true;
-            return new Promise((resolve) => {
-                const checkGlobalGoogle = setInterval(() => {
-                    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                        clearInterval(checkGlobalGoogle);
-                        googleMapsLoaded = true;
-                        googleMapsLoading = false;
-                        resolve();
-                    }
-                }, 100);
-            });
-        }
-
-        googleMapsLoading = true;
-        
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyArpDAi1ugbTSLT4wlr4T_qMmBZLouBfxo&libraries=places,marker&loading=async`;
-            script.async = true;
-            script.defer = true;
-            
-            script.onload = function() {
-                googleMapsLoaded = true;
-                googleMapsLoading = false;
-                resolve();
-            };
-            
-            script.onerror = function() {
-                googleMapsLoading = false;
-                reject(new Error('Error al cargar Google Maps API'));
-            };
-            
-            if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
-                document.head.appendChild(script);
-            }
-        });
-    }
-
-    function inicializarEventListeners() {
-        if (livewireListenersInitialized) {
-            return;
-        }
-
-        livewireListenersInitialized = true;
-        
-        Livewire.on('inicializar-mapa', () => {
-            cargarGoogleMaps().then(() => {
-                setTimeout(() => {
-                    if (document.getElementById('mapa-container')) {
-                        inicializarMapa();
-                    }
-                }, 500);
-            });
-        });
-
-        Livewire.on('ubicacion-confirmada', (event) => {
+            // Resetear variables globales
             if (marcador) {
                 marcador.setMap(null);
                 marcador = null;
             }
+            mapa = null;
             ubicacionSeleccionada = null;
-            mostrarEstadoDireccion('success');
-        });
 
-        // Hook simplificado para detectar cambios
-        Livewire.hook('morph.updated', () => {
-            setTimeout(() => {
-                const input = document.getElementById('direccion-autocomplete');
+            try {
+                // CAMBIO: Usar la última posición conocida en lugar de siempre Mercedes
+                const centroInicial = ultimaPosicionConocida;
                 
-                if (input && googleMapsLoaded && !input.hasAttribute('data-autocomplete-ready')) {
-                    console.log('Nuevo campo de dirección detectado - inicializando autocomplete');
+                mapa = new google.maps.Map(mapaContainer, {
+                    zoom: 17, // Aumentar zoom para mejor precisión
+                    center: centroInicial,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                });
+
+                geocoder = new google.maps.Geocoder();
+
+                // Forzar que el mapa se redibuje correctamente
+                google.maps.event.addListenerOnce(mapa, 'idle', function() {
+
+                    google.maps.event.trigger(mapa, 'resize');
+                    mapa.setCenter(centroInicial);
+                    
+                    // NUEVO: Si hay coordenadas previas, crear marcador
+                    if (ultimaPosicionConocida.lat !== -34.6549 || ultimaPosicionConocida.lng !== -59.4307) {
+                        agregarMarcador(new google.maps.LatLng(ultimaPosicionConocida.lat, ultimaPosicionConocida.lng));
+                    }
+                });
+
+                // Listeners del mapa
+                mapa.addListener('click', function(evento) {
+
+                    // NUEVO: Guardar la nueva posición
+                    ultimaPosicionConocida = {
+                        lat: evento.latLng.lat(),
+                        lng: evento.latLng.lng()
+                    };
+                    agregarMarcador(evento.latLng);
+                    geocodificarPosicion(evento.latLng);
+                });
+
+                // Intentar obtener ubicación actual solo si es la primera vez
+                if (ultimaPosicionConocida.lat === -34.6549 && ultimaPosicionConocida.lng === -59.4307) {
+                    obtenerUbicacionActual();
+                }
+                
+            } catch (error) {
+                console.error('Error al inicializar mapa:', error);
+            }
+        }
+
+        // 3. AGREGAR esta función nueva para debugging
+        function verificarEstadoMapa() {
+            
+            const container = document.getElementById('mapa-container');
+            if (container) {
+                console.log('Dimensiones del contenedor:', container.offsetWidth, 'x', container.offsetHeight);
+                console.log('Contenedor visible:', container.offsetWidth > 0 && container.offsetHeight > 0);
+            }
+        }
+
+        function inicializarAutocompleteFormulario() {
+            const input = document.getElementById('direccion-autocomplete');
+            if (!input) {
+                console.log('Input de dirección no encontrado');
+                return false;
+            }
+
+            // Verificar si ya está inicializado
+            if (input.hasAttribute('data-autocomplete-ready')) {
+                console.log('Autocomplete ya inicializado en este input');
+                return true;
+            }
+
+            try {
+                // Limpiar autocomplete anterior si existe
+                if (autocompleteFormulario) {
+                    google.maps.event.clearInstanceListeners(autocompleteFormulario);
+                }
+
+                autocompleteFormulario = new google.maps.places.Autocomplete(input, {
+                    bounds: new google.maps.LatLngBounds(
+                        new google.maps.LatLng(-34.7549, -59.5307),
+                        new google.maps.LatLng(-34.5549, -59.3307)
+                    ),
+                    strictBounds: false,
+                    componentRestrictions: { country: 'ar' },
+                    types: ['address'],
+                    fields: ['geometry', 'formatted_address', 'address_components', 'name']
+                });
+
+                autocompleteFormulario.addListener('place_changed', function() {
+                    const place = autocompleteFormulario.getPlace();
+                    
+                    if (!place.geometry || !place.geometry.location) {
+                        console.log('No se encontró información de ubicación');
+                        mostrarEstadoDireccion('error');
+                        return;
+                    }
+
+                    const location = place.geometry.location;
+                    const direccionCompleta = place.formatted_address;
+                    
+                    // NUEVO: Guardar esta posición como la última conocida para el mapa
+                    ultimaPosicionConocida = {
+                        lat: location.lat(),
+                        lng: location.lng()
+                    };
+                    
+                    // Actualizar Livewire
+                    @this.set('direccion', direccionCompleta);
+                    @this.set('coordenadas', location.lat() + ',' + location.lng());
+                    @this.set('direccionCompleta', direccionCompleta);
+
+                    mostrarEstadoDireccion('success');
+
+                });
+
+                // Manejar cambios manuales
+                let timeoutId;
+                input.addEventListener('input', function(e) {
+                    clearTimeout(timeoutId);
+                    
+                    if (!e.target.value.trim()) {
+                        mostrarEstadoDireccion('reset');
+                        return;
+                    }
+                    
+                    timeoutId = setTimeout(() => {
+                        if (!autocompleteFormulario.getPlace() || !autocompleteFormulario.getPlace().geometry) {
+                            mostrarEstadoDireccion('warning');
+                        }
+                    }, 1000);
+                });
+
+                // Marcar como inicializado
+                input.setAttribute('data-autocomplete-ready', 'true');
+                return true;
+
+            } catch (error) {
+                console.error('Error al inicializar autocomplete:', error);
+                return false;
+            }
+        }
+
+        function sincronizarPosicionDesdeFormulario() {
+            // Esta función se puede llamar cuando Livewire ya tiene coordenadas
+            // para sincronizarlas con la posición del mapa
+            
+            // Obtener las coordenadas actuales desde Livewire
+            const coordenadasActuales = @this.get('coordenadas');
+            
+            if (coordenadasActuales && coordenadasActuales.includes(',')) {
+                const [lat, lng] = coordenadasActuales.split(',').map(coord => parseFloat(coord.trim()));
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    ultimaPosicionConocida = { lat, lng };
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function mostrarEstadoDireccion(estado) {
+            const statusDiv = document.getElementById('direccion-status');
+            const mensajeDiv = document.getElementById('direccion-mensaje');
+            const successIcon = document.getElementById('direccion-success');
+            const errorIcon = document.getElementById('direccion-error');
+            const validadaMsg = document.getElementById('direccion-validada');
+            const noValidadaMsg = document.getElementById('direccion-no-validada');
+
+            // Resetear todos los estados
+            [statusDiv, successIcon, errorIcon, validadaMsg, noValidadaMsg, mensajeDiv].forEach(el => {
+                if (el) el.classList.add('hidden');
+            });
+
+            if (estado === 'success') {
+                if (statusDiv) statusDiv.classList.remove('hidden');
+                if (successIcon) successIcon.classList.remove('hidden');
+                if (mensajeDiv) mensajeDiv.classList.remove('hidden');
+                if (validadaMsg) validadaMsg.classList.remove('hidden');
+            } else if (estado === 'error' || estado === 'warning') {
+                if (statusDiv) statusDiv.classList.remove('hidden');
+                if (errorIcon) errorIcon.classList.remove('hidden');
+                if (mensajeDiv) mensajeDiv.classList.remove('hidden');
+                if (noValidadaMsg) noValidadaMsg.classList.remove('hidden');
+            }
+        }
+
+        function obtenerUbicacionActual() {
+            if (navigator.geolocation) {
+                const opciones = {
+                    enableHighAccuracy: false,
+                    timeout: 5000,
+                    maximumAge: 60000 
+                };
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(posicion) {
+                        const { latitude, longitude } = posicion.coords;
+                        const ubicacionActual = new google.maps.LatLng(latitude, longitude);
+                        
+                        // NUEVO: Guardar esta posición como la última conocida
+                        ultimaPosicionConocida = {
+                            lat: latitude,
+                            lng: longitude
+                        };
+                                              
+                        mapa.setCenter(ubicacionActual);
+                        mapa.setZoom(17);
+                        agregarMarcador(ubicacionActual);
+                        geocodificarPosicion(ubicacionActual);
+                    },
+                    function(error) {
+                        console.warn('Error al obtener ubicación:', error.message);
+                        // Si falla, usar la última posición conocida o Mercedes
+                    },
+                    opciones
+                );
+            }
+        }
+
+
+        function agregarMarcador(posicion, direccion = null) {
+            if (marcador) {
+                marcador.setMap(null);
+            }
+
+            marcador = new google.maps.Marker({
+                position: posicion,
+                map: mapa,
+                draggable: true,
+                title: 'Ubicación del reclamo - Arrastra para ajustar',
+                animation: google.maps.Animation.DROP
+            });
+
+            ubicacionSeleccionada = {
+                lat: posicion.lat(),
+                lng: posicion.lng(),
+                direccion: direccion
+            };
+
+            const btnConfirmar = document.getElementById('btn-confirmar-ubicacion');
+            if (btnConfirmar) {
+                btnConfirmar.disabled = false;
+                btnConfirmar.classList.remove('bg-gray-300', 'cursor-not-allowed');
+                btnConfirmar.classList.add('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
+            }
+            
+            if (direccion) {
+                mostrarDireccionSeleccionada(direccion);
+            } else {
+                geocodificarPosicion(posicion);
+            }
+
+            marcador.addListener('dragend', function() {
+                const nuevaPosicion = marcador.getPosition();
+                ubicacionSeleccionada.lat = nuevaPosicion.lat();
+                ubicacionSeleccionada.lng = nuevaPosicion.lng();
+                geocodificarPosicion(nuevaPosicion);
+            });
+        }
+
+        function geocodificarPosicion(posicion) {
+            geocoder.geocode({ location: posicion }, function(resultados, estado) {
+                if (estado === 'OK' && resultados[0]) {
+                    const direccion = resultados[0].formatted_address;
+                    ubicacionSeleccionada.direccion = direccion;
+                    mostrarDireccionSeleccionada(direccion);
+                } else {
+                    const coordenadas = `Lat: ${posicion.lat().toFixed(6)}, Lng: ${posicion.lng().toFixed(6)}`;
+                    ubicacionSeleccionada.direccion = coordenadas;
+                    mostrarDireccionSeleccionada(coordenadas);
+                }
+            });
+        }
+
+        function mostrarDireccionSeleccionada(direccion) {
+            const elemento = document.getElementById('direccion-seleccionada');
+            if (elemento) {
+                elemento.textContent = direccion;
+            }
+        }
+
+        function limpiarFormularioBusqueda() {
+            const btnConfirmar = document.getElementById('btn-confirmar-ubicacion');
+            if (btnConfirmar) {
+                btnConfirmar.disabled = true;
+                btnConfirmar.classList.add('bg-gray-300', 'cursor-not-allowed');
+                btnConfirmar.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'cursor-pointer');
+            }
+            
+            const direccionSeleccionada = document.getElementById('direccion-seleccionada');
+            if (direccionSeleccionada) {
+                direccionSeleccionada.textContent = 'Seleccione una ubicación en el mapa';
+            }
+            
+            ubicacionSeleccionada = null;
+        }
+
+        function confirmarUbicacionSeleccionada() {
+            if (ubicacionSeleccionada) {
+                // NUEVO: Guardar esta posición para la próxima vez
+                ultimaPosicionConocida = {
+                    lat: ubicacionSeleccionada.lat,
+                    lng: ubicacionSeleccionada.lng
+                };
+                
+                Livewire.dispatch('confirmar-ubicacion-mapa', {
+                    lat: ubicacionSeleccionada.lat,
+                    lng: ubicacionSeleccionada.lng,
+                    direccion: ubicacionSeleccionada.direccion
+                });
+            } else {
+                alert('Por favor, seleccione una ubicación en el mapa');
+            }
+        }
+
+        function cargarGoogleMaps() {
+            if (googleMapsLoaded) {
+                return Promise.resolve();
+            }
+
+            if (googleMapsLoading) {
+                return new Promise((resolve) => {
+                    const checkLoaded = setInterval(() => {
+                        if (googleMapsLoaded) {
+                            clearInterval(checkLoaded);
+                            resolve();
+                        }
+                    }, 100);
+                });
+            }
+
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                googleMapsLoaded = true;
+                return Promise.resolve();
+            }
+
+            const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+            if (existingScript) {
+                googleMapsLoading = true;
+                return new Promise((resolve) => {
+                    const checkGlobalGoogle = setInterval(() => {
+                        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                            clearInterval(checkGlobalGoogle);
+                            googleMapsLoaded = true;
+                            googleMapsLoading = false;
+                            resolve();
+                        }
+                    }, 100);
+                });
+            }
+
+            googleMapsLoading = true;
+            
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyArpDAi1ugbTSLT4wlr4T_qMmBZLouBfxo&libraries=places,marker&loading=async`;
+                script.async = true;
+                script.defer = true;
+                
+                script.onload = function() {
+                    googleMapsLoaded = true;
+                    googleMapsLoading = false;
+                    resolve();
+                };
+                
+                script.onerror = function() {
+                    googleMapsLoading = false;
+                    reject(new Error('Error al cargar Google Maps API'));
+                };
+                
+                if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+                    document.head.appendChild(script);
+                }
+            });
+        }
+
+        // 2. Simplificar inicializarEventListeners - REEMPLAZAR COMPLETA
+        function inicializarEventListeners() {
+                if (livewireListenersInitialized) {
+                    return;
+                }
+
+                livewireListenersInitialized = true;
+                
+                Livewire.on('inicializar-mapa', () => {
+                    
+                    // NUEVO: Intentar sincronizar posición desde el formulario antes de abrir el mapa
+                    sincronizarPosicionDesdeFormulario();
+                    
+                    cargarGoogleMaps().then(() => {
+                        // Dar tiempo para que el modal se muestre completamente
+                        setTimeout(() => {
+                            const container = document.getElementById('mapa-container');
+                            if (container) {
+                                inicializarMapa();
+                            } else {
+                                console.error('Contenedor no encontrado después del timeout');
+                            }
+                        }, 400);
+                    }).catch(error => {
+                        console.error('Error cargando Google Maps:', error);
+                    });
+                });
+
+                Livewire.on('ubicacion-confirmada', (event) => {
+                    if (marcador) {
+                        marcador.setMap(null);
+                        marcador = null;
+                    }
+                    ubicacionSeleccionada = null;
+                    mostrarEstadoDireccion('success');
+                });
+
+                // Hook para autocomplete
+                Livewire.hook('morph.updated', () => {
+                    setTimeout(() => {
+                        const input = document.getElementById('direccion-autocomplete');
+                        
+                        if (input && googleMapsLoaded && !input.hasAttribute('data-autocomplete-ready')) {
+                            inicializarAutocompleteFormulario();
+                        }
+                    }, 150);
+                });
+        }
+
+        function initializeApp() {
+            if (window.googleMapsAppInitialized) {
+                return;
+            }
+            
+            window.googleMapsAppInitialized = true;
+            
+            cargarGoogleMaps().then(() => {
+                const input = document.getElementById('direccion-autocomplete');
+                if (input) {
                     inicializarAutocompleteFormulario();
                 }
-            }, 150);
-        });
-    }
-
-    function initializeApp() {
-        if (window.googleMapsAppInitialized) {
-            return;
+            });
+            
+            inicializarEventListeners();
         }
-        
-        window.googleMapsAppInitialized = true;
-        
-        cargarGoogleMaps().then(() => {
-            const input = document.getElementById('direccion-autocomplete');
-            if (input) {
-                inicializarAutocompleteFormulario();
-            }
-        });
-        
-        inicializarEventListeners();
-    }
 
-    // Inicialización
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-        initializeApp();
-    }
-    
-    document.addEventListener('livewire:init', () => {
-        if (!window.googleMapsAppInitialized) {
+        // Inicialización
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
             initializeApp();
         }
-    });
-    
-    document.addEventListener('livewire:navigated', () => {
-        setTimeout(() => {
-            const input = document.getElementById('direccion-autocomplete');
-            if (input && googleMapsLoaded && !input.hasAttribute('data-autocomplete-ready')) {
-                inicializarAutocompleteFormulario();
-            }
-        }, 200);
-    });
 
-    // Función global
-    window.confirmarUbicacionSeleccionada = confirmarUbicacionSeleccionada;
-</script>
+        function resetearMapa() {
+            // Limpiar estado anterior
+            if (marcador) {
+                marcador.setMap(null);
+                marcador = null;
+            }
+            
+            if (mapa) {
+                mapa = null;
+            }
+            
+            mapaInicializado = false;
+            ubicacionSeleccionada = null;
+            
+            // Limpiar interfaz
+            limpiarFormularioBusqueda();
+        }
+
+        
+        document.addEventListener('livewire:init', () => {
+            if (!window.googleMapsAppInitialized) {
+                initializeApp();
+            }
+        });
+        
+        document.addEventListener('livewire:navigated', () => {
+            setTimeout(() => {
+                const input = document.getElementById('direccion-autocomplete');
+                if (input && googleMapsLoaded && !input.hasAttribute('data-autocomplete-ready')) {
+                    inicializarAutocompleteFormulario();
+                }
+            }, 200);
+        });
+
+        // Función global
+        window.confirmarUbicacionSeleccionada = confirmarUbicacionSeleccionada;
+    </script>
 @endpush
     <style>
     @keyframes progress {

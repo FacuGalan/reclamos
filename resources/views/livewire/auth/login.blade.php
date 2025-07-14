@@ -87,7 +87,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             type="text"
             required
             autofocus
-            autocomplete="username"
+            autocomplete="dni"
             placeholder="12345678"
             maxlength="11"
         />

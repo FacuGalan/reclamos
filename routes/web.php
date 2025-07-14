@@ -17,6 +17,20 @@ Route::view('reclamos', 'reclamos')
     ->middleware(['auth', 'verified'])
     ->name('reclamos');
 
+    // Crear nuevo reclamo normal (área privada)
+Route::get('reclamos/create', function () {
+    return view('reclamos.create', ['tipoInterno' => false]);
+})
+    ->middleware(['auth', 'verified'])
+    ->name('reclamos.create');
+
+// Crear nuevo reclamo interno (área privada)  
+Route::get('reclamos/create/interno', function () {
+    return view('reclamos.create', ['tipoInterno' => true]);
+})
+    ->middleware(['auth', 'verified'])
+    ->name('reclamos.create.interno');
+
 // Ruta para modificar reclamo, recibe el ID del reclamo y un parámetro opcional editable
 Route::view('modificar-reclamo/{reclamo}', 'modificar-reclamo')
     ->middleware(['auth', 'verified'])
@@ -32,7 +46,7 @@ Route::get('/tramites', function () {
 })->name('tramites');
 
 // Rutas del dashboard (área privada)
-Route::view('dashboard', 'dashboard')
+Route::view('dashboard', 'reclamos')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
