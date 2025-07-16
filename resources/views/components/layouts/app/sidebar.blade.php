@@ -34,6 +34,9 @@
                     <flux:navlist.item class="flux-nav-custom" icon="arrows-right-left" :href="route('tipos-movimiento')" :current="request()->routeIs('tipos-movimiento')" wire:navigate>Tipos de Movimiento</flux:navlist.item>
                     <flux:navlist.item class="flux-nav-custom" icon="adjustments-horizontal" :href="route('estados')" :current="request()->routeIs('estados')" wire:navigate>Estados</flux:navlist.item>
                 </flux:navlist.group>
+                <flux:navlist.group :heading="__('Administración')" class="grid">
+                    <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('usuarios')" :current="request()->routeIs('usuarios')" wire:navigate>Usuarios</flux:navlist.item>
+                </flux:navlist.group>
             </div>
                   
 
@@ -190,7 +193,7 @@
                         toast: true,
                         position: 'top-end',
                         showConfirmButton: false,
-                        timer: 2000,
+                        timer: 4000,
                         timerProgressBar: true
                     }).then(() => {
                         // Después de que termine el toast, redirigir

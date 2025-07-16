@@ -731,22 +731,25 @@
     @endif
 
     @if($mostrarModalDetalle && $reclamoDetalle)
+        <!-- Contenedor principal del modal -->
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <!-- Overlay -->
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="cerrarModalDetalle"></div>
+            <!-- Overlay de fondo -->
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-opacity-80 transition-opacity" wire:click="cerrarModalDetalle"></div>
 
-                <!-- Modal más grande para acomodar la tabla -->
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+            <!-- Contenedor de centrado -->
+            <div class="flex min-h-full items-center justify-center p-4">
+                <!-- Modal content -->
+                <div class="relative w-full max-w-6xl bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all">
+                    
                     <!-- Header -->
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-600">
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-600 rounded-t-lg">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                                 Detalle del Reclamo #{{ $reclamoDetalle->id }}
                             </h3>
                             <button 
                                 wire:click="cerrarModalDetalle"
-                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">
                                 <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
@@ -766,7 +769,7 @@
                                         <p class="text-sm text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($reclamoDetalle->fecha)->format('d/m/Y') }}</p>
                                     </div>
                                     <div>
-                                        <label class="block mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">Estado Actual</label>
+                                        <label class="block mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Estado Actual</label>
                                         <p class="text-sm text-gray-900 dark:text-white">
                                             {{ $reclamoDetalle->estado->nombre ?? 'Sin estado' }}
                                         </p>
@@ -779,7 +782,6 @@
                                                 <p class="text-sm text-gray-900 dark:text-white">{{ $reclamoDetalle->direccion }}
                                                 @if($reclamoDetalle->entre_calles)
                                                     <span class="text-xs text-gray-500 dark:text-gray-400">Entre: {{ $reclamoDetalle->entre_calles }}</span>
-                                                    
                                                 @endif
                                                 </p>
                                             </div>
@@ -799,13 +801,11 @@
                                     <!-- Descripción -->
                                     <div>
                                         <label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">Descripción</label>
-                                       <p class="text-sm text-gray-900 dark:text-white">
+                                    <p class="text-sm text-gray-900 dark:text-white">
                                             {{ $reclamoDetalle->descripcion }}
                                         </p>
                                     </div>
                                 </div>
-
-                                
                             </div>
                         </div>
 
@@ -871,15 +871,8 @@
                                                         </td>
                                                         <td class="px-4 py-3 whitespace-nowrap">
                                                             @if($movimiento->estado)
-                                                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                                                    @switch($movimiento->estado->id)
-                                                                        @case(1) bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 @break
-                                                                        @case(2) bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 @break
-                                                                        @case(3) bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 @break
-                                                                        @case(4) bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 @break
-                                                                        @case(5) bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 @break
-                                                                        @default bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400
-                                                                    @endswitch">
+                                                                <span class="inline-flex items-center font-bold rounded-full px-2 py-1 text-sm"
+                                                                        style="background-color: {{ $movimiento->estado->codigo_color }}; color: {{ $movimiento->estado->getColorTexto() }};">   
                                                                     {{ $movimiento->estado->nombre }}
                                                                 </span>
                                                             @else
@@ -906,10 +899,10 @@
                     </div>
 
                     <!-- Footer -->
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-t border-gray-200 dark:border-gray-600">
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
                         <div class="flex items-center justify-end space-x-4">
                             
-                            <!-- Botón Cerrar (derecha) -->
+                            <!-- Botón Cerrar -->
                             <button 
                                 wire:click="cerrarModalDetalle"
                                 type="button" 
@@ -917,11 +910,11 @@
                                 Cerrar
                             </button>
 
-                            <!-- Botón Modificar (izquierda) -->
+                            <!-- Botón Modificar -->
                             <button 
                                 wire:click="irAModificarReclamo({{ $reclamoDetalle->id }})"
                                 type="button" 
-                                class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer text-base font-medium  sm:text-sm">
+                                class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#77BF43] text-white hover:bg-[#5a9032] transition-colors cursor-pointer text-base font-medium sm:text-sm">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
@@ -935,79 +928,86 @@
     @endif
 
      <!-- Modal del Mapa -->
-    @if($mostrarMapa)
-        <div class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
-                <!-- Overlay -->
-                <div class="fixed inset-0 bg-black bg-opacity-50" wire:click="cerrarMapa"></div>
+@if($mostrarMapa)
+    <!-- Contenedor principal del modal -->
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Overlay de fondo -->
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-opacity-80 transition-opacity" wire:click="cerrarMapa"></div>
 
-                <!-- Modal del mapa -->
-                <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-auto z-[10000]">
-                    <!-- Header -->
-                    <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600 rounded-t-lg">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                                Seleccionar Ubicación Exacta
-                            </h3>
-                            <button 
-                                wire:click="cerrarMapa"
-                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">
-                                <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
-                        </div>
+        <!-- Contenedor de centrado -->
+        <div class="flex min-h-full items-center justify-center p-4">
+            <!-- Modal content -->
+            <div class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all">
+                
+                <!-- Header -->
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-600 rounded-t-lg">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                            Seleccionar Ubicación Exacta
+                        </h3>
+                        <button 
+                            wire:click="cerrarMapa"
+                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">
+                            <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenido del mapa -->
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6">
+                    <!-- Contenedor del mapa -->
+                    <div id="mapa-container" class="w-full h-96 bg-gray-200 dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></div>
+                    
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                        <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center">
+                            <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Haga clic en el mapa para seleccionar la ubicación exacta del reclamo. El marcador se puede arrastrar para ajustar la posición.</span>
+                        </p>
                     </div>
 
-                    <!-- Contenido del mapa -->
-                    <div class="px-6 py-4">
-                        <!-- Contenedor del mapa -->
-                        <div id="mapa-container" class="w-full h-96 bg-gray-200 dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></div>
+                    <!-- Información de ubicación seleccionada -->
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ubicación seleccionada:</p>
+                        <p id="direccion-seleccionada" class="text-sm text-gray-600 dark:text-gray-400">
+                            Seleccione una ubicación en el mapa
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
+                    <div class="flex items-center justify-end space-x-4">
                         
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
-                            <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center">
-                                <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>Haga clic en el mapa para seleccionar la ubicación exacta del reclamo. El marcador se puede arrastrar para ajustar la posición.</span>
-                            </p>
-                        </div>
+                        <!-- Botón Cancelar -->
+                        <button 
+                            wire:click="cerrarMapa"
+                            type="button" 
+                            class="cursor-pointer inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-500 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
+                            Cancelar
+                        </button>
 
-                        <!-- Información de ubicación seleccionada -->
-                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ubicación seleccionada:</p>
-                            <p id="direccion-seleccionada" class="text-sm text-gray-600 dark:text-gray-400">
-                                Seleccione una ubicación en el mapa
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Footer con botones -->
-                    <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
-                        <div class="flex justify-end space-x-3">
-                            <button 
-                                wire:click="cerrarMapa"
-                                type="button" 
-                                class="px-4 py-2 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 rounded-md cursor-pointer transition-colors">
-                                Cancelar
-                            </button>
-                            <button 
-                                id="btn-confirmar-ubicacion"
-                                type="button" 
-                                onclick="confirmarUbicacionSeleccionada()"
-                                disabled
-                                class="px-4 py-2 bg-gray-300 text-white rounded-md cursor-not-allowed transition-colors">
-                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Confirmar Ubicación
-                            </button>
-                        </div>
+                        <!-- Botón Confirmar -->
+                        <button 
+                            id="btn-confirmar-ubicacion"
+                            type="button" 
+                            onclick="confirmarUbicacionSeleccionada()"
+                            disabled
+                            class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-300 text-white cursor-not-allowed text-base font-medium sm:text-sm transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Confirmar Ubicación
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
+@endif
 
   @push('scripts')
     <script>

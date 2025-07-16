@@ -62,6 +62,10 @@ Route::view('areas', 'areas')
     ->middleware(['auth', 'verified'])
     ->name('areas');
 
+Route::view('usuarios', 'usuarios')
+    ->middleware(['auth', 'verified'])
+    ->name('usuarios');
+
 Route::view('tipos-movimiento', 'tipos-movimiento')
     ->middleware(['auth', 'verified'])
     ->name('tipos-movimiento');

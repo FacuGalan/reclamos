@@ -14,6 +14,10 @@ use App\Models\TipoMovimiento;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\MovimientoReclamoMail;
+
 /**
  * @property Collection $categorias
  * @property Collection $categoriasFiltradas
@@ -151,7 +155,7 @@ class ModificarReclamo extends Component
     {
         $this->historial = Movimiento::where('reclamo_id', $this->reclamoId)
             ->with(['tipoMovimiento', 'estado', 'usuario'])
-            ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
         
         // IMPORTANTE: Actualizar timestamp para forzar re-renderización
@@ -351,6 +355,25 @@ class ModificarReclamo extends Component
             ]);
 
             DB::commit();
+
+            // En tu función guardarMovimiento, cambia esta parte:
+            if ($this->notificado && !empty($this->reclamo->persona->email)) {
+                try {
+                    Log::info('Intentando enviar email a: ' .  $this->reclamo->persona->email);
+                    
+                    Mail::to($this->reclamo->persona->email)->send(new MovimientoReclamoMail($this->reclamo, $this->observaciones));
+                    
+                    Log::info('Email enviado exitosamente a: ' . $this->reclamo->persona->email);
+                    
+                } catch (\Exception $emailException) {
+                    Log::error('Error detallado al enviar email: ' . $emailException->getMessage(), [
+                        'reclamo_id' => $this->reclamoId,
+                        'email' => $this->reclamo->persona->email,
+                        'trace' => $emailException->getTraceAsString()
+                    ]);
+                }
+            }
+
 
             $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
 

@@ -31,11 +31,11 @@ class AbmAreas extends Component
     public $secretaria_id = '';
 
     // Estado de guardado
-    public $isSaving = false;
     public $mostrarNotificacion = false;
     public $mensajeNotificacion = '';
     public $tipoNotificacion = 'success';
     public $notificacionTimestamp = null;
+    public $isSaving = false;
 
     protected $queryString = [
         'busqueda' => ['except' => ''],
@@ -111,7 +111,7 @@ class AbmAreas extends Component
     {
         $area = Area::find($areaId);
         if (!$area) {
-            $this->mostrarNotificacionError('El área solicitada no existe.');
+            session()->flash('error', 'El área solicitada no existe.');
             return;
         }
 
@@ -157,9 +157,9 @@ class AbmAreas extends Component
                 $this->showDeleteModal = false;
                 $this->selectedArea = null;
                 
-                $this->mostrarNotificacionExito('Área eliminada exitosamente');
+                session()->flash('success', 'Área eliminada exitosamente');
             } catch (\Exception $e) {
-                $this->mostrarNotificacionError('Error al eliminar el área: ' . $e->getMessage());
+                session()->flash('error', 'Error al eliminar el área: ' . $e->getMessage());
             }
         }
     }
@@ -202,6 +202,11 @@ class AbmAreas extends Component
             $this->mostrarNotificacionExito($mensaje);
             $this->cerrarModal();
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // CLAVE: NO hagas return aquí, vuelve a lanzar la excepción
+            $this->isSaving = false;
+            throw $e; // ← ESTO es lo que faltaba
+            
         } catch (\Exception $e) {
             $this->mostrarNotificacionError('Error al guardar el área: ' . $e->getMessage());
         }

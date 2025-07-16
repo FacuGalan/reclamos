@@ -22,7 +22,8 @@ class Reclamo extends Model
         'notificado',
         'no_aplica',     
         'persona_id',           
-        'domicilio_id'          
+        'domicilio_id',
+        'barrio_id'          
     ];
     public function area()
     {
@@ -57,5 +58,9 @@ class Reclamo extends Model
     public function domicilio()
     {
         return $this->belongsTo(Domicilios::class, 'domicilio_id');
+    }
+    public function barrio()
+    {
+        return $this->belongsTo(Barrios::class, 'barrio_id');
     }
 }

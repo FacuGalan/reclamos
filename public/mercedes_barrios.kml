@@ -1,0 +1,1121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:ns2="http://www.google.com/kml/ext/2.2" xmlns:ns3="http://www.w3.org/2005/Atom" xmlns:ns4="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0">
+    <Document>
+        <Schema name="mercedes_barrios_1" id="mercedes_barrios_1">
+            <SimpleField type="string" name="barrio"/>
+        </Schema>
+        <Folder>
+            <name>mercedes_barrios</name>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b9">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">12 DE OCTUBRE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.459296816180704,-34.66126107837015 -59.457796889757105,-34.66109483054614 -59.457796889757105,-34.66109483054614 -59.45691927323266,-34.66263917249049 -59.45949893392574,-34.66230668203859 -59.459296816180704,-34.66126107837015</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b8">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">ALMAFUERTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.412825691488905,-34.65639162892675 -59.40531542159481,-34.65824669102353 -59.41107045844,-34.659314207935466 -59.41302780923394,-34.65925295733695 -59.41427242903225,-34.65920045678794 -59.412825691488905,-34.65639162892675</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b7">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">AMERICA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44811119465996,-34.65824669102353 -59.44634532383498,-34.65749417083883 -59.445345372885924,-34.65724041249182 -59.445260270677466,-34.65728416398639 -59.44268592887243,-34.657004154022005 -59.443068888810366,-34.65857919776568 -59.444185855296034,-34.658386694024934 -59.4450262396043,-34.65821169023621 -59.44513261736484,-34.657949183860225 -59.44811119465996,-34.65824669102353</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b6">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">AUTOCONSTRUCCION</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41898496382415,-34.65886795253841 -59.41441072012093,-34.659506709521715 -59.412474644879104,-34.659550459819854 -59.41137895394556,-34.65948045933174 -59.411591709466634,-34.65980421109366 -59.412581022639664,-34.65990921139347 -59.413846917990085,-34.65999671154167 -59.414719215626505,-34.65997921151942 -59.41466602674622,-34.65990921139347 -59.41787863511454,-34.659795461062664 -59.41904879048046,-34.659287957684505 -59.41898496382415,-34.65886795253841</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b5">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">AVELLANEDA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.466248602832,-34.66324290174247 -59.466163500623566,-34.668475037658794 -59.473737597173994,-34.67248203536759 -59.4785033208462,-34.67326941387733 -59.4803968449838,-34.67328691109253 -59.484098791050585,-34.67176463954231 -59.466248602832,-34.66324290174247</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b4">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">HOSPITAL</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.43663303429773,-34.65158752513396 -59.43244175053245,-34.65235760058265 -59.43353744146601,-34.65631287537178 -59.43687770314695,-34.65584035247053 -59.437781914111554,-34.65584035247053 -59.43663303429773,-34.65158752513396</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b3">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">BELLO HORIZONTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.4054537126835,-34.64997734426065 -59.40328360636851,-34.65018736962647 -59.40043268238605,-34.65092245421665 -59.398539158248425,-34.6519200585917 -59.39745410509092,-34.65246261031683 -59.39698604294456,-34.65291765096105 -59.39702859404877,-34.653407691938135 -59.400028446896,-34.656557886185944 -59.40073054011555,-34.65778292939206 -59.40100712229296,-34.65785293131405 -59.40156028664775,-34.659095455590126 -59.407134481300055,-34.65773042791176 -59.40628345921573,-34.65536782687534 -59.40602815259043,-34.655437830837215 -59.4054537126835,-34.64997734426065</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b2">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">BLANDENGUES</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41516600222078,-34.655709095630996 -59.41291079369736,-34.65633912656511 -59.414389444568855,-34.659095455590126 -59.41587873321642,-34.6589729540245 -59.41668720419652,-34.65893795354392 -59.418878586063634,-34.65857044760538 -59.41860200388623,-34.65767792639819 -59.41516600222078,-34.65830794236575 -59.41477240450679,-34.657415418331546 -59.415304293309504,-34.656575386930676 -59.41527237998134,-34.65615536803737 -59.41516600222078,-34.655709095630996</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b1">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">CALVILLO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42274009877121,-34.63866144117417 -59.41939983709026,-34.63884523847983 -59.41982534813242,-34.64217102411382 -59.42314433426128,-34.642109760847475 -59.42274009877121,-34.63866144117417</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41b0">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">EL PLATEADO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.48163082700606,-34.61370498787256 -59.4779714320435,-34.61181390896856 -59.46733365598952,-34.61433533793416 -59.457717106436725,-34.60971265966282 -59.442483811127424,-34.63051268465522 -59.440569011437695,-34.63250837251413 -59.43895206947751,-34.63516921497613 -59.43937758051967,-34.63534426740886 -59.439654162697074,-34.63553244836199 -59.44048390922928,-34.63555432984045 -59.44123387244108,-34.63571187631504 -59.44190937122052,-34.635812530850465 -59.44390927311865,-34.63709039520277 -59.44437733526504,-34.63726544358085 -59.44473901965087,-34.63726544358085 -59.4456538683915,-34.63766805344835 -59.4466750948927,-34.63794812872525 -59.448462241269766,-34.638700826345385 -59.44865372123874,-34.63908592481176 -59.450547245376335,-34.64006616738447 -59.451547196325414,-34.64080134171048 -59.453270516046146,-34.6425167231257 -59.45475980469372,-34.643059336389854 -59.45722776873824,-34.645124735043495 -59.45950425281381,-34.64041625120967 -59.457483075363534,-34.639838612105585 -59.45850430186471,-34.638630808250284 -59.460461652658644,-34.63926096897807 -59.462376452348366,-34.63689784156018 -59.48163082700606,-34.61370498787256</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41af">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">EL ROSEDAL</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.40999604305857,-34.64895783857036 -59.40560264154828,-34.650217998281214 -59.40616644367912,-34.65530219810739 -59.40645366363258,-34.65526719607657 -59.406804710242376,-34.65645725683207 -59.40743233902956,-34.6577173025365 -59.409772649761436,-34.65707853176108 -59.40942160315167,-34.65483841999941 -59.40942160315164,-34.65317579790829 -59.40929394983901,-34.651968188323764 -59.40999604305857,-34.64895783857036</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41ae">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">EL TRIANGULO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45205780957602,-34.65573097178536 -59.45090892976218,-34.65859232300448 -59.45246204506606,-34.65877607612896 -59.45205780957602,-34.65573097178536</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41ad">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">ESPERANZA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42317624758946,-34.64219290384086 -59.41394265797459,-34.642446708252336 -59.414666026746275,-34.64460839020321 -59.415740442127706,-34.64455588037831 -59.415974473200905,-34.64686628121562 -59.419846623684556,-34.645824858504604 -59.419867899236664,-34.64565857971789 -59.420335961383024,-34.64562357361503 -59.42137846343631,-34.6453872820342 -59.421484841196865,-34.64473091299866 -59.42331453867816,-34.6443633440692 -59.42317624758946,-34.64219290384086</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41ac">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">ESTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42044233914358,-34.65021799828122 -59.42029341027881,-34.650235500364566 -59.42050616579989,-34.65090932776329 -59.42209119443193,-34.65593223213455 -59.42738880690682,-34.65490842440843 -59.42592079381138,-34.64991171122472 -59.42278264987545,-34.65048928015768 -59.42202736777562,-34.65038426792371 -59.42044233914358,-34.65021799828122</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41ab">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">ESTRADA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42106464904272,-34.65297890624163 -59.417788214018096,-34.653560829149356 -59.418038201755365,-34.65490842440843 -59.41812330396379,-34.655245319799825 -59.41838924836514,-34.6558884799263 -59.4186392361024,-34.656597262856394 -59.42201672999955,-34.655945357792525 -59.42106464904272,-34.65297890624163</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41aa">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">EVA DUARTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41145873726597,-34.63557183501909 -59.41245868821504,-34.639151566417425 -59.417926505106784,-34.63887149520454 -59.41824563838841,-34.63631580169541 -59.41145873726597,-34.63557183501909</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a9">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">FACUNDO QUIROGA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.461690315792865,-34.65507905990768 -59.45224397065692,-34.653468946856584 -59.452041852911904,-34.65440526640397 -59.45185037294293,-34.655490333769826 -59.452116317344284,-34.65553408618826 -59.452297159537196,-34.65687289902558 -59.454616194716955,-34.65756417300476 -59.45410558146637,-34.659034204829965 -59.45836069188796,-34.659742960857365 -59.459562760582074,-34.65731916516545 -59.460818018156445,-34.657485420563965 -59.461690315792865,-34.65507905990768</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a8">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">FAVALORO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44453158301778,-34.673558117455556 -59.445797478368206,-34.675622756137486 -59.451307846364166,-34.673356899916406 -59.44999939990951,-34.67131845120006 -59.44453158301778,-34.673558117455556</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a7">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">GENDARMERIA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.432808753806306,-34.660722959206076 -59.43057482083497,-34.6611517048393 -59.43240451831625,-34.664774079394526 -59.4345427113031,-34.664109114290106 -59.432808753806306,-34.660722959206076</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a6">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">GUEMES</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44017009483566,-34.642801157940866 -59.438170192937505,-34.64308996767795 -59.43819146848961,-34.642879924332554 -59.439265883871066,-34.641409606017575 -59.44188277678036,-34.63625453410363 -59.44182958790009,-34.63614075131308 -59.441393439081864,-34.635974453107686 -59.43937226163162,-34.63571187631506 -59.436553250977305,-34.64322124449865 -59.43252153385284,-34.644218941543976 -59.43314916264003,-34.646450588844985 -59.44068070808625,-34.64511160767216 -59.44017009483566,-34.642801157940866</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a5">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">GENERAL PEÑALOZA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.430319514209685,-34.63614075131308 -59.43055354528286,-34.63199194911995 -59.429745074302744,-34.631081635647874 -59.429617420990105,-34.63053894401772 -59.42951104322957,-34.6300662742215 -59.42897915442687,-34.62985619789208 -59.42848981672837,-34.628735781817824 -59.42804303013411,-34.62887583465457 -59.427745172404606,-34.62845567543504 -59.426766497007634,-34.62779041898584 -59.42438363517155,-34.62707263630819 -59.42204332443967,-34.62663496089623 -59.42172419115807,-34.636158256367956 -59.42685159921609,-34.63596570056133 -59.42708563028927,-34.636053225983396 -59.430319514209685,-34.63614075131308</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a4">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">HIPOLITO YRIGOYEN</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.445677803387525,-34.652357600582576 -59.44637989660708,-34.65239260384208 -59.446241605518374,-34.652637626244754 -59.4465820143521,-34.652760137174496 -59.44565652783542,-34.653731467422766 -59.44679476987318,-34.654440268798666 -59.447571327525104,-34.654589028811735 -59.45167750908194,-34.65543783083713 -59.45204983124383,-34.65348644825344 -59.44703943872243,-34.65108872244613 -59.4457309922678,-34.65148251429116 -59.445677803387525,-34.652357600582576</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a3">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">HISTORICO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.431316805714694,-34.648857199989656 -59.42617875988065,-34.64983732705441 -59.42829567731538,-34.65717916036052 -59.43334862094099,-34.65633037616816 -59.431316805714694,-34.648857199989656</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a2">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">JOSE HERNANDEZ</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41715792578689,-34.65188505513257 -59.41499845724794,-34.651675034067885 -59.410860362362946,-34.651683784956205 -59.41093482679533,-34.65112372624145 -59.4106156935137,-34.65107997149501 -59.409594467012525,-34.650904952278275 -59.40940298704356,-34.651990065465384 -59.4095093648041,-34.65318892400269 -59.4095093648041,-34.65463278170593 -59.41075398460242,-34.65447527117871 -59.41223263547391,-34.65428275790563 -59.41492399281556,-34.65385397673583 -59.415136748336636,-34.65391523132445 -59.41627499037442,-34.653722716750615 -59.41746642129244,-34.65350394964669 -59.41715792578689,-34.65188505513257</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a1">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LA AMISTAD</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44681604542527,-34.64960104748276 -59.44235881725868,-34.6504586516031 -59.443816192578076,-34.65552533570632 -59.44473104131871,-34.65558658905979 -59.44444382136525,-34.654702786288624 -59.44441190803709,-34.654562777064115 -59.44613522775783,-34.6542215035886 -59.44553951229881,-34.65385397673583 -59.446564727965985,-34.65276451256151 -59.446237616352334,-34.65264200163823 -59.44636393994298,-34.652396979248465 -59.44566716561144,-34.65236197599082 -59.4457176950477,-34.65148907747272 -59.44581343503217,-34.65131187138799 -59.44704209816642,-34.65101433933202 -59.44681604542527,-34.64960104748276</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-41a0">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LA COLINA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45299659331261,-34.66116701714217 -59.44563525228328,-34.66088702029699 -59.44751813864482,-34.66382693998483 -59.45352848211531,-34.66306572078749 -59.45299659331261,-34.66116701714217</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-419f">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LA NUEVA AUSTRAL</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44689050985766,-34.66303072203556 -59.44393320811464,-34.66415067476533 -59.44511400125665,-34.66617180114613 -59.44595438556492,-34.665813076686035 -59.4460501255494,-34.66577589174463 -59.447119222042815,-34.66727858755723 -59.44901274618041,-34.66646927878863 -59.447406441996264,-34.664041305048535 -59.447433036436415,-34.66396255876306 -59.44689050985766,-34.66303072203556</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-419e">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LA PAMPITA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.37782474882742,-34.65309485361298 -59.3719261020055,-34.651882867415885 -59.37035171114952,-34.6532217392298 -59.37041021891782,-34.65333112322635 -59.37236225082372,-34.65360239491491 -59.37242607748005,-34.653549890786415 -59.373537725077675,-34.65371177840914 -59.373532406189646,-34.65414056031452 -59.378303448749854,-34.65411430842487 -59.37812260655693,-34.65377740843638 -59.37781411105137,-34.65319548704915 -59.37782474882742,-34.65309485361298</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-419d">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LAPENTA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42484371898587,-34.64558200384863 -59.417546204612854,-34.646942855898615 -59.417269622435434,-34.647012866975516 -59.4169079380496,-34.64736292147325 -59.416439875903244,-34.6470478724918 -59.4162164826061,-34.64709162936637 -59.415950538204754,-34.647205397132176 -59.41591862487659,-34.64702161835597 -59.41434423402062,-34.64749419152886 -59.41548247605838,-34.64769547187712 -59.41679092251302,-34.64797551328787 -59.41675900918486,-34.64830806123455 -59.41705686691438,-34.649896396842095 -59.42027479417071,-34.65011954899354 -59.4215566461852,-34.650220186041764 -59.42238107382937,-34.65035582708739 -59.42266829378284,-34.650307696419176 -59.42585962659902,-34.64968637073909 -59.42492882119429,-34.64604583374454 -59.42483308120982,-34.64563888878679 -59.42484371898587,-34.64558200384863</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-419c">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LAS ACACIAS</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.413876171874236,-34.64258892590188 -59.41101992900375,-34.64272457943269 -59.41097737789954,-34.644816241267044 -59.41444529289312,-34.64464120882683 -59.414541032877594,-34.644593074841005 -59.413876171874236,-34.64258892590188</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-419b">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LAS PALMAS</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41322726753493,-34.64771297449298 -59.411429483381816,-34.64700411559411 -59.410833767922796,-34.64688159615781 -59.40989764363004,-34.64644402526442 -59.4092381015147,-34.64607646392932 -59.407046719647575,-34.645490112712245 -59.40457875560307,-34.644877502533824 -59.40177038272483,-34.64424738448541 -59.4006002273589,-34.64398483388529 -59.39936624533663,-34.6437485376344 -59.39823864107492,-34.643555999450626 -59.39499411937847,-34.64327594311251 -59.39381332623646,-34.64323218422424 -59.39249424200578,-34.64319717709698 -59.39427075060679,-34.64801051839768 -59.39552600818115,-34.651248427142086 -59.39611108586412,-34.652097263376206 -59.39653659690627,-34.65235103746975 -59.39705784793291,-34.65235978828671 -59.39730251678216,-34.652202273440174 -59.4002491807491,-34.650749622413905 -59.40196186269379,-34.65032957399907 -59.40544041546343,-34.64990077238023 -59.40562125765635,-34.64990952345584 -59.41322726753493,-34.64771297449298</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-419a">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LOMAS DEL PACIFICO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45251257450213,-34.65889639045391 -59.449140399493025,-34.65842388228232 -59.4484063929453,-34.658336380473415 -59.4466937110006,-34.658187627186265 -59.445172509024914,-34.65804762384855 -59.445087406816484,-34.65829262953433 -59.44001318763875,-34.65932514553746 -59.44074719418646,-34.66212512418907 -59.44386406257026,-34.66124139114513 -59.4451725090249,-34.66083014582219 -59.44557674451496,-34.66083014582219 -59.45291680999219,-34.6610576434871 -59.45251257450213,-34.65889639045391</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4199">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LOPARDO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45493266855439,-34.659237644680154 -59.45261363337463,-34.65889639045391 -59.45279979445558,-34.65983702370152 -59.454826290793854,-34.66008639909758 -59.45493266855439,-34.659237644680154</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4198">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LOS ALAMOS</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.39623342028872,-34.65370740307211 -59.39259530087826,-34.65414493562862 -59.392680403086686,-34.65565002998526 -59.39357397627524,-34.65584254008265 -59.394318620598995,-34.655702532783444 -59.39772270893628,-34.6550899980686 -59.39623342028872,-34.65370740307211</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4197">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LOS DURAZNOS</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.4196950353757,-34.65978014850609 -59.41748769684448,-34.660042649082385 -59.414897398375366,-34.66016077407043 -59.41508887834434,-34.660488898153766 -59.41613138039762,-34.66090889508457 -59.41831212448868,-34.661937003588115 -59.42048754969173,-34.66070764682084 -59.4196950353757,-34.65978014850609</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4196">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LOS PARAISOS</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.460448355438324,-34.673831510067636 -59.44787450414254,-34.67867806449085 -59.45106583695873,-34.68261458766399 -59.452427472293635,-34.68480146411788 -59.45974626221876,-34.68263208290482 -59.45925692452029,-34.6795703594785 -59.461873817429556,-34.67913296117612 -59.460448355438324,-34.673831510067636</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4195">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">LOS ROBLES</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.421620472841425,-34.6362567222326 -59.4190142177082,-34.63640551487309 -59.41830148671259,-34.63632674233195 -59.417961077878864,-34.63896995784803 -59.41285494537298,-34.639232524326104 -59.4138655340981,-34.64233074598822 -59.41972694870382,-34.6421557083014 -59.41932271321376,-34.63876865631856 -59.42271616377497,-34.63855860202774 -59.42158855951325,-34.636440524867346 -59.421620472841425,-34.6362567222326</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4194">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">MALVINAS</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45171474129801,-34.64740667818151 -59.44999142157729,-34.647590456104176 -59.4501935393223,-34.64888564134 -59.44702348205824,-34.6494457151752 -59.44721496202719,-34.650968396786986 -59.45211897678807,-34.653348624652345 -59.45239555896547,-34.64975200395339 -59.45282107000764,-34.64966449298938 -59.45171474129801,-34.64740667818151</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4193">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">MARCHETTI</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45384229650883,-34.64377479280662 -59.450810530333435,-34.64429989450564 -59.45119349027137,-34.647152888951915 -59.451789205730414,-34.64720539713213 -59.45303382552873,-34.64981326157324 -59.45912927120762,-34.64841307609845 -59.456757047147605,-34.64661905389887 -59.456842149356035,-34.64653153962782 -59.45384229650883,-34.64377479280662</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4192">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">MITRE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.442481151683225,-34.656743831409536 -59.439662141028904,-34.656332563767435 -59.437896270203964,-34.65612255397157 -59.436747390390124,-34.65608755228718 -59.4335454197979,-34.656481320384195 -59.43423687524141,-34.65855513482244 -59.434641110731455,-34.66015639907388 -59.437864356875814,-34.659552647334046 -59.438843032272764,-34.65934264569782 -59.4394387477318,-34.65929889528995 -59.44290666272538,-34.65860763578027 -59.442481151683225,-34.656743831409536</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4191">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">MODELO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.43046046474226,-34.66116264219871 -59.42832227175542,-34.661565136027406 -59.42947115156923,-34.663568826212995 -59.4312955301625,-34.66289072687992 -59.43046046474226,-34.66116264219871</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4190">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">MUTTI</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45449651973614,-34.65770417715899 -59.45447524418402,-34.65762542485123 -59.452310456757054,-34.656947276882256 -59.45261895226261,-34.65882857694667 -59.454028457589764,-34.659007954490136 -59.45449651973614,-34.65770417715899</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-418f">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">NORTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44359811816882,-34.64467840325123 -59.4375771369223,-34.64576359793763 -59.438917496705095,-34.651031841247175 -59.44202372731286,-34.65045427609432 -59.44147056295805,-34.64837150773069 -59.44177905846361,-34.648310249045515 -59.44440658914893,-34.64806521385218 -59.44359811816882,-34.64467840325123</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-418e">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">NORTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.432407177760076,-34.64425832407567 -59.425056474506796,-34.645553561364885 -59.426120252112206,-34.64962292524908 -59.431407226811,-34.64860779080666 -59.43141786458707,-34.648730307692034 -59.43352414424576,-34.64831024904553 -59.432407177760076,-34.64425832407567</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-418d">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">OBRERO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41776959790983,-34.6550834351721 -59.41523780720898,-34.655700345167475 -59.41537077940966,-34.65659288767154 -59.415354822745584,-34.65669351686074 -59.41489739837527,-34.657362916618276 -59.41522185054492,-34.658216065335296 -59.41859402555402,-34.65760354919692 -59.41834403781674,-34.65669351686074 -59.41813128229567,-34.65595848344827 -59.41782278679009,-34.655275946585526 -59.41776959790983,-34.6550834351721</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-418c">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">OESTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.43748139693777,-34.64578110096137 -59.43319437318803,-34.646551230346844 -59.433715624214685,-34.64838025896775 -59.43142850236308,-34.64884407320919 -59.43236462665581,-34.6521169527733 -59.43881111894452,-34.65104934315869 -59.43748139693777,-34.64578110096137</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-418b">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">PAGO CHICO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.415652680475084,-34.64466089999476 -59.41099333456345,-34.64488844204094 -59.41087631902684,-34.646770015799305 -59.41107843677188,-34.64677876720541 -59.41311025199817,-34.64757514129283 -59.41413147849937,-34.64729509852971 -59.41418466737963,-34.647120071322405 -59.41586543599615,-34.646857529818654 -59.415652680475084,-34.64466089999476</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-418a">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">PARIS GIANINI</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.420492868579615,-34.66309853210398 -59.420280113058546,-34.663151030183386 -59.42012054641773,-34.66310728178619 -59.41682283584101,-34.663789754152 -59.41890783994759,-34.6666508271191 -59.42020564862618,-34.66834817539551 -59.422290652732755,-34.66750825482166 -59.42109922181471,-34.66504968836667 -59.420492868579615,-34.66309853210398</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4189">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">MEDALLA MILAGROSA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.424130987990075,-34.65910858074697 -59.419758862031905,-34.65977358598102 -59.42062052189228,-34.66075358396755 -59.42037585304302,-34.66085858306444 -59.41966312204742,-34.661278578121575 -59.418524880009656,-34.66192606633072 -59.41998225532904,-34.662652297086076 -59.420439679699356,-34.662827291497166 -59.42300338372836,-34.6623460559774 -59.426035149903726,-34.6617948191296 -59.4255138988771,-34.66011483659506 -59.424726703449096,-34.660228586487484 -59.424130987990075,-34.65910858074697</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4188">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">MOLINO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42748188744707,-34.65500468037412 -59.4253756077884,-34.655415954605346 -59.426141527664285,-34.65818981473651 -59.420673710772554,-34.659038579885596 -59.42069498632465,-34.659476084299136 -59.42422672797456,-34.65895107872572 -59.424801167881476,-34.66018483654735 -59.42560963886158,-34.6600098365558 -59.425875583262936,-34.66083233330269 -59.42619471654455,-34.66172482053732 -59.42924775827203,-34.66114732989487 -59.429194569391754,-34.66106858085908 -59.42748188744707,-34.65500468037412</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4187">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">PAYRO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44207691619308,-34.65053303521577 -59.436736752614,-34.65156564788592 -59.437853719099664,-34.65580972589309 -59.443151331574526,-34.65482091888777 -59.44207691619308,-34.65053303521577</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4186">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">BELGRANO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45968243556235,-34.657498545975805 -59.45843781576403,-34.65977358598102 -59.459065444551214,-34.66024608645706 -59.459586695577876,-34.662258558309865 -59.46183126632525,-34.6625298007784 -59.462022746294224,-34.66137482668901 -59.4661608411792,-34.6626785462713 -59.466309770043964,-34.66276604349532 -59.46623530561158,-34.6630722830518 -59.481053727654725,-34.66979176898571 -59.48254301630228,-34.66714953614822 -59.48154306535321,-34.66657208331375 -59.482840874031794,-34.66300228553868 -59.475224226377144,-34.66118232944231 -59.472054169113086,-34.66056983522786 -59.46806234364888,-34.659513272067755 -59.46715281379626,-34.66120420415196 -59.465509277395924,-34.66063108485304 -59.46402530763638,-34.660158586572166 -59.46469016863979,-34.65865794916698 -59.461562662479906,-34.657822305480316 -59.459754240550744,-34.65735854147401 -59.45968243556235,-34.657498545975805</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4185">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">RAVELLO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.46477527084819,-34.6586841996175 -59.4640838154047,-34.6601367115865 -59.466913463835034,-34.66109920549302 -59.46791341478411,-34.65951545958304 -59.46477527084819,-34.6586841996175</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4184">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SAN ANTONIO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41746908073629,-34.653591456557486 -59.41507558112416,-34.65400273780106 -59.41495856558756,-34.65401148844365 -59.409501386471874,-34.654825294165995 -59.409873708633775,-34.65705665596225 -59.417703111809466,-34.65495655240516 -59.41746908073629,-34.653591456557486</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4183">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SAN FRANCISCO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42566016829784,-34.662149186095554 -59.4205859491201,-34.66310290694519 -59.421117837922786,-34.6647828288996 -59.42222416663238,-34.66714516152066 -59.42238373327319,-34.667521378646114 -59.42110720014673,-34.66810757401807 -59.422479473257695,-34.67073227854842 -59.423745368608124,-34.670452314027365 -59.42888341444219,-34.66846628854323 -59.42566016829784,-34.662149186095554</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4182">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SAN JORGE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.406544084728864,-34.666515212741125 -59.4052888271545,-34.66600775051865 -59.402246423203074,-34.66574526883912 -59.400969890076595,-34.66649771409554 -59.399735908054346,-34.667320146442684 -59.39907636593899,-34.66903497911946 -59.399267845907964,-34.67060979418688 -59.40088478786816,-34.67484414844186 -59.40905459987761,-34.67111722821989 -59.406544084728864,-34.666515212741125</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4181">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SAN ALBERTO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.416724436412444,-34.66381600297685 -59.41124598174467,-34.66487469864918 -59.409224804294425,-34.66531217224982 -59.40827804222562,-34.66566214946721 -59.408044011152434,-34.66597712769887 -59.40819294001718,-34.66623523396825 -59.40874610437197,-34.666720821549866 -59.40962903978448,-34.66738139107806 -59.41191616163607,-34.6691924619734 -59.40904396210148,-34.6708722604541 -59.41038432188428,-34.67337439711287 -59.415362801077514,-34.67218457931579 -59.4158308632239,-34.672149584415955 -59.416618058651885,-34.67197460969507 -59.422341182168914,-34.67075852517373 -59.4210380546023,-34.668162256210636 -59.42013916252576,-34.66847722493728 -59.416724436412444,-34.66381600297685</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4180">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SAN JOSE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.430250368664986,-34.63625234597439 -59.42709094917698,-34.6361735732878 -59.42671862701508,-34.63612105812183 -59.42181461225423,-34.63623484093939 -59.42285711430751,-34.638632996316545 -59.42324007424545,-34.6418975270389 -59.42995251093548,-34.64066349702066 -59.430250368664986,-34.63625234597439</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-417f">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SAN JUSTO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.44564323061506,-34.64183626357048 -59.44036689369231,-34.6425889259018 -59.44096260915133,-34.64505691026897 -59.44365396649297,-34.64455806828822 -59.44389863534221,-34.64545948231075 -59.4463985127149,-34.645021903912095 -59.44600491500089,-34.64269394800957 -59.44580279725586,-34.6425889259018 -59.44564323061506,-34.64183626357048</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-417e">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SAN MARTIN</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45827558967911,-34.65981952364549 -59.45510553241504,-34.65925951990308 -59.454945965774236,-34.66021327401102 -59.45277585945923,-34.659942023959694 -59.45291415054792,-34.6603445237171 -59.45680757658367,-34.66261948559281 -59.45779688975668,-34.66102701883775 -59.45925426507607,-34.661202016681216 -59.45902023400289,-34.66033577374317 -59.45827558967911,-34.65981952364549</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-417d">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SANTA TERESITA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.416075532073116,-34.648067401669586 -59.415415989957765,-34.647839868347575 -59.414469227888965,-34.64775235536516 -59.41369267023701,-34.647909878667015 -59.41007582637869,-34.648960026364094 -59.409618402008356,-34.65086776064703 -59.41099067511932,-34.65114779134206 -59.4109693995672,-34.65153283200315 -59.41511813222825,-34.65160283920394 -59.417139309678504,-34.65186536568027 -59.41642657868289,-34.64844370540867 -59.416075532073116,-34.648067401669586</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-417c">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SEMINARIO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42819195899852,-34.66162200999768 -59.42583037271455,-34.66210324972247 -59.428016435693635,-34.66638178547516 -59.429048299970866,-34.66839410830625 -59.43318639485586,-34.666740507472866 -59.4313779729267,-34.662995723268736 -59.42942062213275,-34.66369569579447 -59.42819195899852,-34.66162200999768</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-417b">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">SOLDADO BALVIDARES</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.45194079403896,-34.655645654750494 -59.44678147265279,-34.65458684116631 -59.44637723716276,-34.65436807634308 -59.445877261688224,-34.65436807634308 -59.44457945300964,-34.65469184807636 -59.44494113739547,-34.65568940708694 -59.44473901965045,-34.65567190615514 -59.44359013983662,-34.655575650964145 -59.443802895357706,-34.65652069709094 -59.44580279725583,-34.6568007086887 -59.44737718811184,-34.65736072904612 -59.44900476784808,-34.658288254439064 -59.45081318977725,-34.658533259413446 -59.45194079403896,-34.655645654750494</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-417a">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">TRES AVENIDAS</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.43402677916413,-34.65856388498431 -59.429016386642715,-34.659430146444166 -59.429447216572896,-34.66105764348703 -59.42945785434894,-34.66112764264289 -59.434446971318245,-34.66014764908001 -59.43402677916413,-34.65861638593661 -59.43402677916413,-34.65856388498431</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4179">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">3 DE OCTUBRE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41186829164375,-34.66023077398382 -59.413261840306824,-34.662435740990645 -59.41375117800528,-34.66218199777496 -59.415059624459914,-34.66396693355856 -59.420091292533435,-34.66297822387982 -59.42007001698134,-34.66287322746877 -59.41596383542451,-34.66105326853782 -59.415123451116244,-34.660615772450925 -59.41454901120933,-34.66045827329421 -59.41362352469265,-34.66036202366218 -59.41186829164375,-34.66023077398382</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4178">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">TROCHA</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.43001633759177,-34.640751017485094 -59.423250712021456,-34.641985046200965 -59.423442191990446,-34.64440929027433 -59.429846133174905,-34.64327156722464 -59.43001633759177,-34.640751017485094</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4177">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">UNIDAD Y PROGRESO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.450717449792734,-34.64434802866162 -59.44387735979005,-34.64554699771336 -59.444515626353294,-34.648189919353534 -59.44182426901165,-34.6484349541783 -59.44230296893407,-34.65036020260118 -59.446962314845706,-34.64941508623508 -59.45011109655767,-34.648881265748216 -59.44986642770843,-34.647402302511665 -59.45103658307436,-34.64729728636742 -59.450717449792734,-34.64434802866162</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4176">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">UNION</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.420197670293945,-34.65024643916457 -59.417112715238304,-34.649931401140734 -59.41777225735364,-34.65342300567177 -59.4210380546022,-34.652889210993756 -59.420197670293945,-34.65024643916457</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4175">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">VILLA ASUNCION</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.41166617389867,-34.66018702404482 -59.40401761291589,-34.658699512376394 -59.40190069548115,-34.65909326806353 -59.40336870857659,-34.661193266797795 -59.403496361889225,-34.661333264821245 -59.404740981687546,-34.6631969659755 -59.40527287049026,-34.66492063348575 -59.40621963255905,-34.66562933916583 -59.40800677893612,-34.665366856287456 -59.414995797803556,-34.663949434374736 -59.41379372910947,-34.66226074575262 -59.41314482477018,-34.66252323847104 -59.41166617389867,-34.66018702404482</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4174">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">VILLA DEL PARQUE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.4392818405347,-34.63575345102909 -59.43879250283623,-34.63542085273185 -59.438281889585646,-34.6351845320786 -59.435899027749564,-34.63443180254721 -59.434090605820394,-34.63320641428031 -59.4321226172504,-34.63156086441782 -59.4310375640929,-34.63031792745731 -59.43027164421701,-34.62986276278528 -59.429824857622734,-34.62986276278528 -59.4299525109354,-34.63107069431928 -59.4305269508423,-34.63160462946436 -59.43070779303523,-34.631954749005395 -59.43070779303523,-34.63250618428606 -59.43049503751416,-34.63515827418667 -59.43002697536778,-34.64169623261554 -59.429920597607236,-34.64336783670259 -59.43022909311279,-34.64435678032331 -59.433069379319214,-34.64384918241607 -59.436303263239616,-34.643254063671144 -59.43760107191817,-34.639998338472246 -59.4392818405347,-34.63575345102909</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4173">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">VILLA DEL PARQUE OESTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.42895255998633,-34.66854284327122 -59.42379323860016,-34.67052886692001 -59.41674039307638,-34.671998668741054 -59.42010193030944,-34.67415958001111 -59.42225076107233,-34.67568180754577 -59.42825046676676,-34.67918107510238 -59.43111202852528,-34.6807731928972 -59.432005601713804,-34.681577988046605 -59.43263323050099,-34.68194539192727 -59.43309065487131,-34.683196302439434 -59.43371828365849,-34.68431598253321 -59.43449484131044,-34.68400982151168 -59.43694152980285,-34.68441220433473 -59.42895255998633,-34.66854284327122</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4172">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">VILLA INDUSTRIAL ESTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.43293640711857,-34.66066389713353 -59.43474482904773,-34.664141925193164 -59.43242579386798,-34.66485063753407 -59.433712964770486,-34.667615432660455 -59.439600973816354,-34.66617180114601 -59.43772340634284,-34.663135718246906 -59.436962805354966,-34.660782021236024 -59.43598944884603,-34.66010389909711 -59.43293640711857,-34.66066389713353</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4171">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">VILLA INDUSTRIAL OESTE</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.43990415043388,-34.659364520892986 -59.43673409316981,-34.65997702401617 -59.43665962873743,-34.66006452409276 -59.436946848690894,-34.66034452371706 -59.437340446404875,-34.66073827158806 -59.438191468489215,-34.662899476583995 -59.43936162385515,-34.665331858507486 -59.44206361897285,-34.66434316511613 -59.44096792803929,-34.662199497332004 -59.440659432533735,-34.66231324436282 -59.43990415043388,-34.659364520892986</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="mercedes_barrios.fid--63cb8e4b_19813368e0d_-4170">
+                <ExtendedData>
+                    <SchemaData schemaUrl="#mercedes_barrios_1">
+                        <SimpleData name="barrio">VIRGEN DEL ROSARIO</SimpleData>
+                    </SchemaData>
+                </ExtendedData>
+                <Polygon>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <tessellate>1</tessellate>
+                            <coordinates>-59.425255932807616,-34.65542689272184 -59.41860732277388,-34.65668695409118 -59.41916048712867,-34.658577010225464 -59.41959663594691,-34.65966202297538 -59.420665732440334,-34.659500146974786 -59.42054339801571,-34.659001391903836 -59.426059084899684,-34.65803449852341 -59.425255932807616,-34.65542689272184</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+        </Folder>
+    </Document>
+</kml>

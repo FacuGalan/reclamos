@@ -385,11 +385,14 @@
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($historial as $hist)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ \Carbon\Carbon::parse($hist->fecha)->format('d/m/Y') }}
-                                </div>
-                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                {{ \Carbon\Carbon::parse($hist->fecha)->format('d/m/Y') }}
+                                                            </div>
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                                {{ \Carbon\Carbon::parse($hist->created_at)->format('H:i') }}
+                                                            </div>
+                                                        </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
                                     {{ $hist->usuario->name }}
@@ -501,8 +504,10 @@
                                 @foreach($areas as $area)
                                     @if($area->id == $reclamo->area_id)
                                         <option value="{{ $area->id }}" selected disabled>{{ $area->nombre }} (Actual)</option>
+                                    @else
+                                        <option value="{{ $area->id }}">{{ $area->nombre }}</option> 
                                     @endif
-                                    <option value="{{ $area->id }}">{{ $area->nombre }}</option>
+                                    
                                 @endforeach
                             </select>
                             @error('nuevaArea') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror

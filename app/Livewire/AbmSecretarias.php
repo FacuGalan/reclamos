@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Secretaria;
+use Illuminate\Validation\ValidationException;
 
 class AbmSecretarias extends Component
 {
@@ -34,14 +35,36 @@ class AbmSecretarias extends Component
         'busqueda' => ['except' => ''],
     ];
 
-    protected $rules = [
-        'nombre' => 'required|string|max:255|unique:secretarias,nombre',
-    ];
+    // Reglas dinámicas basadas en el estado
+    protected function rules()
+    {
+        return [
+            'nombre' => $this->isEditing 
+                ? 'required|string|max:255|unique:secretarias,nombre,' . $this->selectedSecretariaId
+                : 'required|string|max:255|unique:secretarias,nombre',
+        ];
+    }
 
     protected $messages = [
         'nombre.required' => 'El nombre de la secretaría es obligatorio',
         'nombre.unique' => 'Ya existe una secretaría con este nombre',
+        'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
     ];
+
+    // NUEVO: Validación en tiempo real MÁS AGRESIVA
+    public function updated($propertyName)
+    {
+        // Validar inmediatamente cuando cambie el nombre
+        if ($propertyName === 'nombre') {
+            $this->validateOnly($propertyName);
+        }
+    }
+
+    // NUEVO: Validación cuando el campo pierde el foco
+    public function updatedNombre()
+    {
+        $this->validateOnly('nombre');
+    }
 
     public function placeholder()
     {
@@ -112,7 +135,7 @@ class AbmSecretarias extends Component
     {
         $this->nombre = '';
         $this->isSaving = false;
-        $this->resetErrorBag();
+        $this->resetErrorBag(); // Solo se resetea cuando se cierra el modal
     }
 
     public function confirmarEliminacion($secretariaId)
@@ -155,11 +178,7 @@ class AbmSecretarias extends Component
         $this->isSaving = true;
 
         try {
-            if ($this->isEditing) {
-                // Actualizar reglas para edición
-                $this->rules['nombre'] = 'required|string|max:255|unique:secretarias,nombre,' . $this->selectedSecretariaId;
-            }
-
+            // Validar usando las reglas dinámicas
             $this->validate();
 
             if (!$this->isEditing) {
@@ -180,6 +199,11 @@ class AbmSecretarias extends Component
             $this->mostrarNotificacionExito($mensaje);
             $this->cerrarModal();
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // CLAVE: NO hagas return aquí, vuelve a lanzar la excepción
+            $this->isSaving = false;
+            throw $e; // ← ESTO es lo que faltaba
+            
         } catch (\Exception $e) {
             $this->mostrarNotificacionError('Error al guardar la secretaría: ' . $e->getMessage());
         }

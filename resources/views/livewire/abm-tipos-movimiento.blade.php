@@ -233,6 +233,7 @@
                     </h2>
                     <button 
                         wire:click="cerrarModal"
+                        type="button"
                         class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -240,67 +241,120 @@
                     </button>
                 </div>
 
-                <form wire:submit.prevent="save" class="space-y-4">
-                    <!-- Nombre -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Nombre del Tipo de Movimiento *
-                        </label>
-                        <input 
-                            type="text" 
-                            wire:model="nombre"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
-                            placeholder="Ingrese el nombre del tipo de movimiento">
-                        @error('nombre') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                <!-- CLAVE: wire:key único para forzar re-renderización -->
+                <div wire:key="form-tipos-{{ $showFormModal ? 'open' : 'closed' }}-{{ $isEditing ? 'edit' : 'create' }}">
+                    <form wire:submit.prevent="save" class="space-y-4">
+                        <!-- Nombre -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Nombre del Tipo de Movimiento *
+                            </label>
+                            <input 
+                                type="text" 
+                                wire:model.live="nombre"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white
+                                    @error('nombre') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"
+                                placeholder="Ingrese el nombre del tipo de movimiento"
+                                autofocus>
+                            
+                            @error('nombre') 
+                                <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                                    <span class="text-red-600 text-sm font-medium flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $message }}
+                                    </span>
+                                </div>
+                            @enderror
+                        </div>
 
-                    <!-- Área -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Área *
-                        </label>
-                        <select 
-                            wire:model="area_id"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
-                            <option value="">Seleccione un área</option>
-                            @foreach($areas as $area)
-                                <option value="{{ $area->id }}">{{ $area->nombre }}</option>
-                            @endforeach
-                        </select>
-                        @error('area_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <!-- Botones -->
-                    <div class="flex justify-end space-x-3 pt-4">
-                        <button 
-                            type="button"
-                            wire:click="cerrarModal"
-                            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer">
-                            Cancelar
-                        </button>
+                        <!-- Área -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Área *
+                            </label>
+                            <select 
+                                wire:model.live="area_id"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white
+                                    @error('area_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                <option value="">Seleccione un área</option>
+                                @foreach($areas as $area)
+                                    <option value="{{ $area->id }}">{{ $area->nombre }}</option>
+                                @endforeach
+                            </select>
+                            
+                            @error('area_id') 
+                                <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                                    <span class="text-red-600 text-sm font-medium flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $message }}
+                                    </span>
+                                </div>
+                            @enderror
+                        </div>
                         
-                        <button 
-                            type="submit"
-                            wire:loading.attr="disabled"
-                            wire:target="save"
-                            class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer relative">
+                        <!-- Estado al que pasa-->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Estado *
+                            </label>
+                            <select 
+                                wire:model.live="estado_id"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white
+                                    @error('estado_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                @foreach($estados as $estado)
+                                    <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
+                                @endforeach
+                            </select>
                             
-                            <!-- Estado normal -->
-                            <span wire:loading.remove wire:target="save">
-                                {{ $isEditing ? 'Actualizar' : 'Crear' }}
-                            </span>
+                            @error('estado_id') 
+                                <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                                    <span class="text-red-600 text-sm font-medium flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $message }}
+                                    </span>
+                                </div>
+                            @enderror
+                        </div>
+
+
+                        <!-- Botones -->
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button 
+                                type="button"
+                                wire:click="cerrarModal"
+                                class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                                Cancelar
+                            </button>
                             
-                            <!-- Estado guardando -->
-                            <span wire:loading wire:target="save" class="flex items-center">
-                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Guardando...
-                            </span>
-                        </button>
-                    </div>
-                </form>
+                            <button 
+                                type="submit"
+                                wire:loading.attr="disabled"
+                                wire:target="save"
+                                class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors relative">
+                                
+                                <!-- Estado normal -->
+                                <span wire:loading.remove wire:target="save">
+                                    {{ $isEditing ? 'Actualizar' : 'Crear' }}
+                                </span>
+                                
+                                <!-- Estado guardando -->
+                                <span wire:loading wire:target="save" class="flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Guardando...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     @endif

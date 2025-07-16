@@ -10,6 +10,7 @@ use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\Domicilios;
 use App\Models\Movimiento;
+use App\Models\Barrio;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -75,6 +76,8 @@ class AltaReclamo extends Component
     public $latitud = null;
     public $longitud = null;
     public $direccionCompleta = '';
+
+    public $barrio_encontrado;
 
     // Agregar esta propiedad a tu clase
     protected $listeners = [
@@ -418,6 +421,40 @@ class AltaReclamo extends Component
         ]);
     }
 
+    public function obtenerBarrioPorCoordenadas($coordenadas)
+{
+    if (empty($coordenadas)) {
+        return null;
+    }
+    
+    $coords = explode(',', $coordenadas);
+    if (count($coords) != 2) {
+        return null;
+    }
+    
+    $lat = trim($coords[0]);
+    $lng = trim($coords[1]);
+    
+    if (!is_numeric($lat) || !is_numeric($lng)) {
+        return null;
+    }
+    
+    // Construir el punto directamente en la consulta
+    $punto = "POINT({$lng} {$lat})";
+    
+    $barrio = DB::selectOne("
+        SELECT id 
+        FROM barrios 
+        WHERE ST_Contains(
+            ST_GeomFromText(poligono, 4326),
+            ST_GeomFromText(?, 4326)
+        )
+        LIMIT 1
+    ", [$punto]);
+    
+    return $barrio ? $barrio->id : null;
+}
+
     public function save()
     {
         // Activar estado de guardado
@@ -425,6 +462,8 @@ class AltaReclamo extends Component
 
         try {
             DB::beginTransaction();
+            
+            $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);
 
             // Buscar o crear la persona
             $persona = Persona::where('dni', $this->persona_dni)->first();
@@ -455,6 +494,7 @@ class AltaReclamo extends Component
                     'direccion' => $this->direccion,
                     'entre_calles' => $this->entre_calles,
                     'coordenadas' => $this->coordenadas,
+                    'barrio_id' => $barrio_encontrado
                 ]);
             }
 
@@ -482,6 +522,7 @@ class AltaReclamo extends Component
                 'estado_id' => $estadoInicial->id,
                 'persona_id' => $persona->id,
                 'domicilio_id' => $domicilio->id,
+                'barrio_id' => $barrio_encontrado,
                 'usuario_id' => Auth::id() ?? 1,
                 'responsable_id' => null //Auth::id() ?? 1,
             ]);
@@ -499,17 +540,17 @@ class AltaReclamo extends Component
                 $this->dispatch('reclamo-creado-exitoso');
                 
                 // Volver al ABM con un mensaje de éxito que se mostrará allí
-                // session()->flash('reclamo_creado', 'Reclamo creado exitosamente');
+                //session()->flash('reclamo_creado', 'Reclamo creado exitosamente');
 
-                
-                // Área privada: emitir evento con información de redirección
-                $this->isSaving = false;
-                
                 // Emitir evento que manejará el toast y la redirección
                 $this->dispatch('reclamo-guardado-con-redirect', [
                     'mensaje' => 'Reclamo creado exitosamente',
                     'redirect_url' => route('reclamos')
                 ]);
+                
+                // Área privada: emitir evento con información de redirección
+                $this->isSaving = false;
+                
                 
             } else {
                 // Área pública: mostrar notificación completa y redirigir al home

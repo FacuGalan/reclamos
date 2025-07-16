@@ -34,7 +34,7 @@ class AbmTiposMovimiento extends Component
     // Datos del formulario
     public $nombre = '';
     public $area_id = '';
-    public $estado_id = '';
+    public $estado_id = 2;
 
     // Estado de guardado
     public $isSaving = false;
@@ -49,17 +49,36 @@ class AbmTiposMovimiento extends Component
         'filtro_estado' => ['except' => ''],
     ];
 
-    protected $rules = [
-        'nombre' => 'required|string|max:255|unique:tipo_movimientos,nombre',
-        'area_id' => 'required|exists:areas,id',
-    ];
+    // SOLUCIÓN: Usar método rules() en lugar de propiedad estática
+    protected function rules()
+    {
+        return [
+            'nombre' => $this->isEditing 
+                ? 'required|string|max:255|unique:tipo_movimientos,nombre,' . $this->selectedTipoMovimientoId
+                : 'required|string|max:255|unique:tipo_movimientos,nombre',
+            'area_id' => 'required|exists:areas,id',
+            'estado_id' => 'required|exists:estados,id',
+        ];
+    }
 
     protected $messages = [
         'nombre.required' => 'El nombre del tipo de movimiento es obligatorio',
         'nombre.unique' => 'Ya existe un tipo de movimiento con este nombre',
+        'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
         'area_id.required' => 'Debe seleccionar un área',
         'area_id.exists' => 'El área seleccionada no es válida',
+        'estado_id.required' => 'Debe seleccionar un estado',
+        'estado_id.exists' => 'El estado seleccionado no es válido',
     ];
+
+    // NUEVO: Validación en tiempo real
+    public function updated($propertyName)
+    {
+        // Validar cuando cambie el nombre, area_id o estado_id
+        if (in_array($propertyName, ['nombre', 'area_id', 'estado_id'])) {
+            $this->validateOnly($propertyName);
+        }
+    }
 
     public function mount()
     {
@@ -73,7 +92,10 @@ class AbmTiposMovimiento extends Component
 
         // Cargar datos filtrados por las áreas del usuario
         $this->areas = Area::whereIn('id', $this->userAreas)->orderBy('nombre')->get();
-        $this->estados = Estado::orderBy('nombre')->get();
+        $this->estados = Estado::where('id', 2)
+                                ->orWhere('id', '>', 5)
+                                ->orderBy('id')
+                                ->get();
 
         $this->listaTimestamp = microtime(true);
     }
@@ -175,7 +197,7 @@ class AbmTiposMovimiento extends Component
     {
         $this->nombre = '';
         $this->area_id = '';
-        $this->estado_id = '';
+        $this->estado_id = 2;
         $this->isSaving = false;
         $this->resetErrorBag();
     }
@@ -225,25 +247,22 @@ class AbmTiposMovimiento extends Component
         $this->isSaving = true;
 
         try {
-            // Verificar que el área seleccionada esté dentro de las áreas permitidas del usuario
+            // PASO 1: Validar campos PRIMERO
+            $this->validate();
+
+            // PASO 2: Verificar permisos DESPUÉS de la validación de campos
             if (!in_array($this->area_id, $this->userAreas)) {
                 $this->mostrarNotificacionError('No tienes permisos para crear tipos de movimiento en el área seleccionada.');
                 $this->isSaving = false;
                 return;
             }
 
-            if ($this->isEditing) {
-                // Actualizar reglas para edición
-                $this->rules['nombre'] = 'required|string|max:255|unique:tipo_movimientos,nombre,' . $this->selectedTipoMovimientoId;
-            }
-
-            $this->validate();
-
+            // PASO 3: Lógica de guardado
             if (!$this->isEditing) {
                 TipoMovimiento::create([
                     'nombre' => $this->nombre,
                     'area_id' => $this->area_id,
-                    'estado_id' => 2 //$this->estado_id,
+                    'estado_id' => $this->estado_id
                 ]);
                 
                 $mensaje = 'Tipo de movimiento creado exitosamente';
@@ -260,7 +279,7 @@ class AbmTiposMovimiento extends Component
                 $tipoMovimiento->update([
                     'nombre' => $this->nombre,
                     'area_id' => $this->area_id,
-                    'estado_id' => 2 //$this->estado_id,
+                    'estado_id' => $this->estado_id,
                 ]);
                 
                 $mensaje = 'Tipo de movimiento actualizado exitosamente';
@@ -269,6 +288,11 @@ class AbmTiposMovimiento extends Component
             $this->mostrarNotificacionExito($mensaje);
             $this->cerrarModal();
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // CRÍTICO: Re-lanzar la excepción para que se muestren los errores
+            $this->isSaving = false;
+            throw $e;
+            
         } catch (\Exception $e) {
             $this->mostrarNotificacionError('Error al guardar el tipo de movimiento: ' . $e->getMessage());
         }

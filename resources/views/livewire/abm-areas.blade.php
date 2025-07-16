@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto p-6 pt-0 space-y-6">
 
-    <!-- Notificación flotante -->
+     <!-- Notificación flotante -->
     @if($mostrarNotificacion)
         <div 
             x-data="{ visible: true }"
@@ -209,9 +209,11 @@
                         <input 
                             type="text" 
                             wire:model="nombre"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white @error('nombre') border-red-500 @enderror"
                             placeholder="Ingrese el nombre del área">
-                        @error('nombre') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @error('nombre') 
+                            <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                        @enderror
                     </div>
 
                     <!-- Secretaría -->
@@ -221,13 +223,15 @@
                         </label>
                         <select 
                             wire:model="secretaria_id"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white @error('secretaria_id') border-red-500 @enderror">
                             <option value="">Seleccione una secretaría</option>
                             @foreach($secretarias as $secretaria)
                                 <option value="{{ $secretaria->id }}">{{ $secretaria->nombre }}</option>
                             @endforeach
                         </select>
-                        @error('secretaria_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @error('secretaria_id') 
+                            <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                        @enderror
                     </div>
 
                     <!-- Botones -->

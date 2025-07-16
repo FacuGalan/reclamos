@@ -178,23 +178,27 @@
     </div>
 
     <!-- Modal de Formulario (Crear/Editar) -->
-    @if($showFormModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
-                        {{ $isEditing ? 'Editar Secretaría' : 'Nueva Secretaría' }}
-                    </h2>
-                    <button 
-                        wire:click="cerrarModal"
-                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
+@if($showFormModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
+                    {{ $isEditing ? 'Editar Secretaría' : 'Nueva Secretaría' }}
+                </h2>
+                <button 
+                    wire:click="cerrarModal"
+                    type="button"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
 
+            <!-- CLAVE: Agregar wire:key único para forzar re-renderización -->
+            <div wire:key="form-{{ $showFormModal ? 'open' : 'closed' }}-{{ $isEditing ? 'edit' : 'create' }}">
                 <form wire:submit.prevent="save" class="space-y-4">
+                    
                     <!-- Nombre -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -202,10 +206,25 @@
                         </label>
                         <input 
                             type="text" 
-                            wire:model="nombre"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
-                            placeholder="Ingrese el nombre de la secretaría">
-                        @error('nombre') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            wire:model.live="nombre"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white
+                                @error('nombre') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"
+                            placeholder="Ingrese el nombre de la secretaría"
+                            autofocus>
+                        
+                        <!-- MENSAJE DE ERROR MÁS VISIBLE -->
+                        @error('nombre') 
+                            <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                                <span class="text-red-600 text-sm font-medium flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    {{ $message }}
+                                </span>
+                            </div>
+                        @enderror
+
+                        
                     </div>
 
                     <!-- Botones -->
@@ -213,7 +232,7 @@
                         <button 
                             type="button"
                             wire:click="cerrarModal"
-                            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer">
+                            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
                             Cancelar
                         </button>
                         
@@ -221,7 +240,7 @@
                             type="submit"
                             wire:loading.attr="disabled"
                             wire:target="save"
-                            class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer relative">
+                            class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors relative">
                             
                             <!-- Estado normal -->
                             <span wire:loading.remove wire:target="save">
@@ -241,7 +260,8 @@
                 </form>
             </div>
         </div>
-    @endif
+    </div>
+@endif
 
     <!-- Modal de confirmación para eliminar -->
     @if($showDeleteModal)
