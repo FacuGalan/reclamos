@@ -1,6 +1,5 @@
 <div class="max-w-7xl mx-auto p-6 pt-0 space-y-6">
 
-   
     @if($currentView === 'list')
         <!-- Vista de Lista de Reclamos -->
         
@@ -18,56 +17,78 @@
                 </p>
             </div>
             <!-- Dropdown Container -->
-            <div class="relative group">
-                <!-- Botón Principal -->
-                <button class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-                    Nuevo Reclamo
-                    <!-- Flecha del dropdown -->
-                    <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
+            @if(Auth::user()->rol->lReclamosAlta)
+                @if(Auth::user()->ver_privada)
+                    <div class="relative group">
+                        <!-- Botón Principal -->
+                        <button 
+                            href="{{ route('reclamos.create') }}"
+                            wire:navigate
+                            class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
+                            Nuevo Reclamo
+                            <!-- Flecha del dropdown -->
+                            <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
 
-                <!-- Dropdown Menu -->
-                <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform scale-95 group-hover:scale-100">
-                    
-                    <!-- Opción 1: Reclamo Normal -->
-                    <a 
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform scale-95 group-hover:scale-100">
+                            
+                            <!-- Opción 1: Reclamo Normal -->
+                            <a 
+                                href="{{ route('reclamos.create') }}"
+                                wire:navigate
+                                class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-t-lg cursor-pointer">
+                                <svg class="w-5 h-5 text-[#77BF43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span class="font-medium">Reclamo</span>
+                            </a>
+                            
+                            <!-- Separador -->
+                            <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+                            <!-- Opción 2: Reclamo Privado -->
+                            <a 
+                                href="{{ route('reclamos.create.interno') }}"
+                                wire:navigate
+                                class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-b-lg cursor-pointer">
+                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                <span class="font-medium">Reclamo Interno</span>
+                            </a>
+                        </div>
+                    </div>
+                @else
+                    <button 
                         href="{{ route('reclamos.create') }}"
                         wire:navigate
-                        class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-t-lg cursor-pointer">
-                        <svg class="w-5 h-5 text-[#77BF43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <span class="font-medium">Reclamo</span>
-                    </a>
-                    
-                    <!-- Separador -->
-                    <div class="border-t border-gray-200 dark:border-gray-700"></div>
+                        class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
+                        Nuevo Reclamo
+                    </button>
 
-                    <!-- Opción 2: Reclamo Privado -->
-                    <a 
-                        href="{{ route('reclamos.create.interno') }}"
-                        wire:navigate
-                        class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-b-lg cursor-pointer">
-                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        <span class="font-medium">Reclamo Interno</span>
-                    </a>
-                </div>
-            </div>
+                @endif
+            @endif
         </div>
 
         <!-- Filtros -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
-                <button 
-                    wire:click="limpiarFiltros"
-                    class="px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer">
-                    Limpiar Filtros
-                </button>
+                <div class="flex flex-col md:flex-row  items-center gap-2">
+                    <button 
+                        wire:click="exportarExcel"
+                        class="px-4 py-2 bg-[#217346] hover:bg-[#2e8b5c] text-white rounded-lg transition-colors cursor-pointer">
+                        Exportar Excel
+                    </button>
+                    <button 
+                        wire:click="limpiarFiltros"
+                        class="px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer">
+                        Limpiar Filtros
+                    </button>
+                </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -83,13 +104,26 @@
                 </div>
 
                 <!-- Búsqueda general -->
-                <div class="lg:col-span-2">
+                <div >
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Búsqueda</label>
                     <input 
                         type="text" 
                         wire:model.live.debounce.300ms="busqueda"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                         placeholder="Buscar por descripción, dirección, DNI o nombre...">
+                </div>
+
+                <!-- Filtro por barrio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
+                    <select 
+                        wire:model.live="filtro_barrio"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        <option value="">Todos los barrios</option>
+                        @foreach($barrios as $barrio)
+                            <option value="{{ $barrio->id }}">{{ $barrio->nombre }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <!-- Filtro por estado -->
@@ -169,26 +203,29 @@
                 </div>
             @endif
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <div class=" overflow-x-auto">
+                <table class="w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 ID / Fecha
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Solicitante
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-28 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Categoría
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Dirección
+                            </th>
+                            <th class="w-64 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Descripción
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-20 px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Estado
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-20 px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Acciones
                             </th>
                         </tr>
@@ -202,36 +239,44 @@
                                     }} 
                                     transition-colors
                                 ">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white truncate">
                                         #{{ $reclamo->id }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
                                         {{ \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y') }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white truncate" title="{{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}">
                                         {{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
                                         DNI: {{ $reclamo->persona->dni }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900 dark:text-white">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900 dark:text-white truncate" title="{{ $reclamo->categoria->nombre }}">
                                         {{ $reclamo->categoria->nombre }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ $reclamo->area->nombre }}">
                                         {{ $reclamo->area->nombre }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                                        {{ $reclamo->descripcion }}
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ Str::before($reclamo->direccion, ',') }}">
+                                        {{ Str::before($reclamo->direccion, ',') }}
+                                        @if($reclamo->barrio_id > 0)
+                                            <br>
+                                            <span class="truncate block" title="Barrio: {{ $reclamo->barrio->nombre}}">
+                                                Barrio: {{ $reclamo->barrio->nombre}}
+                                            </span>
+                                        @endif
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $reclamo->direccion }}
+                                </td>
+                                <td class="px-6 py-4 w-[200px]">
+                                   <div class="text-sm text-gray-900 dark:text-white truncate" style="max-width: 100px;" title="{{ $reclamo->descripcion }}">
+                                        {{ $reclamo->descripcion }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -243,27 +288,31 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center align-center space-x-2 justify-center">
-                       
+                    
                                         @if(($reclamo->estado_id < 4 || $reclamo->estado_id > 5) && Auth::user()->rol_id != 5 )
                                             <!-- Editar -->
-                                            <button 
-                                                wire:click="editarReclamo({{ $reclamo->id}},true)"
-                                                class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
-                                                title="Editar">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                            </button>
+                                            @if(Auth::user()->rol->lReclamosModifica)
+                                                <button 
+                                                    wire:click="editarReclamo({{ $reclamo->id}},true)"
+                                                    class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
+                                                    title="Editar">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                    </svg>
+                                                </button>
+                                            @endif
 
                                             <!-- Eliminar -->
-                                            <button 
-                                                wire:click="confirmarEliminacion({{ $reclamo->id }})"
-                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                                title="Eliminar">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                </svg>
-                                            </button>
+                                            @if(Auth::user()->rol->lReclamosBaja)
+                                                <button 
+                                                    wire:click="confirmarEliminacion({{ $reclamo->id }})"
+                                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                    title="Eliminar">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            @endif
                                         @else
 
                                             <button 
@@ -281,7 +330,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
+                                <td colspan="7" class="px-6 py-12 text-center">
                                     <div class="text-gray-500 dark:text-gray-400">
                                         <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>

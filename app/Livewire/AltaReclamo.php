@@ -43,6 +43,10 @@ class AltaReclamo extends Component
     public $persona_apellido = '';
     public $persona_telefono = '';
     public $persona_email = '';
+    public $persona_domicilios = []; // Domicilios de la persona
+
+    public $mostrar_inputs_direccion = true;
+    public $domicilio_id = null; // ID del domicilio seleccionado
     
     // Control de flujo
     public $step = 1; // 1: datos persona, 2: datos reclamo, 3: confirmación
@@ -78,6 +82,7 @@ class AltaReclamo extends Component
     public $direccionCompleta = '';
 
     public $barrio_encontrado;
+    
 
     // Agregar esta propiedad a tu clase
     protected $listeners = [
@@ -85,27 +90,29 @@ class AltaReclamo extends Component
     ];
 
     protected $rules = [
-        'persona_dni' => 'required|numeric|digits_between:7,11',
+        'persona_dni' => 'required|numeric|digits:8',
         'persona_nombre' => 'required|string|max:255',
         'persona_apellido' => 'required|string|max:255',
         'persona_telefono' => 'required|numeric|digits_between:10,15',
         'persona_email' => 'nullable|email|max:255',
-        'descripcion' => 'required|string|max:1000',
-        'direccion' => 'nullable|string|max:255',
+        'descripcion' => 'nullable|string|max:1000',
+        'direccion' => 'required|string|max:255',
         'entre_calles' => 'nullable|string|max:255',
-        'coordenadas' => 'nullable|string',
+        'coordenadas' => 'required|string',
         'categoria_id' => 'required|exists:categorias,id',
     ];
 
     protected $messages = [
-        'persona_dni.required' => 'El DNI es obligatorio pone uno bueno',
+        'persona_dni.required' => 'El DNI es obligatorio',
         'persona_dni.numeric' => 'El DNI debe contener solo números',
-        'persona_dni.digits_between' => 'El DNI debe tener entre 7 y 11 dígitos',
+        'persona_dni.digits_between' => 'El DNI debe tener 8 dígitos',
         'persona_nombre.required' => 'El nombre es obligatorio',
         'persona_apellido.required' => 'El apellido es obligatorio',
-        'persona_telefono.digits_between' => 'El teléfono debe tener entre 10 y 15 dígitos',
+        'persona_telefono.required' => 'El teléfono es obligatorio',
+        'persona_telefono.digits_between' => 'El teléfono debe tener 10 dígitos',
         'persona_email.email' => 'Ingrese un email válido',
-        'descripcion.required' => 'La descripción del reclamo es obligatoria',
+        'direccion.required' => 'La dirección es obligatoria',
+        'coordenadas.required' => 'Dirección no validada - Use el mapa para mayor precisión',
         'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
         'categoria_id.required' => 'Debe seleccionar una categoría',
     ];
@@ -293,6 +300,19 @@ class AltaReclamo extends Component
                 $this->personaEncontrada = true;
                 $this->personaId = $persona->id; // Guardar el ID de la persona
                 
+                // Cargar domicilios de la persona
+                $this->persona_domicilios = Domicilios::where('persona_id', $persona->id)->get();
+                $this->domicilio_id = null; // Limpiar ID de domicilio seleccionado
+                
+                if($this->persona_domicilios->isEmpty()) {
+                    // Si no tiene domicilios, inicializar como un array vacío
+                    $this->persona_domicilios = [];
+                    $this->mostrar_inputs_direccion = true;
+                }else {
+                    // Si tiene domicilios, NO mostrar inputs de dirección
+                    $this->mostrar_inputs_direccion = false;
+                }
+                
                 // Cargar historial de reclamos de esta persona
                 if (Auth::check()){
                     $this->cargarReclamosPersona($persona->id);
@@ -310,6 +330,9 @@ class AltaReclamo extends Component
                 $this->personaEncontrada = false;
                 $this->personaId = null;
                 $this->reclamosPersona = []; // Limpiar historial
+                $this->persona_domicilios = []; // Limpiar domicilios
+                $this->mostrar_inputs_direccion = true; // Mostrar inputs de dirección
+                $this->domicilio_id = null; // Limpiar ID de domicilio
             }
         } catch (\Exception $e) {
             // En caso de error, limpiar campos
@@ -317,6 +340,30 @@ class AltaReclamo extends Component
             $this->personaEncontrada = false;
             $this->personaId = null;
             $this->reclamosPersona = [];
+        }
+    }
+
+    public function updatedDomicilioId($value)
+    {
+        
+        if ($value === 'nuevo' || $value === '' || is_null($value)) {
+            $this->mostrar_inputs_direccion = true;
+         
+            // Limpiar campos para ingresar nuevos datos
+            $this->direccion = '';
+            $this->coordenadas = '';
+            $this->entre_calles = '';
+        } else {
+            // Eligió un domicilio existente, ocultar inputs
+            $this->mostrar_inputs_direccion = false;
+
+            // Buscar el domicilio y autocompletar
+            $domicilio = Domicilios::find($value);
+            if ($domicilio) {
+                $this->direccion = $domicilio->direccion;
+                $this->coordenadas = $domicilio->coordenadas;
+                $this->entre_calles = $domicilio->entre_calles;
+            }
         }
     }
 
@@ -412,13 +459,22 @@ class AltaReclamo extends Component
 
     public function validateStep2()
     {
-        $this->validate([
-            'descripcion' => $this->rules['descripcion'],
-            'direccion' => $this->rules['direccion'],
-            'entre_calles' => $this->rules['entre_calles'],
-            'coordenadas' => $this->rules['coordenadas'],
-            'categoria_id' => $this->rules['categoria_id'],
-        ]);
+        if($this->isPrivateArea){
+            $this->validate([
+                'descripcion' => $this->rules['descripcion'],
+                'categoria_id' => $this->rules['categoria_id'],
+            ]);
+        }else{
+            $this->validate([
+                'descripcion' => $this->rules['descripcion'],
+                'direccion' => $this->rules['direccion'],
+                'entre_calles' => $this->rules['entre_calles'],
+                'coordenadas' => $this->rules['coordenadas'],
+                'categoria_id' => $this->rules['categoria_id'],
+            ]);
+
+        }
+        
     }
 
     public function obtenerBarrioPorCoordenadas($coordenadas)
@@ -525,6 +581,15 @@ class AltaReclamo extends Component
                 'barrio_id' => $barrio_encontrado,
                 'usuario_id' => Auth::id() ?? 1,
                 'responsable_id' => null //Auth::id() ?? 1,
+            ]);
+
+            Movimiento::create([
+                'reclamo_id' => $this->reclamoCreado->id,
+                'tipo_movimiento_id' => 1,
+                'observaciones' => 'Inicio del reclamo',
+                'fecha' => now()->toDateString(),
+                'usuario_id' => Auth::id() ?? 1,
+                'estado_id' => 1
             ]);
 
             DB::commit();

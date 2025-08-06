@@ -36,9 +36,14 @@ Route::view('modificar-reclamo/{reclamo}', 'modificar-reclamo')
     ->middleware(['auth', 'verified'])
     ->name('modificar-reclamo');
 
+// REPORTES
+Route::view('reportes', 'reportes')
+    ->middleware(['auth', 'verified'])
+    ->name('reportes');
+
 // Rutas para las otras secciones (las crearemos después)
 Route::get('/nuevo-reporte', function () {
-    return view('welcome', ['slot' => view('nuevo-reporte')]);
+    return view('welcome', ['slot' => view('reportes/nuevo-reporte')]);
 })->name('nuevo-reporte');
 
 Route::get('/tramites', function () {
@@ -62,6 +67,10 @@ Route::view('areas', 'areas')
     ->middleware(['auth', 'verified'])
     ->name('areas');
 
+Route::view('motivos', 'motivos')
+    ->middleware(['auth', 'verified'])
+    ->name('motivos');
+
 Route::view('usuarios', 'usuarios')
     ->middleware(['auth', 'verified'])
     ->name('usuarios');
@@ -74,6 +83,9 @@ Route::view('estados', 'estados')
     ->middleware(['auth', 'verified'])
     ->name('estados');
 
+Route::view('mapa-barrios', 'mapa-barrios')
+    ->middleware(['auth', 'verified'])
+    ->name('mapa-barrios');
 
 // Rutas de configuración
 Route::middleware(['auth'])->group(function () {

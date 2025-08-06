@@ -67,7 +67,7 @@
     </div>
 
     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-        <div class="grid grid-cols-2 gap-10">
+        <div class="grid lg:grid-cols-2 gap-10">
             <div>
                 <!-- Sección: Datos Personales -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6 pb-2 border-b border-gray-200 dark:border-gray-600">
@@ -286,15 +286,17 @@
                 </div>
             </div>
         </div>    
-        <div class="flex items-center justify-between pt-6 dark:border-gray-600" >
-            <button
-                wire:click="derivarReclamo"
-                @if($reclamo->estado->id == 4 || !$editable) disabled @endif
-                class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white dark:text-gray-200 rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
-                <span>
-                    Derivar Reclamo
-                </span>
-            </button>
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-between pt-6 dark:border-gray-600" >
+            @if(Auth::user()->rol->lReclamosDeriva)
+                <button
+                    wire:click="derivarReclamo"
+                    @if($reclamo->estado->id == 4 || !$editable) disabled @endif
+                    class="w-full md:w-auto px-4 py-2 bg-red-500 dark:bg-red-600 text-white dark:text-gray-200 rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
+                    <span>
+                        Derivar Reclamo
+                    </span>
+                </button>
+            @endif
 
             @if($noAplica == 1)
                 <label class="inline-flex items-center mr-4 text-red-500 font-bold">
@@ -314,7 +316,7 @@
                     })
                 "
                 @if($reclamo->estado->id == 4 || !$editable) disabled @endif
-                class="px-8 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors font-medium cursor-pointer relative min-h-[2.5rem] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
+                class="w-full md:w-auto px-8 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors font-medium cursor-pointer relative min-h-[2.5rem] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
                 <!-- Estado normal -->
                 <span wire:loading.remove wire:target="save" x-show="!showSuccess" class="flex items-center whitespace-nowrap">
                     Actualizar Reclamo
@@ -451,7 +453,13 @@
                             <select wire:model.live="tipoMovimientoId" class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
                                 <option value="">Seleccione un tipo de movimiento</option>
                                 @foreach($tiposMovimiento as $tipo)
-                                    <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                                    @if($tipo->estado_id == 4 )
+                                        @if(Auth::user()->rol->lReclamosFinaliza)
+                                            <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                                        @endif 
+                                    @else 
+                                        <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                             @error('tipoMovimientoId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror

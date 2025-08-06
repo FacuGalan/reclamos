@@ -8,7 +8,11 @@ use App\Models\Reclamo;
 use App\Models\Area;
 use App\Models\Categoria;
 use App\Models\Estado;
+use App\Models\Barrio;
 use Illuminate\Support\Facades\Auth;
+
+use App\Exports\GenericExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AbmReclamos extends Component
 {
@@ -17,6 +21,7 @@ class AbmReclamos extends Component
     // Propiedades para filtros
     public $busqueda = '';
     public $busqueda_id = '';
+    public $filtro_barrio = '';
     public $filtro_estado = '';
     public $filtro_area = '';
     public $filtro_categoria = '';
@@ -33,6 +38,7 @@ class AbmReclamos extends Component
     
     // Datos para los selects (filtrados por áreas del usuario)
     public $estados = [];
+    public $barrios = [];
     public $areas = [];
     public $categorias = [];
 
@@ -40,11 +46,13 @@ class AbmReclamos extends Component
 
     // Áreas del usuario logueado
     public $userAreas = [];
+    public $ver_privada = false; // Para filtrar categorías privadas
 
     // ← ESTA ES LA CLAVE: agregar currentView y selectedReclamoId al queryString
     protected $queryString = [
         'busqueda' => ['except' => ''],
         'busqueda_id' => ['except' => ''],
+        'filtro_barrio' => ['except' => ''],
         'filtro_estado' => ['except' => ''],
         'filtro_area' => ['except' => ''],
         'filtro_categoria' => ['except' => ''],
@@ -64,6 +72,7 @@ class AbmReclamos extends Component
     {
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
+        $this->ver_privada = Auth::user()->ver_privada; // Verificar si el usuario puede ver categorías privadas
 
         $this->listaTimestamp = microtime(true); // Inicializar timestamp
 
@@ -73,6 +82,7 @@ class AbmReclamos extends Component
         }
 
         // Cargar datos filtrados por las áreas del usuario
+        $this->barrios = Barrio::orderBy('nombre')->get();
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::whereIn('id', $this->userAreas)->orderBy('nombre')->get();
         $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
@@ -99,6 +109,11 @@ class AbmReclamos extends Component
         $this->resetPage();
     }
 
+    public function updatingFiltroBarrio()
+    {
+        $this->resetPage();
+    }
+
     public function updatingFiltroEstado()
     {
         $this->resetPage();
@@ -114,9 +129,9 @@ class AbmReclamos extends Component
         $this->resetPage();
     }
 
-    public function getReclamos()
+    public function getReclamos($forExport = false)
     {
-        $query = Reclamo::with(['persona', 'categoria', 'area', 'estado', 'usuario', 'responsable'])
+        $query = Reclamo::with(['persona', 'categoria', 'area', 'estado','barrio', 'usuario', 'responsable'])
             ->whereIn('area_id', $this->userAreas) // ← FILTRO PRINCIPAL: Solo reclamos de áreas del usuario
             ->orderBy('created_at', 'desc');
 
@@ -136,6 +151,10 @@ class AbmReclamos extends Component
         // Aplicar filtro id
         if ($this->busqueda_id) {
             $query->where('id', $this->busqueda_id);
+        }
+
+        if ($this->filtro_barrio) {
+            $query->where('barrio_id', $this->filtro_barrio);
         }
 
         if ($this->filtro_estado) {
@@ -167,15 +186,30 @@ class AbmReclamos extends Component
             $query->where('fecha', '<=', $this->filtro_fecha_hasta);
         }
 
+        // FILTRO POR CATEGORÍAS PRIVADAS
+        
+        if (!$this->ver_privada) {
+            $query->whereHas('categoria', function ($q) {
+                $q->where('privada', false);
+            });
+        }
+        
+
         $this->listaTimestamp = microtime(true);
 
-        return $query->paginate(15);
+        // Condicional según el parámetro
+        if ($forExport) {
+            return $query; // Devuelve Collection para exportar
+        } else {
+            return $query->paginate(15); // Devuelve LengthAwarePaginator para la vista
+        }
     }
 
     public function limpiarFiltros()
     {
         $this->busqueda = '';
         $this->busqueda_id = '';
+        $this->filtro_barrio = '';
         $this->filtro_estado = '';
         $this->filtro_area = '';
         $this->filtro_categoria = '';
@@ -281,6 +315,79 @@ class AbmReclamos extends Component
             'areas_count' => count($this->userAreas),
             'areas_names' => Area::whereIn('id', $this->userAreas)->pluck('nombre')->toArray(),
         ];
+    }
+
+    // Método para exportar a Excel
+    public function exportarExcel()
+    {
+        // 1. Obtener los datos filtrados
+        $data = $this->getReclamos(true)->get();
+        
+        // 2. Definir encabezados
+        $headings = [
+            'ID',
+            'Fecha',
+            'Nombre',
+            'Apellido',
+            'DNI',
+            'Teléfono',
+            'Email',
+            'Categoría',
+            'Área',
+            'Descripción',
+            'Dirección',
+            'Barrio',
+            'Estado',
+            'Usuario Creador',
+            'Responsable',
+            'Fecha Creación'
+        ];
+        
+        // 3. Función de mapeo personalizada
+        $mappingCallback = function ($reclamo) {
+            return [
+                $reclamo->id,
+                \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y'),
+                $reclamo->persona->nombre,
+                $reclamo->persona->apellido,
+                $reclamo->persona->dni,
+                $reclamo->persona->telefono ?? 'N/A',
+                $reclamo->persona->email ?? 'N/A',
+                $reclamo->categoria->nombre,
+                $reclamo->area->nombre,
+                $reclamo->descripcion,
+                $reclamo->direccion,
+                $reclamo->barrio->nombre ?? 'N/A',
+                $reclamo->estado->nombre,
+                $reclamo->usuario?->name ?? 'N/A',
+                $reclamo->responsable?->name ?? 'Sin asignar',
+                $reclamo->created_at->format('d/m/Y H:i'),
+            ];
+        };
+        
+        // 4. Estilo personalizado para encabezados
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '77BF43'], // Tu color verde personalizado
+            ],
+        ];
+        
+        // 5. Crear la exportación
+        $export = new GenericExport(
+            $data,
+            $headings,
+            $mappingCallback,
+            'Reclamos - ' . date('d/m/Y'),
+            $headerStyle
+        );
+        
+        // 6. Descargar el archivo
+        return Excel::download($export, 'reclamos_' . date('Y-m-d_H-i-s') . '.xlsx');
     }
 
     public function render()

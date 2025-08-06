@@ -61,6 +61,6 @@ class Reclamo extends Model
     }
     public function barrio()
     {
-        return $this->belongsTo(Barrios::class, 'barrio_id');
+        return $this->belongsTo(Barrio::class, 'barrio_id');
     }
 }

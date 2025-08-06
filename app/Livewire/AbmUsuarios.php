@@ -32,6 +32,7 @@ class AbmUsuarios extends Component
     public $areas = [];
     public $userAreas = []; // Áreas del usuario autenticado
     public $puedeVerTodos = false; // Nueva propiedad para saber si puede ver todos
+    public $ver_privada = false; // Nueva propiedad para controlar acceso a áreas privadas
 
     // Datos del formulario
     public $dni = '';
@@ -59,12 +60,11 @@ class AbmUsuarios extends Component
     protected $rules = [
         'dni' => 'required|numeric|digits_between:7,11|unique:users,dni',
         'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255|unique:users,email',
+        'email' => 'nullable|email|max:255|unique:users,email',
         'telefono' => 'required|numeric|digits_between:10,15',
         'rol_id' => 'nullable|exists:user_rols,id',
         'password' => 'required|string|min:8|confirmed',
-        'areas_asignadas' => 'required|array|min:1',
-        'areas_asignadas.*' => 'exists:areas,id',
+        'areas_asignadas' => 'nullable|array',
     ];
 
     protected $messages = [
@@ -73,7 +73,6 @@ class AbmUsuarios extends Component
         'dni.digits_between' => 'El DNI debe tener entre 7 y 11 dígitos',
         'dni.unique' => 'Ya existe un usuario con este DNI',
         'name.required' => 'El nombre es obligatorio',
-        'email.required' => 'El email es obligatorio',
         'email.email' => 'Ingrese un email válido',
         'email.unique' => 'Ya existe un usuario con este email',
         'telefono.required' => 'El teléfono es obligatorio',
@@ -81,8 +80,6 @@ class AbmUsuarios extends Component
         'password.required' => 'La contraseña es obligatoria',
         'password.min' => 'La contraseña debe tener al menos 8 caracteres',
         'password.confirmed' => 'Las contraseñas no coinciden',
-        'areas_asignadas.required' => 'Debe asignar al menos un área',
-        'areas_asignadas.min' => 'Debe asignar al menos un área',
     ];
 
     public function mount()
@@ -312,6 +309,7 @@ class AbmUsuarios extends Component
                     'telefono' => $this->telefono,
                     'rol_id' => $this->rol_id ?: null,
                     'password' => Hash::make($this->password),
+                    'ver_privada' => $this->ver_privada ? 1 : 0,
                 ]);
 
                 // Sincronizar áreas
@@ -328,6 +326,7 @@ class AbmUsuarios extends Component
                     'email' => $this->email,
                     'telefono' => $this->telefono,
                     'rol_id' => $this->rol_id ?: null,
+                    'ver_privada' => $this->ver_privada ? 1 : 0,
                 ];
 
                 // Solo actualizar la contraseña si se proporcionó una nueva
@@ -355,6 +354,11 @@ class AbmUsuarios extends Component
             $this->mostrarNotificacionExito($mensaje);
             $this->cerrarModal();
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // CLAVE: NO hagas return aquí, vuelve a lanzar la excepción
+            $this->isSaving = false;
+            throw $e; // ← ESTO es lo que faltaba
+            
         } catch (\Exception $e) {
             $this->mostrarNotificacionError('Error al guardar el usuario: ' . $e->getMessage());
         }

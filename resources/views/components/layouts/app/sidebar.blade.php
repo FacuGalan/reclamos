@@ -19,24 +19,52 @@
        
             <div class="bg-[#3F516A] rounded-lg p-2 mt-4">   
                 <flux:navlist.group :heading="__('Menú')" class="grid">
-                    <flux:navlist.item class="flux-nav-custom" icon="home" :href="route('reclamos')" 
-                                       :current="request()->routeIs(['reclamos', 'modificar-reclamo','reclamos.create','reclamos.create.interno'])" wire:navigate>
-                        <span class="flex items-center justify-between w-full">
-                            <span>Reclamos</span>
-                            <livewire:contador-notificaciones-reclamos />
-                        </span>
-                    </flux:navlist.item>
+                    @if(Auth::user()->rol->lReclamosAbm)
+                        <flux:navlist.item class="flux-nav-custom" icon="shield-exclamation" :href="route('reclamos')" 
+                                        :current="request()->routeIs(['reclamos', 'modificar-reclamo','reclamos.create','reclamos.create.interno'])" wire:navigate>
+                            <span class="flex items-center justify-between w-full">
+                                <span>Reclamos</span>
+                                <livewire:contador-notificaciones-reclamos />
+                            </span>
+                        </flux:navlist.item>
+                    @endif
+                   
+                    @if(Auth::user()->rol->lReportesAbm)
+                        <flux:navlist.item class="flux-nav-custom" icon="exclamation-triangle" :href="route('reportes')" 
+                                        :current="request()->routeIs(['reportes'])" wire:navigate>
+                                        Reportes
+                        </flux:navlist.item>
+                    @endif
                     
                 </flux:navlist.group>
-                <flux:navlist.group :heading="__('Mantenimiento')" class="grid">
-                    <flux:navlist.item class="flux-nav-custom" icon="building-office-2" :href="route('secretarias')" :current="request()->routeIs('secretarias')" wire:navigate>Secretarías</flux:navlist.item>
-                    <flux:navlist.item class="flux-nav-custom" icon="building-office" :href="route('areas')" :current="request()->routeIs('areas')" wire:navigate>Áreas</flux:navlist.item>
-                    <flux:navlist.item class="flux-nav-custom" icon="arrows-right-left" :href="route('tipos-movimiento')" :current="request()->routeIs('tipos-movimiento')" wire:navigate>Tipos de Movimiento</flux:navlist.item>
-                    <flux:navlist.item class="flux-nav-custom" icon="adjustments-horizontal" :href="route('estados')" :current="request()->routeIs('estados')" wire:navigate>Estados</flux:navlist.item>
-                </flux:navlist.group>
-                <flux:navlist.group :heading="__('Administración')" class="grid">
-                    <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('usuarios')" :current="request()->routeIs('usuarios')" wire:navigate>Usuarios</flux:navlist.item>
-                </flux:navlist.group>
+
+                @if(Auth::user()->rol->lSecretariaAbm || Auth::user()->rol->lAreasAbm || Auth::user()->rol->lMotivosAbm || Auth::user()->rol->lTiposMovAbm || Auth::user()->rol->lEstadosAbm)
+                    <flux:navlist.group :heading="__('Mantenimiento')" class="grid">
+
+                        @if(Auth::user()->rol->lSecretariaAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="building-office-2" :href="route('secretarias')" :current="request()->routeIs('secretarias')" wire:navigate>Secretarías</flux:navlist.item>
+                        @endif  
+                        @if(Auth::user()->rol->lAreasAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="building-office" :href="route('areas')" :current="request()->routeIs('areas')" wire:navigate>Áreas</flux:navlist.item>
+                        @endif
+                        @if(Auth::user()->rol->lMotivosAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="clipboard-document-list" :href="route('motivos')" :current="request()->routeIs('motivos')" wire:navigate>Motivos</flux:navlist.item>
+                        @endif
+                        @if(Auth::user()->rol->lTiposMovAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="arrows-right-left" :href="route('tipos-movimiento')" :current="request()->routeIs('tipos-movimiento')" wire:navigate>Tipos de Movimiento</flux:navlist.item>
+                        @endif
+                        @if(Auth::user()->rol->lEstadosAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="adjustments-horizontal" :href="route('estados')" :current="request()->routeIs('estados')" wire:navigate>Estados</flux:navlist.item>
+                        @endif
+
+                    </flux:navlist.group>
+                @endif
+
+                @if(Auth::user()->rol->lUsuariosAbm)
+                    <flux:navlist.group :heading="__('Administración')" class="grid">
+                        <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('usuarios')" :current="request()->routeIs('usuarios')" wire:navigate>Usuarios</flux:navlist.item>
+                    </flux:navlist.group>
+                @endif
             </div>
                   
 
@@ -125,7 +153,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Configuración') }}</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -133,7 +161,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
+                            {{ __('Cerrar sesión') }}
                         </flux:menu.item>
                     </form>
                 </flux:menu>

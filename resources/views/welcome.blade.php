@@ -21,14 +21,14 @@
             </h1>
         </flux:header>
 
-        <main class="flex-1 flex items-center justify-center" >
+        <main class="py-6 flex-1 flex items-center justify-center" >
             {!! $slot ?? 'Welcome to your application!' !!}
         </main>
 
         <!-- OPCIÓN 1: Solo con clases de Tailwind (recomendado) -->
         <footer class="border-t border-zinc-200 bg-slate-700 dark:border-zinc-700 dark:bg-slate-700 pt-2" >
             <div class="container mx-auto px-4 pt-2">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="hidden sm:flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex items-start">
                         <div class="text-white">
                             <p class="font-semibold">Municipalidad de Mercedes</p>
@@ -43,13 +43,13 @@
                         </div>
                         <div class="text-center">
                             <p class="text-white font-medium">Línea 911</p>
-                            <p class="text-gray-300">Atención ciudadana</p>
+                            <p class="text-gray-300">Policía</p>
                         </div>
                         <div class="text-center">
                             <p class="text-white font-medium">Línea 147</p>
-                            <p class="text-gray-300">Policía</p>
+                            <p class="text-gray-300">Atención ciudadana</p>
                         </div>
-                        <div class="text-center md:text-left">
+                        <div class="text-center">
                             <p class="text-white font-medium">Línea 107</p>
                             <p class="text-gray-300">SAME</p>
                         </div>
