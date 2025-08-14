@@ -40,6 +40,8 @@ class AbmMotivos extends Component
     public $tipoNotificacion = 'success';
     public $notificacionTimestamp = null;
 
+    public $ver_privada = false;
+
     protected $queryString = [
         'busqueda' => ['except' => ''],
         'filtro_area' => ['except' => ''],
@@ -52,8 +54,7 @@ class AbmMotivos extends Component
             'nombre' => $this->isEditing 
                 ? 'required|string|max:255|unique:categorias,nombre,' . $this->selectedMotivoId
                 : 'required|string|max:255|unique:categorias,nombre',
-            'area_id' => 'required|exists:areas,id',
-            'privada' => 'boolean',
+            'area_id' => 'required|exists:areas,id'
         ];
     }
 
@@ -78,6 +79,7 @@ class AbmMotivos extends Component
     {
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
+        $this->ver_privada = Auth::user()->ver_privada;
 
         // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
         if (empty($this->userAreas)) {
@@ -122,6 +124,12 @@ class AbmMotivos extends Component
             }
         }
 
+        // FILTRO POR MOTIVOS PRIVADOS
+
+        if(Auth::user()->rol->id > 1){
+            $query->where('privada', $this->ver_privada);
+        }
+
         $this->listaTimestamp = microtime(true);
 
         return $query->paginate(15);
@@ -141,6 +149,11 @@ class AbmMotivos extends Component
         $this->isEditing = false;
         $this->selectedMotivoId = null;
         $this->showFormModal = true;
+        if(count($this->userAreas) === 1) {
+            $this->area_id = $this->userAreas[0]; // Asignar automáticamente el área si solo hay una
+        } else {
+            $this->area_id = ''; // Dejar vacío para que el usuario seleccione
+        }
     }
 
     public function editarMotivo($motivoId)
@@ -239,7 +252,7 @@ class AbmMotivos extends Component
                 Categoria::create([
                     'nombre' => $this->nombre,
                     'area_id' => $this->area_id,
-                    'privada' => $this->privada ? 1 : 0,
+                    'privada' => $this->ver_privada ? 1 : 0,
                 ]);
                 
                 $mensaje = 'Motivo creado exitosamente';
@@ -255,8 +268,7 @@ class AbmMotivos extends Component
                 
                 $motivo->update([
                     'nombre' => $this->nombre,
-                    'area_id' => $this->area_id,
-                    'privada' => $this->privada ? 1 : 0,
+                    'area_id' => $this->area_id
                 ]);
                 
                 $mensaje = 'Motivo actualizado exitosamente';

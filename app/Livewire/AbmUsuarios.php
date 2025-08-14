@@ -92,7 +92,9 @@ class AbmUsuarios extends Component
         $this->puedeVerTodos = empty($this->userAreas);
 
         // Cargar datos para los selects
-        $this->roles = UserRol::orderBy('nombre')->get();
+        $this->roles = UserRol::where('id', '>', Auth::user()->rol_id)->orderBy('nombre')->get();
+
+        $this->ver_privada = Auth::user()->ver_privada;
         
         // CAMBIO: Si puede ver todos, cargar todas las áreas; si no, solo las suyas
         if ($this->puedeVerTodos) {

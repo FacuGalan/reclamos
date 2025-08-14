@@ -13,5 +13,6 @@
     <livewire:alta-reclamo 
         :show-persona-form="true" 
         :is-private-area="$tipoInterno"
+        :contexto="'privado'"
         :key="'alta-reclamo-' . ($tipoInterno ? 'interno' : 'normal') . '-' . now()" />
 </x-layouts.app>

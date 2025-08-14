@@ -247,58 +247,37 @@
                         </div>
 
                         <!-- Área -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Área *
-                            </label>
-                            <select 
-                                wire:model.live="area_id"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white
-                                    @error('area_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
-                                <option value="">Seleccione un área</option>
-                                @foreach($areas as $area)
-                                    <option value="{{ $area->id }}">{{ $area->nombre }}</option>
-                                @endforeach
-                            </select>
-                            
-                            @error('area_id') 
-                                <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
-                                    <span class="text-red-600 text-sm font-medium flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        {{ $message }}
-                                    </span>
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Motivo interno -->
-                        <div>
-                            <label class="flex items-center space-x-3 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    wire:model.live="privada"
-                                    class="w-4 h-4 text-[#77BF43] bg-gray-100 border-gray-300 rounded focus:ring-[#77BF43] focus:ring-2 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-[#77BF43] dark:ring-offset-gray-800">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Motivo interno
+                        @if(count($areas) > 1)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Área *
+                                </label>
+                                <select 
+                                    wire:model.live="area_id"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white
+                                        @error('area_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                    <option value="">Seleccione un área</option>
+                                    @foreach($areas as $area)
+                                        <option value="{{ $area->id }}">{{ $area->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                
+                    
+                            </div>
+                        @else
+                            <input type="hidden" wire:model.live="area_id">
+                        @endif
+        
+                        @error('area_id') 
+                            <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                                <span class="text-red-600 text-sm font-medium flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    {{ $message }}
                                 </span>
-                            </label>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Marque esta opción si el motivo es de uso interno únicamente
-                            </p>
-                            
-                            @error('privada') 
-                                <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
-                                    <span class="text-red-600 text-sm font-medium flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        {{ $message }}
-                                    </span>
-                                </div>
-                            @enderror
-                        </div>
+                            </div>
+                        @enderror
 
                         <!-- Botones -->
                         <div class="flex justify-end space-x-3 pt-4">

@@ -2,11 +2,53 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use Illuminate\Http\Request;
 
 // Ruta principal que carga la vista home en el slot del welcome
 Route::get('/', function () {
     return view('welcome', ['slot' => view('home')]);
 })->name('home');
+
+Route::get('reclamos/crear-interno-publico', function (Request $request) {
+    // Validar que vengan los parámetros mínimos requeridos
+    $request->validate([
+        'user' => 'required|numeric|digits:8',
+        'nombre' => 'required|string|max:255',
+        'apellido' => 'required|string|max:255'
+    ]);
+
+    // Guardar los datos en la sesión
+    session([
+        'datos_reclamo_externo' => [
+            'dni' => $request->get('user'),
+            'nombre' => $request->get('nombre'),
+            'apellido' => $request->get('apellido')
+        ]
+    ]);
+
+    // Redirigir a una URL limpia
+    return redirect()->route('reclamos.crear-interno-publico.form');
+})
+    ->name('reclamos.crear-interno-publico');
+
+// Nueva ruta para mostrar el formulario con URL limpia (ESTO HACE QUE NO SE MUESTREN EN LA URL LOS DATOS DEL PARAMETRO GET)
+Route::get('reclamos/crear-interno-publico/formulario', function () {
+    // Recuperar los datos de la sesión
+    $datos = session('datos_reclamo_externo');
+    
+    // Si no hay datos, redirigir a algún lugar (opcional)
+    if (!$datos) {
+        return redirect()->route('reclamos')->with('error', 'No se encontraron datos para crear el reclamo');
+    }
+
+    // Limpiar los datos de la sesión después de usarlos (opcional)
+    session()->forget('datos_reclamo_externo');
+
+    return view('welcome', [
+        'slot' => view('reclamos/crear-interno-publico', $datos)
+    ]);
+})
+    ->name('reclamos.crear-interno-publico.form');
 
 // Ruta para nuevo reclamo que carga la vista nuevo-reclamo en el slot
 Route::get('/nuevo-reclamo', function () {
@@ -86,6 +128,10 @@ Route::view('estados', 'estados')
 Route::view('mapa-barrios', 'mapa-barrios')
     ->middleware(['auth', 'verified'])
     ->name('mapa-barrios');
+
+Route::view('estadisticas', 'estadisticas')
+    ->middleware(['auth', 'verified'])
+    ->name('estadisticas');
 
 // Rutas de configuración
 Route::middleware(['auth'])->group(function () {

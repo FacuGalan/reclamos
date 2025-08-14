@@ -6,6 +6,8 @@ use Livewire\Component;
 use App\Models\Reclamo;
 use App\Models\Area;
 use App\Models\Categoria;
+use App\Models\Edificio;
+use Illuminate\Support\Collection;
 use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\Domicilios;
@@ -21,6 +23,8 @@ use App\Mail\MovimientoReclamoMail;
 /**
  * @property Collection $categorias
  * @property Collection $categoriasFiltradas
+ * @property Collection $edificios
+ * @property Collection $edificiosFiltrados
  */
 class ModificarReclamo extends Component
 {
@@ -30,6 +34,7 @@ class ModificarReclamo extends Component
     public $reclamoId;
     public $reclamo;
     public $userAreas = []; // Áreas del usuario logueado
+    public $isPrivateArea = false; // Para indicar si el reclamo es de una área privada
 
     public $isSaving = false; // Para controlar el estado de guardado
 
@@ -62,7 +67,8 @@ class ModificarReclamo extends Component
     public $area_nombre = '';
     public $categoria_id = '';
     public $estado_id = '';
-    
+    public $edificio_id = '';
+
     // Datos de la persona
     public $persona_dni = '';
     public $persona_nombre = '';
@@ -73,7 +79,7 @@ class ModificarReclamo extends Component
     //Historial
     public $historial = [];
     public $historialTimestamp; // NUEVO: para forzar re-renderización
-    
+
     // Control de flujo
     public $step = 1; // 1: datos persona, 2: datos reclamo, 3: confirmación
     public $showSuccess = false;
@@ -83,10 +89,15 @@ class ModificarReclamo extends Component
     public $categoriasFiltradas = [];
     public $estados = [];
     public $areas = [];
+    public $edificios = [];
+    public $edificioBusqueda = '';
+    public $edificioSeleccionado = null;
+    public $edificiosFiltrados = [];
 
     // Nuevas propiedades para el searchable select
     public $categoriaBusqueda = '';
     public $mostrarDropdown = false;
+    public $mostrarDropdownEdificios = false;
     public $categoriaSeleccionada = null;
 
     protected $rules = [
@@ -101,6 +112,7 @@ class ModificarReclamo extends Component
         'coordenadas' => 'nullable|string',
         'categoria_id' => 'required|exists:categorias,id',
         'estado_id' => 'required|exists:estados,id',
+        'edificio_id' => 'required|exists:edificios,id',
     ];
 
     protected $messages = [
@@ -125,6 +137,15 @@ class ModificarReclamo extends Component
 
     public function mount($reclamoId, $editable = true)
     {
+        $this->reclamo = Reclamo::with(['categoria'])->find($this->reclamoId);
+        
+        if (!$this->reclamo) {
+            session()->flash('error', 'Reclamo no encontrado.');
+            return;
+        }
+
+        $this->isPrivateArea = $this->reclamo->categoria->privada;
+
         $this->editable = $editable;
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
@@ -138,12 +159,14 @@ class ModificarReclamo extends Component
         $this->historialTimestamp = microtime(true); // Inicializar timestamp
         
         // Cargar datos para los selects
-        $this->categorias = Categoria::whereIn('area_id', $this->userAreas)
+        $this->categorias = Categoria::where('privada', $this->isPrivateArea)
+                                    ->whereIn('area_id', $this->userAreas)
                                     ->orderBy('nombre')->get();
         $this->categoriasFiltradas = $this->categorias;
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::orderBy('nombre')->get();
-        
+        $this->edificios = Edificio::orderBy('nombre')->get();
+
         // Cargar datos del reclamo
         $this->cargarDatosReclamo();
 
@@ -164,12 +187,7 @@ class ModificarReclamo extends Component
 
     public function cargarDatosReclamo()
     {
-        $this->reclamo = Reclamo::find($this->reclamoId);
         
-        if (!$this->reclamo) {
-            session()->flash('error', 'Reclamo no encontrado.');
-            return;
-        }
         // Cargar datos del reclamo
         $this->descripcion = $this->reclamo->descripcion;
         $this->direccion = $this->reclamo->direccion;
@@ -181,6 +199,7 @@ class ModificarReclamo extends Component
         $this->estado_id = $this->reclamo->estado_id;
         $this->noAplica = $this->reclamo->no_aplica;
         $this->notificado = $this->reclamo->notificado; // Asignar valor de notificado si existe
+        $this->edificio_id = $this->reclamo->edificio_id;
          
         // Configurar categoria seleccionada para el dropdown
         if ($this->categoria_id) {
@@ -188,6 +207,13 @@ class ModificarReclamo extends Component
             if ($categoria) {
                 $this->categoriaBusqueda = $categoria->nombre;
                 $this->categoriaSeleccionada = $categoria;
+            }
+        }
+        if ($this->edificio_id) {
+            $edificio = $this->edificios->find($this->edificio_id);
+            if ($edificio) {
+                $this->edificioBusqueda = $edificio->nombre;
+                $this->edificioSeleccionado = $edificio;
             }
         }
 
@@ -242,6 +268,44 @@ class ModificarReclamo extends Component
     {
         $this->categoriasFiltradas = $this->categorias;
         $this->mostrarDropdown = true;
+    }
+
+    // Método para filtrar edificios cuando se escribe en el input
+    public function updatedEdificioBusqueda()
+    {
+        if (empty($this->edificioBusqueda)) {
+            $this->edificiosFiltrados = $this->edificios;
+            $this->mostrarDropdownEdificios = false;
+            $this->edificio_id = '';
+            $this->edificioSeleccionado = null;
+        } else {
+            $this->edificiosFiltrados = $this->edificios->filter(function ($edificio) {
+                return stripos($edificio->nombre, $this->edificioBusqueda) !== false;
+            });
+            $this->mostrarDropdownEdificios = true;
+        }
+    }
+
+    // Método para seleccionar un edificio del dropdown
+    public function seleccionarEdificio($edificioId)
+    {
+        $edificio = $this->edificios->find($edificioId);
+        if ($edificio) {
+            $this->edificio_id = $edificio->id;
+            $this->edificioBusqueda = $edificio->nombre;
+            $this->edificioSeleccionado = $edificio;
+            $this->mostrarDropdownEdificios = false;
+            $this->direccion = $edificio->direccion;
+
+            // Limpiar errores de validación
+            $this->resetErrorBag('edificio_id');
+        }
+    }
+
+    public function mostrarTodosEdificios()
+    {
+        $this->edificiosFiltrados = $this->edificios;
+        $this->mostrarDropdownEdificios = true;
     }
 
     public function nextStep()
@@ -332,6 +396,16 @@ class ModificarReclamo extends Component
         $this->fechaMovimiento = date('Y-m-d'); // Asignar fecha actual si no se especifica
         $this->usuarioId = Auth::id(); // Asignar el ID del usuario
         $this->estadoMovimientoId = TipoMovimiento::where('id',$this->tipoMovimientoId)->first()->estado_id; // Obtener el estado del movimiento
+
+        // Validar observaciones si el estado no es finalizado (4)
+        if($this->estadoMovimientoId != 4){
+            $this->validate([
+                'observaciones' => 'required|string|max:1000'
+            ], [
+                'observaciones.required' => 'Las observaciones son obligatorias a menos que sea un movimiento de Finalización.'
+            ]);
+        }
+        
 
         try {
             DB::beginTransaction();

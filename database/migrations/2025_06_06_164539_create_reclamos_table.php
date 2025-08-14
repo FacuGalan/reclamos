@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('reclamos', function (Blueprint $table) {
             $table->id();
             $table->date('fecha');
-            $table->string('descripcion');
+            $table->string('descripcion', 500);
             $table->string('direccion')->nullable();
             $table->string('entre_calles')->nullable();
             $table->string('coordenadas');

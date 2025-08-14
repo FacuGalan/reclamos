@@ -30,8 +30,13 @@ class ContadorNotificacionesReclamos extends Component
     {
         $anteriorConteo = $this->conteoReclamos;
         
-        $this->conteoReclamos = Reclamo::whereNull('responsable_id')
+        $this->conteoReclamos = Reclamo::with(['categoria'])->whereNull('responsable_id')
             ->whereIn('area_id', $this->userAreas)
+            ->whereHas('categoria', function ($q) {
+                if(Auth::user()->rol_id > 1) {
+                    $q->where('privada', Auth::user()->ver_privada);
+                }
+            })
             ->count();
             
         $this->ultimaActualizacion = now()->format('H:i:s');

@@ -247,29 +247,121 @@
 
                     <!-- Ubicación -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Dirección *
-                            </label>
-                            <input 
-                                type="text" 
-                                wire:model="direccion"
-                                class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
-                                placeholder="Ingrese la dirección donde ocurrió el problema">
-                            @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Entre calles
-                            </label>
-                            <input 
-                                type="text" 
-                                wire:model="entre_calles"
-                                class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
-                                placeholder="Entre qué calles se encuentra">
-                            @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
+                        @if(!$reclamo->categoria->privada)
+                            
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Dirección *
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        wire:model="direccion"
+                                        class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
+                                        placeholder="Ingrese la dirección donde ocurrió el problema">
+                                    @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Entre calles
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        wire:model="entre_calles"
+                                        class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
+                                        placeholder="Entre qué calles se encuentra">
+                                    @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+                            
+                        @else 
+                                <div x-data="{
+                                    search: @entangle('edificioBusqueda'),
+                                    open: @entangle('mostrarDropdownEdificios'),
+                                    selectedId: @entangle('edificio_id'),
+                                    edificios: @js($edificios),
+
+                                    get filteredEdificios() {
+                                        if (this.search === '') {
+                                            return this.edificios;
+                                        }
+                                        return this.edificios.filter(edificio => 
+                                            edificio.nombre.toLowerCase().includes(this.search.toLowerCase())
+                                        );
+                                    },
+
+                                    selectEdificio(edificio) {
+                                        $wire.seleccionarEdificio(edificio.id);
+                                    }
+                                }" 
+                                class="relative">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Edificio *
+                                    </label>
+                                    
+                                    <!-- Input principal -->
+                                    <div class="relative">
+                                        <input 
+                                            type="text" 
+                                            x-model="search"
+                                            @focus="open = true; $wire.mostrarTodosEdificios()"
+                                            @click="open = true; $wire.mostrarTodosEdificios()"
+                                            @blur="setTimeout(() => open = false, 150)"
+                                            class="w-full bg-white px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
+                                            placeholder="Busque o seleccione un edificio..."
+                                            autocomplete="off">
+                                        
+                                        <!-- Ícono de flecha -->
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <svg class="w-5 h-5 text-gray-400 transform transition-transform" 
+                                                :class="{ 'rotate-180': open }" 
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Dropdown -->
+                                    <div x-show="open" 
+                                        x-transition:enter="transition ease-out duration-100"
+                                        x-transition:enter-start="transform opacity-0 scale-95"
+                                        x-transition:enter-end="transform opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-75"
+                                        x-transition:leave-start="transform opacity-100 scale-100"
+                                        x-transition:leave-end="transform opacity-0 scale-95"
+                                        class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+
+                                        <template x-for="edificio in filteredEdificios" :key="edificio.id">
+                                            <div @click="selectEdificio(edificio)"
+                                                class="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition-colors"
+                                                :class="{ 'bg-blue-100 dark:bg-blue-900': selectedId == edificio.id }"
+                                                x-text="edificio.nombre">
+                                            </div>
+                                        </template>
+                                        
+                                        <div x-show="filteredEdificios.length === 0" 
+                                            class="px-3 py-2 text-gray-500 dark:text-gray-400 text-center">
+                                            No se encontraron edificios que coincidan con su búsqueda
+                                        </div>
+                                    </div>
+                                    
+                                    @error('edificio_id') 
+                                        <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                                    @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Dirección
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model.live="direccion"
+                                    readonly
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                    placeholder="Entre qué calles se encuentra">
+                                @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+
+                        @endif
                     </div>
 
                     <div>
@@ -287,7 +379,7 @@
             </div>
         </div>    
         <div class="flex flex-col md:flex-row gap-4 items-center justify-between pt-6 dark:border-gray-600" >
-            @if(Auth::user()->rol->lReclamosDeriva)
+            @if(Auth::user()->rol->lReclamosDeriva && !$reclamo->categoria->privada)
                 <button
                     wire:click="derivarReclamo"
                     @if($reclamo->estado->id == 4 || !$editable) disabled @endif
@@ -315,8 +407,8 @@
                         setTimeout(() => showSuccess = false, 800)
                     })
                 "
-                @if($reclamo->estado->id == 4 || !$editable) disabled @endif
-                class="w-full md:w-auto px-8 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors font-medium cursor-pointer relative min-h-[2.5rem] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400">
+                class="w-full md:w-auto ml-auto px-8 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors font-medium cursor-pointer relative min-h-[2.5rem] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-400 disabled:bg-zinc-400"
+                @if($reclamo->estado->id == 4 || !$editable) disabled @endif>
                 <!-- Estado normal -->
                 <span wire:loading.remove wire:target="save" x-show="!showSuccess" class="flex items-center whitespace-nowrap">
                     Actualizar Reclamo

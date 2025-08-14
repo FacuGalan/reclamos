@@ -19,7 +19,7 @@
     @endif
     
     <!-- Notificación de éxito centrada (solo para área pública) -->
-    @if(Auth::guest())
+    @if($contexto === 'publico')
         <div 
             x-data="{ show: false, reclamoData: {} }"
             x-show="show"
@@ -229,6 +229,7 @@
                                 {{ $personaEncontrada 
                                 ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                                 : 'bg-white dark:bg-gray-700' }}"
+                            {{ !empty($this->datosPrecargados) ? 'readonly' : '' }}
                             placeholder="Ingrese su DNI"
                             @wheel.prevent>
 
@@ -283,19 +284,21 @@
                         @error('persona_telefono') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
                     
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Email 
-                            <span class="text-gray-500 dark:text-gray-400 text-sm">(opcional, deberá ingresarlo si quiere recibir novedades de su reclamo)</span>
-                        </label>
-                        <input 
-                            type="email" 
-                            id="persona_email"
-                            wire:model="persona_email"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                            placeholder="Ingrese su email">
-                        @error('persona_email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                    @if(!$isPrivateArea)
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Email 
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">(opcional, deberá ingresarlo si quiere recibir novedades de su reclamo)</span>
+                            </label>
+                            <input 
+                                type="email" 
+                                id="persona_email"
+                                wire:model="persona_email"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                placeholder="Ingrese su email">
+                            @error('persona_email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
                 </div>
 
                 <!-- NUEVA SECCIÓN: Historial de reclamos -->
@@ -315,19 +318,19 @@
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                                     <thead class="bg-gray-50 dark:bg-gray-800">
                                         <tr>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <th class="w-10 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                                 ID / Fecha
                                             </th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <th class="w-15 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                                 Categoría
                                             </th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <th class="w-20 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                                 Descripción
                                             </th>
-                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <th class="w-10 px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                                 Estado
                                             </th>
-                                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                            <th class="w-10 px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                                 Ver
                                             </th>
                                         </tr>
@@ -335,7 +338,7 @@
                                     <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
                                         @foreach($reclamosPersona as $reclamo)
                                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                <td class="px-4 py-3">
                                                     <div class="text-sm font-medium text-gray-900 dark:text-white">
                                                         #{{ $reclamo->id }}
                                                     </div>
@@ -343,7 +346,7 @@
                                                         {{ \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y') }}
                                                     </div>
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                <td class="px-4 py-3">
                                                     <div class="text-sm text-gray-900 dark:text-white">
                                                         {{ $reclamo->categoria->nombre ?? 'Sin categoría' }}
                                                     </div>
@@ -352,16 +355,16 @@
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3">
-                                                    <div class="text-sm text-gray-900 dark:text-white max-w-xs truncate" style="max-width: 100px;">
-                                                        {{ $reclamo->descripcion }}
+                                                    <div class="text-sm text-gray-900 dark:text-white max-w-xs ">
+                                                        {{ strlen($reclamo->descripcion) > 100 ? substr($reclamo->descripcion, 0, 150) . '...' : $reclamo->descripcion }}
                                                     </div>
                                                     @if($reclamo->direccion)
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 ">
                                                             {{ Str::before($reclamo->direccion, ',') }}
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap ">
+                                                <td class="px-4 py-3 ">
                                                     <div class="flex items-center align-center space-x-2 justify-center">
                                                     @if($reclamo->estado)
                                                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
@@ -373,7 +376,7 @@
                                                     @endif
                                                     </div>
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                                <td class="px-4 py-3  text-sm">
                                                     <div class="flex items-center align-center space-x-2 justify-center">
                                                         <button 
                                                             wire:click="verDetalleReclamo({{ $reclamo->id }})"
@@ -616,6 +619,102 @@
                                 </div>
                             @endif
                         </div>
+                    @else 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div x-data="{
+                                    search: '',
+                                    open: false,
+                                    selectedId: @entangle('edificio_id'),
+                                    edificios: @js($edificios),
+                                    
+                                    get filteredEdificios() {
+                                        if (this.search === '') {
+                                            return this.edificios;
+                                        }
+                                        return this.edificios.filter(edificio => 
+                                            edificio.nombre.toLowerCase().includes(this.search.toLowerCase())
+                                        );
+                                    },
+
+                                    selectEdificio(edificio) {
+                                        this.selectedId = edificio.id;
+                                        this.search = edificio.nombre;
+                                        @this.set('direccion', edificio.direccion);
+                                        this.open = false;
+                                    },
+
+                                    get selectedEdificio() {
+                                        return this.edificios.find(e => e.id == this.selectedId);
+                                    }
+                                }" 
+                                class="relative">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Edificio *
+                                </label>
+                                
+                                <!-- Input principal -->
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        x-model="search"
+                                        @focus="open = true"
+                                        @click="open = true"
+                                        @blur="setTimeout(() => open = false, 150)"
+                                        class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                        placeholder="Busque o seleccione un motivo..."
+                                        autocomplete="off">
+                                    
+                                    <!-- Ícono de flecha -->
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400 transform transition-transform" 
+                                            :class="{ 'rotate-180': open }" 
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dropdown -->
+                                <div x-show="open" 
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="transform opacity-0 scale-95"
+                                    x-transition:enter-end="transform opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="transform opacity-100 scale-100"
+                                    x-transition:leave-end="transform opacity-0 scale-95"
+                                    class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+
+                                    <template x-for="edificio in filteredEdificios" :key="edificio.id">
+                                        <div @click="selectEdificio(edificio)"
+                                            class="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition-colors"
+                                            :class="{ 'bg-blue-100 dark:bg-blue-900': selectedId == edificio.id }"
+                                            x-text="edificio.nombre">
+                                        </div>
+                                    </template>
+                                    
+                                    <div x-show="filteredEdificios.length === 0" 
+                                        class="px-3 py-2 text-gray-500 dark:text-gray-400 text-center">
+                                        No se encontraron edificios que coincidan con su búsqueda
+                                    </div>
+                                </div>
+                                
+                                @error('edificio_id') 
+                                    <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Dirección
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model.live="direccion"
+                                    readonly
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                    placeholder="Entre qué calles se encuentra">
+                                @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
                     @endif
                  
                     <div>
@@ -672,6 +771,9 @@
                                         @if($entre_calles)
                                             <p><strong>Entre calles:</strong> {{ $entre_calles }}</p>
                                         @endif
+                                    @else
+                                        <p><strong>Edificio:</strong> {{ $edificios->find($edificio_id)->nombre ?? 'Edificio no encontrado' }}</p>
+                                        <p><strong>Dirección:</strong> {{ $direccion}}</p>
                                     @endif
                                 <p><strong>Descripción:</strong> {{ $descripcion }}</p>
                             </div>
@@ -1010,17 +1112,19 @@
   @push('scripts')
     <script>
         // Variables globales para control de inicialización
-        let mapa;
-        let marcador;
-        let geocoder;
-        let autocompleteFormulario;
-        let ubicacionSeleccionada = null;
-        let mapaInicializado = false;
-        let googleMapsLoaded = false;
-        let googleMapsLoading = false;
-        let livewireListenersInitialized = false;
-        let ultimaPosicionConocida = { lat: -34.6549, lng: -59.4307 }; // Mercedes por defecto
-
+        if (typeof mapa === 'undefined') {
+            var mapa = null;
+            var marcador;
+            var geocoder;
+            var autocompleteFormulario;
+            var ubicacionSeleccionada = null;
+            var mapaInicializado = false;
+            var googleMapsLoaded = false;
+            var googleMapsLoading = false;
+            var livewireListenersInitialized = false;
+            var ultimaPosicionConocida = { lat: -34.6549, lng: -59.4307 }; // Mercedes por defecto
+        }
+        
 
         function inicializarMapa() {
             

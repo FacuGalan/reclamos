@@ -187,12 +187,13 @@ class AbmReclamos extends Component
         }
 
         // FILTRO POR CATEGORÍAS PRIVADAS
-        
-        if (!$this->ver_privada) {
+
+        if(Auth::user()->rol->id > 1){
             $query->whereHas('categoria', function ($q) {
-                $q->where('privada', false);
+                $q->where('privada', $this->ver_privada);
             });
         }
+
         
 
         $this->listaTimestamp = microtime(true);

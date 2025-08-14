@@ -18,7 +18,7 @@
             </div>
             <!-- Dropdown Container -->
             @if(Auth::user()->rol->lReclamosAlta)
-                @if(Auth::user()->ver_privada)
+                @if(Auth::user()->rol->id == 1)
                     <div class="relative group">
                         <!-- Botón Principal -->
                         <button 
@@ -62,12 +62,21 @@
                         </div>
                     </div>
                 @else
-                    <button 
-                        href="{{ route('reclamos.create') }}"
-                        wire:navigate
-                        class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-                        Nuevo Reclamo
-                    </button>
+                    @if(Auth::user()->ver_privada)
+                        <button 
+                            href="{{ route('reclamos.create.interno') }}"
+                            wire:navigate
+                            class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
+                            Nuevo Reclamo
+                        </button>
+                    @else   
+                        <button 
+                            href="{{ route('reclamos.create') }}"
+                            wire:navigate
+                            class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
+                            Nuevo Reclamo
+                        </button>
+                    @endif
 
                 @endif
             @endif
@@ -207,19 +216,23 @@
                 <table class="w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-20 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 ID / Fecha
                             </th>
                             <th class="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Solicitante
                             </th>
-                            <th class="w-28 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-40 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Categoría
                             </th>
                             <th class="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Dirección
+                                @if(Auth::user()->ver_privada)
+                                    Lugar
+                                @else
+                                    Dirección
+                                @endif
                             </th>
-                            <th class="w-64 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="w-56 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Descripción
                             </th>
                             <th class="w-20 px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -243,28 +256,30 @@
                                     <div class="text-sm font-medium text-gray-900 dark:text-white truncate">
                                         #{{ $reclamo->id }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 ">
                                         {{ \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y') }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white truncate" title="{{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}">
+                                <td class="px-6 py-4 ">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white " title="{{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}">
                                         {{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 ">
                                         DNI: {{ $reclamo->persona->dni }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900 dark:text-white truncate" title="{{ $reclamo->categoria->nombre }}">
+                                    <div class="text-sm text-gray-900 dark:text-white" title="{{ $reclamo->categoria->nombre }}">
                                         {{ $reclamo->categoria->nombre }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ $reclamo->area->nombre }}">
-                                        {{ $reclamo->area->nombre }}
-                                    </div>
+                                    @if (!$reclamo->categoria->privada)
+                                        <div class="text-sm text-gray-500 dark:text-gray-400" title="{{ $reclamo->area->nombre }}">
+                                            {{ $reclamo->area->nombre }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate" title="{{ Str::before($reclamo->direccion, ',') }}">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 " title="{{ Str::before($reclamo->direccion, ',') }}">
                                         {{ Str::before($reclamo->direccion, ',') }}
                                         @if($reclamo->barrio_id > 0)
                                             <br>
@@ -274,9 +289,9 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 w-[200px]">
-                                   <div class="text-sm text-gray-900 dark:text-white truncate" style="max-width: 100px;" title="{{ $reclamo->descripcion }}">
-                                        {{ $reclamo->descripcion }}
+                                <td class="px-6 py-4">
+                                   <div class="text-sm text-gray-900 dark:text-white" title="{{ $reclamo->descripcion }}">
+                                         {{ strlen($reclamo->descripcion) > 150 ? substr($reclamo->descripcion, 0, 150) . '...' : $reclamo->descripcion }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">

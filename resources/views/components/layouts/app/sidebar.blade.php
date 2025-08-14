@@ -60,6 +60,10 @@
                     </flux:navlist.group>
                 @endif
 
+                <flux:navlist.group :heading="__('Estadisticas')" class="grid">
+                    <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('estadisticas')" :current="request()->routeIs('estadisticas')" wire:navigate>Estadisticas</flux:navlist.item>
+                </flux:navlist.group>
+
                 @if(Auth::user()->rol->lUsuariosAbm)
                     <flux:navlist.group :heading="__('Administración')" class="grid">
                         <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('usuarios')" :current="request()->routeIs('usuarios')" wire:navigate>Usuarios</flux:navlist.item>

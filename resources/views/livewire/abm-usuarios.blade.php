@@ -400,26 +400,49 @@
                                                 placeholder="{{ $isEditing ? 'Dejar vacío para mantener actual' : 'Confirme la contraseña' }}">
                                             @error('password_confirmation') <span class="text-red-500 text-sm block mt-1">{{ $message }}</span> @enderror
                                         </div>
-
                                         <!-- Acceso para ver áreas privadas -->
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                Área Privada
-                                            </label>
-                                            <div class="w-full py-3 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
-                                                <div class="flex items-center">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        wire:model="ver_privada"
-                                                        id="acceso_areas_privadas"
-                                                        class="h-4 w-4 text-[#77BF43] focus:ring-[#77BF43] border-gray-300 rounded dark:bg-gray-800 dark:border-gray-600 cursor-pointer"
-                                                    >
-                                                    <label for="acceso_areas_privadas" class="ml-3 text-sm text-gray-700 dark:text-gray-300 select-none cursor-pointer">
-                                                        Permitir acceso a áreas privadas
+                                        @if(Auth::user()->ver_privada)
+                                            @if(Auth::user()->rol_id ==1)
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                        Área Privada
                                                     </label>
+                                                    <div class="w-full py-3 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+                                                        <div class="flex items-center">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                wire:model="ver_privada"
+                                                                id="acceso_areas_privadas"
+                                                                class="h-4 w-4 text-[#77BF43] focus:ring-[#77BF43] border-gray-300 rounded dark:bg-gray-800 dark:border-gray-600 cursor-pointer"
+                                                            >
+                                                            <label for="acceso_areas_privadas" class="ml-3 text-sm text-gray-700 dark:text-gray-300 select-none cursor-pointer">
+                                                                Permitir acceso a motivos internos
+                                                            </label>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            @else 
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                        Área Privada
+                                                    </label>
+                                                    <div class="w-full py-3 hover:bg-gray-50 dark:hover:bg-gray-700 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+                                                        <div class="flex items-center">
+                                                            <input 
+                                                                hidden
+                                                                type="checkbox" 
+                                                                wire:model="ver_privada"
+                                                                id="acceso_areas_privadas"
+                                                                class="h-4 w-4 text-[#77BF43] focus:ring-[#77BF43] border-gray-300 rounded dark:bg-gray-800 dark:border-gray-600 cursor-pointer"
+                                                            >
+                                                            <label for="acceso_areas_privadas" class="ml-3 text-sm text-gray-700 dark:text-gray-300 select-none cursor-pointer">
+                                                                Este usuario gestiona motivos internos
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endif
                                     </div>
                                 </div>
                             </div>
