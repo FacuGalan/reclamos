@@ -323,7 +323,7 @@
                                         <!-- Email -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                Email *
+                                                Email
                                             </label>
                                             <input 
                                                 type="email" 
@@ -337,7 +337,7 @@
                                         <!-- Teléfono -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                Teléfono *
+                                                Teléfono
                                             </label>
                                             <input 
                                                 type="text" 

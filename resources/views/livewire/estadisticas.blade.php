@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Estadísticas y Mapa de Calor</h1>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Estadísticas y Mapas</h1>
             <p class="text-gray-600 dark:text-gray-300">
                 Analiza la distribución geográfica y temporal de los reclamos
             </p>
@@ -124,10 +124,17 @@
                     <div class="text-xs text-red-600 dark:text-red-300">Sin Asignar</div>
                 </div-->
 
-                <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3 text-center">
+                <!--div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3 text-center">
                     <div class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ $estadisticasRendimiento['porcentaje_finalizados'] }}%</div>
                     <div class="text-xs text-indigo-600 dark:text-indigo-300">% Resolución</div>
+                </div-->
+
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3 text-center">
+                    <div class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ str_replace('.', ',', $estadisticasRendimiento['promedio_dias_resolucion']) }}</div>
+                    <div class="text-xs text-indigo-600 dark:text-indigo-300">Días resolución</div>
                 </div>
+
+                
             </div>
 
             <!-- Barra de progreso de resolución -->
@@ -236,7 +243,7 @@
             wire:loading.attr="disabled"
             class="px-6 py-3 bg-[#77BF43] hover:bg-[#5a9032] text-white rounded-lg transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             <span wire:loading.remove>
-                {{ $mostrarMapaCalor ? 'Actualizar' : 'Generar' }} Mapa de Calor
+                {{ $mostrarMapaCalor ? 'Actualizar' : 'Generar' }} Mapas
             </span>
             <span wire:loading class="flex items-center">
                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -259,9 +266,10 @@
         @endif
     </div>
 
-    <!-- Mapa de Calor -->
+    <!-- Mapas -->
     @if($mostrarMapaCalor)
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <!-- Mapa de Calor -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
                     Mapa de Calor de Reclamos
@@ -281,7 +289,7 @@
             </div>
 
             @if($totalReclamos > 0)
-                <!-- Contenedor del mapa -->
+                <!-- Contenedor del mapa de calor -->
                 <div id="mapa-calor-container" class="w-full h-96 bg-gray-200 dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></div>
                 
                 <!-- Leyenda del mapa de calor -->
@@ -302,15 +310,56 @@
                     </p>
                 </div>
             @else
-                <!-- Mensaje cuando no hay datos -->
+                <!-- Mensaje cuando no hay datos para mapa de calor -->
                 <div class="text-center py-8">
                     <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No hay datos para mostrar</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No hay datos para el mapa de calor</h3>
                     <p class="text-gray-500 dark:text-gray-400">
                         No se encontraron reclamos con coordenadas válidas para los filtros seleccionados.
-                        <br>Ajusta los filtros e intenta nuevamente.
+                    </p>
+                </div>
+            @endif
+        </div>
+
+        <!-- Mapa de Puntos Específicos -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                    Ubicaciones Específicas de Reclamos
+                    @if($totalReclamos > 0)
+                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                            ({{ $totalReclamos }} ubicaciones)
+                        </span>
+                    @endif
+                </h3>
+            </div>
+
+            @if($totalReclamos > 0)
+                <!-- Contenedor del mapa de puntos -->
+                <div id="mapa-puntos-container" class="w-full h-96 bg-gray-200 dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></div>
+                
+                <!-- Información del mapa de puntos -->
+                <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <p class="text-sm text-green-700 dark:text-green-300 flex items-center">
+                        <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Cada marcador representa un reclamo específico. Haz clic en los marcadores para ver los detalles del reclamo.</span>
+                    </p>
+                </div>
+            @else
+                <!-- Mensaje cuando no hay datos para mapa de puntos -->
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No hay ubicaciones para mostrar</h3>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        No se encontraron reclamos con coordenadas válidas para los filtros seleccionados.
                     </p>
                 </div>
             @endif
@@ -322,14 +371,18 @@
     @push('scripts')
 <script>
 // Namespace para evitar conflictos con otros mapas
-window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
+// Namespace para evitar conflictos con otros mapas
+window.EstadisticasMapas = window.EstadisticasMapas || {};
 
 (function(namespace) {
     // Variables privadas del namespace
-    let mapa = null;
+    let mapaCalor = null;
+    let mapaPuntos = null;
     let capaCalor = null;
+    let marcadores = [];
     let puntos = [];
-    let inicializado = false;
+    let inicializadoCalor = false;
+    let inicializadoPuntos = false;
     
     // Función para verificar si Google Maps está disponible
     function isGoogleMapsLoaded() {
@@ -340,9 +393,9 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
                google.maps.visualization.HeatmapLayer;
     }
     
-    // Función para inicializar el mapa de calor
+    // Función para inicializar ambos mapas
     namespace.inicializar = function(datosReclamos) {
-        console.log('Inicializando mapa de calor con:', datosReclamos.length, 'reclamos');
+        console.log('Inicializando mapas con:', datosReclamos.length, 'reclamos');
         
         // Verificar que Google Maps esté disponible
         if (!isGoogleMapsLoaded()) {
@@ -350,22 +403,32 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
             return;
         }
         
+        // Limpiar mapas anteriores
+        namespace.limpiar();
+        
+        // Inicializar mapa de calor
+        namespace.inicializarMapaCalor(datosReclamos);
+        
+        // Inicializar mapa de puntos
+        namespace.inicializarMapaPuntos(datosReclamos);
+    };
+
+    // Función para inicializar el mapa de calor
+    namespace.inicializarMapaCalor = function(datosReclamos) {
         const contenedor = document.getElementById('mapa-calor-container');
         if (!contenedor) {
             console.error('Contenedor del mapa de calor no encontrado');
             return;
         }
 
-        // Limpiar mapa anterior de forma más robusta
-        namespace.limpiar();
         contenedor.innerHTML = '';
         
         try {
             // Centro por defecto (Mercedes, Buenos Aires)
             const centro = { lat: -34.6549, lng: -59.4307 };
             
-            // Crear el mapa con configuración específica
-            mapa = new google.maps.Map(contenedor, {
+            // Crear el mapa de calor
+            mapaCalor = new google.maps.Map(contenedor, {
                 zoom: 13,
                 center: centro,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -388,8 +451,6 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
 
             // Procesar puntos para el mapa de calor
             puntos = [];
-            const puntosValidos = [];
-            
             datosReclamos.forEach(reclamo => {
                 if (reclamo.lat && reclamo.lng && 
                     !isNaN(reclamo.lat) && !isNaN(reclamo.lng) &&
@@ -397,20 +458,19 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
                     reclamo.lng >= -180 && reclamo.lng <= 180) {
                     const punto = new google.maps.LatLng(reclamo.lat, reclamo.lng);
                     puntos.push(punto);
-                    puntosValidos.push(reclamo);
                 }
             });
 
             if (puntos.length === 0) {
                 console.warn('No hay puntos válidos para mostrar en el mapa de calor');
-                mostrarMensajeSinDatos(contenedor);
+                mostrarMensajeSinDatos(contenedor, 'calor');
                 return;
             }
 
-            // Crear la capa de calor con configuración optimizada
+            // Crear la capa de calor
             capaCalor = new google.maps.visualization.HeatmapLayer({
                 data: puntos,
-                map: mapa,
+                map: mapaCalor,
                 radius: getRadiusPorZoom(13),
                 opacity: 0.8,
                 maxIntensity: Math.max(3, Math.floor(puntos.length / 8)),
@@ -428,59 +488,18 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
                 ]
             });
 
-            // Ajustar vista si hay múltiples puntos
-            if (puntos.length > 1) {
-                const bounds = new google.maps.LatLngBounds();
-                puntos.forEach(punto => bounds.extend(punto));
-                
-                // Agregar padding al bounds
-                const extendedBounds = new google.maps.LatLngBounds();
-                const ne = bounds.getNorthEast();
-                const sw = bounds.getSouthWest();
-                const latPadding = (ne.lat() - sw.lat()) * 0.1;
-                const lngPadding = (ne.lng() - sw.lng()) * 0.1;
-                
-                extendedBounds.extend(new google.maps.LatLng(ne.lat() + latPadding, ne.lng() + lngPadding));
-                extendedBounds.extend(new google.maps.LatLng(sw.lat() - latPadding, sw.lng() - lngPadding));
-                
-                mapa.fitBounds(extendedBounds);
-                
-                // Limitar zoom
-                google.maps.event.addListenerOnce(mapa, 'bounds_changed', function() {
-                    const currentZoom = mapa.getZoom();
-                    if (currentZoom > 16) {
-                        mapa.setZoom(16);
-                    } else if (currentZoom < 11) {
-                        mapa.setZoom(11);
-                    }
-                });
-            }
+            // Ajustar vista
+            ajustarVistaMapa(mapaCalor, puntos);
 
             // Ajustar radio según zoom
-            mapa.addListener('zoom_changed', function() {
-                if (capaCalor && !capaCalor.getMap()) {
-                    return; // El mapa de calor fue removido
-                }
-                if (capaCalor) {
-                    capaCalor.set('radius', getRadiusPorZoom(mapa.getZoom()));
+            mapaCalor.addListener('zoom_changed', function() {
+                if (capaCalor && capaCalor.getMap()) {
+                    capaCalor.set('radius', getRadiusPorZoom(mapaCalor.getZoom()));
                 }
             });
 
-            // Añadir marcadores informativos si hay pocos puntos
-            if (puntosValidos.length <= 5) {
-                agregarMarcadoresInformativos(puntosValidos);
-            }
-
-            // Forzar redibujado después de un momento
-            setTimeout(() => {
-                if (mapa) {
-                    google.maps.event.trigger(mapa, 'resize');
-                    mapa.setCenter(centro);
-                }
-            }, 100);
-
-            console.log('Mapa de calor inicializado exitosamente con', puntos.length, 'puntos');
-            inicializado = true;
+            console.log('Mapa de calor inicializado exitosamente');
+            inicializadoCalor = true;
             
         } catch (error) {
             console.error('Error al inicializar mapa de calor:', error);
@@ -488,15 +507,185 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
         }
     };
 
+    // Función para inicializar el mapa de puntos
+    namespace.inicializarMapaPuntos = function(datosReclamos) {
+        const contenedor = document.getElementById('mapa-puntos-container');
+        if (!contenedor) {
+            console.error('Contenedor del mapa de puntos no encontrado');
+            return;
+        }
+
+        contenedor.innerHTML = '';
+        
+        try {
+            // Centro por defecto (Mercedes, Buenos Aires)
+            const centro = { lat: -34.6549, lng: -59.4307 };
+            
+            // Crear el mapa de puntos
+            mapaPuntos = new google.maps.Map(contenedor, {
+                zoom: 13,
+                center: centro,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                disableDefaultUI: false,
+                zoomControl: true,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: true,
+                styles: [
+                    {
+                        featureType: "poi.business",
+                        stylers: [{ visibility: "off" }]
+                    },
+                    {
+                        featureType: "poi.medical",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+
+            // Procesar reclamos válidos para marcadores
+            const reclamosValidos = datosReclamos.filter(reclamo => 
+                reclamo.lat && reclamo.lng && 
+                !isNaN(reclamo.lat) && !isNaN(reclamo.lng) &&
+                reclamo.lat >= -90 && reclamo.lat <= 90 &&
+                reclamo.lng >= -180 && reclamo.lng <= 180
+            );
+
+            if (reclamosValidos.length === 0) {
+                console.warn('No hay puntos válidos para mostrar en el mapa de puntos');
+                mostrarMensajeSinDatos(contenedor, 'puntos');
+                return;
+            }
+
+            // Crear marcadores para todos los reclamos
+            marcadores = [];
+            const puntosParaBounds = [];
+
+            reclamosValidos.forEach((reclamo, index) => {
+                const position = { lat: reclamo.lat, lng: reclamo.lng };
+                puntosParaBounds.push(new google.maps.LatLng(reclamo.lat, reclamo.lng));
+                
+                // Definir colores por estado
+                const colorPorEstado = {
+                    'Finalizado': '#10B981',
+                    'Cancelado': '#EF4444',
+                    'En Proceso': '#F59E0B',
+                    'Pendiente': '#6B7280',
+                    'Asignado': '#3B82F6'
+                };
+                
+                const color = colorPorEstado[reclamo.estado] || '#6B7280';
+                
+                const marcador = new google.maps.Marker({
+                    position: position,
+                    map: mapaPuntos,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: color,
+                        fillOpacity: 0.9,
+                        strokeWeight: 2,
+                        strokeColor: '#FFFFFF'
+                    },
+                    title: `#${reclamo.id} - ${reclamo.categoria}`,
+                    zIndex: 1000 + index
+                });
+
+                // Info window simplificada y funcional
+                const descripcionCorta = reclamo.descripcion.length > 100 ? 
+                    reclamo.descripcion.substring(0, 100) + '...' : 
+                    reclamo.descripcion;
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 8px; max-width: 400px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong style="font-size: 16px;">#${reclamo.id}</strong>
+                                <span style="background: ${color}; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px;">${reclamo.estado}</span>
+                            </div>
+                            <div style="margin-bottom: 6px;">
+                                <strong>Categoría:</strong><br>
+                                <span style="font-size: 13px;">${reclamo.categoria}</span>
+                            </div>
+                            <div style="margin-bottom: 6px;">
+                                <strong>Descripción:</strong><br>
+                                <span style="font-size: 12px;">${descripcionCorta}</span>
+                            </div>
+                            <div style="margin-bottom: 6px;">
+                                <strong>Dirección:</strong><br>
+                                <span style="font-size: 12px;">📍 ${reclamo.direccion}</span>
+                            </div>
+                            <div style="border-top: 1px solid #ccc; padding-top: 6px; margin-top: 8px; display: flex; justify-content: space-between; font-size: 11px;">
+                                <span>📅 ${reclamo.fecha}</span>
+                                <span>${reclamo.area}</span>
+                            </div>
+                        </div>
+                    `,
+                    maxWidth: 400
+                });
+
+                marcador.addListener('click', function() {
+                    infoWindow.open(mapaPuntos, marcador);
+                });
+
+                marcadores.push(marcador);
+            });
+
+            // Ajustar vista
+            ajustarVistaMapa(mapaPuntos, puntosParaBounds);
+
+            console.log('Mapa de puntos inicializado exitosamente con', marcadores.length, 'marcadores');
+            inicializadoPuntos = true;
+            
+        } catch (error) {
+            console.error('Error al inicializar mapa de puntos:', error);
+            mostrarMensajeError(contenedor, error.message);
+        }
+    };
+
+    // Función para ajustar la vista del mapa
+    function ajustarVistaMapa(mapa, puntos) {
+        if (puntos.length > 1) {
+            const bounds = new google.maps.LatLngBounds();
+            puntos.forEach(punto => bounds.extend(punto));
+            
+            // Agregar padding al bounds
+            const extendedBounds = new google.maps.LatLngBounds();
+            const ne = bounds.getNorthEast();
+            const sw = bounds.getSouthWest();
+            const latPadding = (ne.lat() - sw.lat()) * 0.1;
+            const lngPadding = (ne.lng() - sw.lng()) * 0.1;
+            
+            extendedBounds.extend(new google.maps.LatLng(ne.lat() + latPadding, ne.lng() + lngPadding));
+            extendedBounds.extend(new google.maps.LatLng(sw.lat() - latPadding, sw.lng() - lngPadding));
+            
+            mapa.fitBounds(extendedBounds);
+            
+            // Limitar zoom
+            google.maps.event.addListenerOnce(mapa, 'bounds_changed', function() {
+                const currentZoom = mapa.getZoom();
+                if (currentZoom > 16) {
+                    mapa.setZoom(16);
+                } else if (currentZoom < 11) {
+                    mapa.setZoom(11);
+                }
+            });
+        }
+    }
+
     // Función para mostrar mensaje cuando no hay datos
-    function mostrarMensajeSinDatos(contenedor) {
+    function mostrarMensajeSinDatos(contenedor, tipo) {
+        const mensaje = tipo === 'calor' ? 
+            'No hay puntos válidos para el mapa de calor' : 
+            'No hay ubicaciones para mostrar';
+            
         contenedor.innerHTML = `
             <div class="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded-lg">
                 <div class="text-center">
                     <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
-                    <p class="text-gray-500 dark:text-gray-400">No hay puntos válidos para el mapa de calor</p>
+                    <p class="text-gray-500 dark:text-gray-400">${mensaje}</p>
                 </div>
             </div>
         `;
@@ -524,48 +713,6 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
         if (zoom <= 15) return 22;
         if (zoom <= 16) return 18;
         return 15;
-    }
-
-    // Función para agregar marcadores informativos
-    function agregarMarcadoresInformativos(reclamos) {
-        if (!mapa || reclamos.length === 0) return;
-        
-        reclamos.forEach(reclamo => {
-            const marcador = new google.maps.Marker({
-                position: { lat: reclamo.lat, lng: reclamo.lng },
-                map: mapa,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 6,
-                    fillColor: '#FF4444',
-                    fillOpacity: 0.9,
-                    strokeWeight: 2,
-                    strokeColor: '#FFFFFF'
-                },
-                title: `ID: ${reclamo.id} - ${reclamo.categoria}`,
-                zIndex: 1000
-            });
-
-            // Info window con mejor contenido
-            const infoWindow = new google.maps.InfoWindow({
-                content: `
-                    <div class="p-3 min-w-[250px] max-w-[300px]">
-                        <div class="font-semibold text-base mb-2 text-gray-800">#${reclamo.id} - ${reclamo.categoria}</div>
-                        <div class="text-sm text-gray-600 mb-2 line-clamp-3">${reclamo.descripcion}</div>
-                        <div class="text-xs text-gray-500 mb-1">📍 ${reclamo.direccion}</div>
-                        <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                            <span class="text-xs text-blue-600">${reclamo.fecha}</span>
-                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">${reclamo.estado}</span>
-                        </div>
-                    </div>
-                `,
-                maxWidth: 350
-            });
-
-            marcador.addListener('click', function() {
-                infoWindow.open(mapa, marcador);
-            });
-        });
     }
 
     // Función mejorada para cargar la API de Google Maps
@@ -613,7 +760,7 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
             
             script.onerror = function(error) {
                 console.error('Error al cargar Google Maps API:', error);
-                reject(new Error('Error al cargar Google Maps API para mapa de calor'));
+                reject(new Error('Error al cargar Google Maps API'));
                 delete window.initGoogleMapsCallback;
             };
             
@@ -621,87 +768,103 @@ window.EstadisticasMapaCalor = window.EstadisticasMapaCalor || {};
         });
     };
 
-    // Función para limpiar el mapa de forma segura
+    // Función para limpiar los mapas de forma segura
     namespace.limpiar = function() {
         try {
+            // Limpiar mapa de calor
             if (capaCalor) {
                 capaCalor.setMap(null);
                 capaCalor = null;
             }
-            if (mapa) {
-                // Limpiar todos los listeners
-                google.maps.event.clearInstanceListeners(mapa);
-                mapa = null;
+            if (mapaCalor) {
+                google.maps.event.clearInstanceListeners(mapaCalor);
+                mapaCalor = null;
             }
+            
+            // Limpiar mapa de puntos
+            if (marcadores && marcadores.length > 0) {
+                marcadores.forEach(marcador => marcador.setMap(null));
+                marcadores = [];
+            }
+            if (mapaPuntos) {
+                google.maps.event.clearInstanceListeners(mapaPuntos);
+                mapaPuntos = null;
+            }
+            
             puntos = [];
-            inicializado = false;
+            inicializadoCalor = false;
+            inicializadoPuntos = false;
+            
         } catch (error) {
-            console.warn('Error al limpiar mapa de calor:', error);
+            console.warn('Error al limpiar mapas:', error);
             // Forzar limpieza
-            mapa = null;
+            mapaCalor = null;
+            mapaPuntos = null;
             capaCalor = null;
+            marcadores = [];
             puntos = [];
-            inicializado = false;
+            inicializadoCalor = false;
+            inicializadoPuntos = false;
         }
     };
 
-    // Función para verificar si el mapa está activo
-    namespace.estaActivo = function() {
-        return inicializado && mapa && capaCalor;
+    // Función para verificar si los mapas están activos
+    namespace.estanActivos = function() {
+        return inicializadoCalor || inicializadoPuntos;
     };
 
-})(window.EstadisticasMapaCalor);
+})(window.EstadisticasMapas);
 
-// Event listeners mejorados para Livewire
+// Event listeners para Livewire
 document.addEventListener('livewire:init', () => {
-    console.log('Inicializando listeners de estadísticas');
+    console.log('Inicializando listeners de mapas de estadísticas');
     
-    // Escuchar evento para inicializar mapa de calor
+    // Escuchar evento para inicializar mapas
     Livewire.on('inicializar-mapa-calor', (event) => {
-        console.log('Evento recibido para inicializar mapa de calor');
+        console.log('Evento recibido para inicializar mapas');
         
         const datosReclamos = event[0].reclamos || [];
         
-        // Limpiar cualquier mapa anterior
-        if (window.EstadisticasMapaCalor.estaActivo()) {
-            window.EstadisticasMapaCalor.limpiar();
+        // Limpiar mapas anteriores
+        if (window.EstadisticasMapas.estanActivos()) {
+            window.EstadisticasMapas.limpiar();
         }
         
-        window.EstadisticasMapaCalor.cargarApi()
+        window.EstadisticasMapas.cargarApi()
             .then(() => {
-                // Dar tiempo para que el contenedor esté disponible
+                // Dar tiempo para que los contenedores estén disponibles
                 setTimeout(() => {
-                    window.EstadisticasMapaCalor.inicializar(datosReclamos);
+                    window.EstadisticasMapas.inicializar(datosReclamos);
                 }, 500);
             })
             .catch(error => {
-                console.error('Error cargando Google Maps para mapa de calor:', error);
+                console.error('Error cargando Google Maps:', error);
             });
     });
 });
 
 // Limpiar cuando se navega fuera de la página
 document.addEventListener('livewire:navigating', () => {
-    console.log('Navegando fuera de estadísticas, limpiando mapa de calor');
-    if (window.EstadisticasMapaCalor) {
-        window.EstadisticasMapaCalor.limpiar();
+    console.log('Navegando fuera de estadísticas, limpiando mapas');
+    if (window.EstadisticasMapas) {
+        window.EstadisticasMapas.limpiar();
     }
 });
 
 // Limpiar en navegación completa si no estamos en estadísticas
 document.addEventListener('livewire:navigated', () => {
     if (!window.location.pathname.includes('estadisticas')) {
-        console.log('Navegación completada fuera de estadísticas, limpiando mapa de calor');
-        if (window.EstadisticasMapaCalor) {
-            window.EstadisticasMapaCalor.limpiar();
+        console.log('Navegación completada fuera de estadísticas, limpiando mapas');
+        if (window.EstadisticasMapas) {
+            window.EstadisticasMapas.limpiar();
         }
     }
 });
 
 // Limpiar al recargar la página
 window.addEventListener('beforeunload', () => {
-    if (window.EstadisticasMapaCalor) {
-        window.EstadisticasMapaCalor.limpiar();
+    if (window.EstadisticasMapas) {
+        window.EstadisticasMapas.limpiar();
     }
 });
 </script>

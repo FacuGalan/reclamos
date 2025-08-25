@@ -3,85 +3,119 @@
     @if($currentView === 'list')
         <!-- Vista de Lista de Reclamos -->
         
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
+        <!-- Header Optimizado -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div class="flex-1 min-w-0">
                 <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Reclamos</h1>
-                <p class="text-gray-600 dark:text-gray-300">
-                    Administra y da seguimiento a todos los reclamos del sistema
+                <div class="flex items-center gap-2 mt-1">
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Administra y da seguimiento a todos los reclamos del sistema
+                    </p>
+                    
                     @if(count($areas) > 0)
-                        <br><span class="text-sm text-blue-600 dark:text-blue-400">
-                            📋 Áreas asignadas: {{ $areas->pluck('nombre')->join(', ') }}
-                        </span>
-                    @endif
-                </p>
-            </div>
-            <!-- Dropdown Container -->
-            @if(Auth::user()->rol->lReclamosAlta)
-                @if(Auth::user()->rol->id == 1)
-                    <div class="relative group">
-                        <!-- Botón Principal -->
-                        <button 
-                            href="{{ route('reclamos.create') }}"
-                            wire:navigate
-                            class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-                            Nuevo Reclamo
-                            <!-- Flecha del dropdown -->
-                            <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-
-                        <!-- Dropdown Menu -->
-                        <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform scale-95 group-hover:scale-100">
-                            
-                            <!-- Opción 1: Reclamo Normal -->
-                            <a 
-                                href="{{ route('reclamos.create') }}"
-                                wire:navigate
-                                class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-t-lg cursor-pointer">
-                                <svg class="w-5 h-5 text-[#77BF43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        <!-- Indicador de áreas con tooltip -->
+                        <div class="relative group cursor-pointer">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 cursor-help">
+                                📋 {{ count($areas) }} área{{ count($areas) > 1 ? 's' : '' }} asignada{{ count($areas) > 1 ? 's' : '' }}
+                                <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                <span class="font-medium">Reclamo</span>
-                            </a>
+                            </span>
                             
-                            <!-- Separador -->
-                            <div class="border-t border-gray-200 dark:border-gray-700"></div>
-
-                            <!-- Opción 2: Reclamo Privado -->
-                            <a 
-                                href="{{ route('reclamos.create.interno') }}"
-                                wire:navigate
-                                class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-b-lg cursor-pointer">
-                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                                <span class="font-medium">Reclamo Interno</span>
-                            </a>
+                            <!-- Tooltip hacia abajo -->
+                            <div class="absolute top-full left-0 mt-2 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 w-96 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 cursor-default">
+                                <div class="font-medium mb-2 cursor-default">Áreas asignadas:</div>
+                                
+                                <!-- Lista de áreas con scroll si es muy larga -->
+                                <div class="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 cursor-default">
+                                    <ul class="space-y-1">
+                                        @foreach($areas as $area)
+                                            <li class="flex items-center text-xs py-1 cursor-default">
+                                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
+                                                <span class="leading-relaxed cursor-default">{{ $area->nombre }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                                
+                                <!-- Contador al final si hay muchas áreas -->
+                                @if(count($areas) > 10)
+                                    <div class="border-t border-gray-700 mt-2 pt-2 text-xs text-gray-400 cursor-default">
+                                        Total: {{ count($areas) }} áreas
+                                    </div>
+                                @endif
+                                
+                                <!-- Flecha del tooltip apuntando hacia arriba -->
+                                <div class="absolute bottom-full left-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-900"></div>
+                            </div>
                         </div>
-                    </div>
-                @else
-                    @if(Auth::user()->ver_privada)
-                        <button 
-                            href="{{ route('reclamos.create.interno') }}"
-                            wire:navigate
-                            class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-                            Nuevo Reclamo
-                        </button>
-                    @else   
-                        <button 
-                            href="{{ route('reclamos.create') }}"
-                            wire:navigate
-                            class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-                            Nuevo Reclamo
-                        </button>
                     @endif
+                </div>
+            </div>
+            
+            <!-- Botón con ancho fijo para evitar que se achique -->
+            @if(Auth::user()->rol->lReclamosAlta)
+                <div class="flex-shrink-0">
+                    @if(Auth::user()->rol->id == 1)
+                        <div class="relative group">
+                            <!-- Botón Principal con ancho mínimo -->
+                            <button 
+                                onclick="window.location.href='{{ route('reclamos.create') }}'"
+                                class="min-w-[180px] px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                <span class="whitespace-nowrap">Nuevo Reclamo</span>
+                                <!-- Flecha del dropdown -->
+                                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
 
-                @endif
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform scale-95 group-hover:scale-100">
+                                
+                                <!-- Opción 1: Reclamo Normal -->
+                                <a 
+                                    href="{{ route('reclamos.create') }}"
+                                    wire:navigate
+                                    class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-t-lg">
+                                    <svg class="w-5 h-5 text-[#77BF43]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="font-medium">Reclamo</span>
+                                </a>
+                                
+                                <!-- Separador -->
+                                <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+                                <!-- Opción 2: Reclamo Privado -->
+                                <a 
+                                    href="{{ route('reclamos.create.interno') }}"
+                                    wire:navigate
+                                    class="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors rounded-b-lg">
+                                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                    <span class="font-medium">Reclamo Interno</span>
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        @if(Auth::user()->ver_privada)
+                            <button 
+                                onclick="window.location.href='{{ route('reclamos.create.interno') }}'"
+                                class="min-w-[180px] px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                <span class="whitespace-nowrap">Nuevo Reclamo</span>
+                            </button>
+                        @else   
+                            <button 
+                                onclick="window.location.href='{{ route('reclamos.create') }}'"
+                                class="min-w-[180px] px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                <span class="whitespace-nowrap">Nuevo Reclamo</span>
+                            </button>
+                        @endif
+                    @endif
+                </div>
             @endif
         </div>
-
         <!-- Filtros -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex flex-col md:flex-row justify-between items-center mb-4">
@@ -122,18 +156,34 @@
                         placeholder="Buscar por descripción, dirección, DNI o nombre...">
                 </div>
 
-                <!-- Filtro por barrio -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
-                    <select 
-                        wire:model.live="filtro_barrio"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                        <option value="">Todos los barrios</option>
-                        @foreach($barrios as $barrio)
-                            <option value="{{ $barrio->id }}">{{ $barrio->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                @if($this->ver_privada)
+                    <!-- Filtro por edificio -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio</label>
+                        <select 
+                            wire:model.live="filtro_edificio"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                            <option value="">Todos los edificios</option>
+                            @foreach($edificios as $edificio)
+                                <option value="{{ $edificio->id }}">{{ $edificio->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                @else
+                    <!-- Filtro por barrio -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
+                        <select 
+                            wire:model.live="filtro_barrio"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                            <option value="">Todos los barrios</option>
+                            @foreach($barrios as $barrio)
+                                <option value="{{ $barrio->id }}">{{ $barrio->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
 
                 <!-- Filtro por estado -->
                 <div>
@@ -280,12 +330,20 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-500 dark:text-gray-400 " title="{{ Str::before($reclamo->direccion, ',') }}">
-                                        {{ Str::before($reclamo->direccion, ',') }}
-                                        @if($reclamo->barrio_id > 0)
+                                        @if($reclamo->edificio_id != null)
+                                            {{ $reclamo->edificio_id != null ? $reclamo->edificio->nombre : '' }}
                                             <br>
-                                            <span class="truncate block" title="Barrio: {{ $reclamo->barrio->nombre}}">
-                                                Barrio: {{ $reclamo->barrio->nombre}}
+                                            <span class="truncate block">
+                                                {{ Str::before($reclamo->direccion, ',') }}
                                             </span>
+                                        @else
+                                            {{ Str::before($reclamo->direccion, ',') }}
+                                            @if($reclamo->barrio_id > 0)
+                                                <br>
+                                                <span class="truncate block" title="Barrio: {{ $reclamo->barrio->nombre}}">
+                                                    Barrio: {{ $reclamo->barrio->nombre}}
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 </td>

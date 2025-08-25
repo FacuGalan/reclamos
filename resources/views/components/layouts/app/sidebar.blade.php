@@ -61,7 +61,7 @@
                 @endif
 
                 <flux:navlist.group :heading="__('Estadisticas')" class="grid">
-                    <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('estadisticas')" :current="request()->routeIs('estadisticas')" wire:navigate>Estadisticas</flux:navlist.item>
+                    <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('estadisticas')" :current="request()->routeIs('estadisticas')" >Estadisticas</flux:navlist.item>
                 </flux:navlist.group>
 
                 @if(Auth::user()->rol->lUsuariosAbm)
@@ -81,7 +81,7 @@
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevrons-up-down"
-                    class="cursor-pointer bg-[#3F516A] dark:bg-[#1F2937] dark:text-white"
+                    class="cursor-pointer bg-[#3F516A] text-white dark:bg-[#1F2937] dark:text-white"
                 />
 
                 <flux:menu class="w-[220px]">

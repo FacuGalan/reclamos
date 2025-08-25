@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\OrdenImpresionController;
+
 // Ruta principal que carga la vista home en el slot del welcome
 Route::get('/', function () {
     return view('welcome', ['slot' => view('home')]);
@@ -77,6 +79,8 @@ Route::get('reclamos/create/interno', function () {
 Route::view('modificar-reclamo/{reclamo}', 'modificar-reclamo')
     ->middleware(['auth', 'verified'])
     ->name('modificar-reclamo');
+
+Route::get('/orden/imprimir', [OrdenImpresionController::class, 'imprimir'])->name('orden.imprimir');
 
 // REPORTES
 Route::view('reportes', 'reportes')

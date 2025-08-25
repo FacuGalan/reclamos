@@ -63,6 +63,20 @@
                 :estado-id="$reclamo->estado->id" 
                 size="large" 
                 wire:key="estado-encabezado-{{ $reclamo->id }}-{{ $reclamo->estado->id }}" />
+                
+                <a href="#" 
+                onclick="event.preventDefault(); 
+                        @this.call('prepararDatosImpresion').then(() => {
+                            window.open('{{ route('orden.imprimir') }}', '_blank', 'width=900,height=1200'); 
+                        }); 
+                        return false;"
+                class="w-full md:w-auto px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white dark:text-gray-200 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition-colors cursor-pointer flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    <span>Imprimir Orden</span>
+                </a>
+
         </div>
     </div>
 
@@ -150,7 +164,7 @@
                 </h2>
                 
                 <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 {{ $isPrivateArea ? '' : 'md:grid-cols-2' }} gap-6">
                         <!-- Selector de categoría -->
                         <div >
                             <div x-data="{
@@ -231,7 +245,7 @@
                         
                         </div>
 
-                        <div>
+                        <div {{ $isPrivateArea ? 'hidden' : '' }} >
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Area
                             </label>
@@ -390,6 +404,8 @@
                 </button>
             @endif
 
+            
+
             @if($noAplica == 1)
                 <label class="inline-flex items-center mr-4 text-red-500 font-bold">
                     Este reclamo no aplica
@@ -411,7 +427,7 @@
                 @if($reclamo->estado->id == 4 || !$editable) disabled @endif>
                 <!-- Estado normal -->
                 <span wire:loading.remove wire:target="save" x-show="!showSuccess" class="flex items-center whitespace-nowrap">
-                    Actualizar Reclamo
+                    Modificar Reclamo
                 </span>
                 
                 <!-- Estado guardando -->
@@ -427,7 +443,7 @@
 
                 <!-- Estado éxito -->
                 <span x-show="showSuccess" class="flex items-center whitespace-nowrap">
-                    ¡Reclamo Actualizado!
+                    ¡Reclamo Modificado!
                 </span>
             </button>
         </div>
@@ -569,7 +585,7 @@
                                     <input type="checkbox" wire:model="noAplica" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
                                 </label>
-                                <label class="inline-flex items-center ml-4">
+                                <label class="inline-flex items-center ml-4" {{ $reclamo->categoria->privada ? 'hidden' : '' }}>
                                     <input type="checkbox" wire:model="notificado" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Notificar al vecino</span>
                                 </label>
@@ -635,17 +651,5 @@
             </div>  
         @endif
     @endif
-
-    <!-- Script para manejo de navegación automática -->
-    <script>
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('reclamo-actualizado', (event) => {
-                // Después de 3 segundos, volver automáticamente a la lista
-                setTimeout(() => {
-                    @this.volverALista();
-                }, 3000);
-            });
-        });
-    </script>
 
 </div>

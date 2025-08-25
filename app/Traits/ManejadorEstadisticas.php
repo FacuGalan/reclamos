@@ -214,7 +214,7 @@ trait ManejadorEstadisticas
      * Obtener estadísticas de rendimiento
      */
     protected function estadisticasRendimiento(array $userAreas, ?string $fechaDesde = null, ?string $fechaHasta = null,
-                                               ?string $categoria, ?string $area, ?string $barrio ): array
+                                           ?string $categoria, ?string $area, ?string $barrio ): array
     {
         $query = Reclamo::with(['categoria'])
             ->whereIn('area_id', $userAreas);
@@ -246,10 +246,16 @@ trait ManejadorEstadisticas
             COUNT(CASE WHEN estado_id = 5 THEN 1 END) as cancelados,
             COUNT(CASE WHEN estado_id  < 4 OR estado_id > 5 THEN 1 END) as activos,
             COUNT(CASE WHEN responsable_id IS NOT NULL THEN 1 END) as asignados,
-            COUNT(CASE WHEN coordenadas IS NOT NULL AND coordenadas != "" THEN 1 END) as con_ubicacion
+            COUNT(CASE WHEN coordenadas IS NOT NULL AND coordenadas != "" THEN 1 END) as con_ubicacion,
+            AVG(CASE WHEN estado_id = 4 THEN DATEDIFF(updated_at, created_at) END) as promedio_dias_resolucion
         ')->whereHas('categoria', function ($q) {
                 $q->where('privada', false);
         })->first();    
+
+        // Redondear el promedio de días de resolución
+        $promedioDiasResolucion = $stats->promedio_dias_resolucion 
+            ? round($stats->promedio_dias_resolucion, 1) 
+            : 0;
 
         return [
             'total_reclamos' => $stats->total ?? 0,
@@ -259,6 +265,7 @@ trait ManejadorEstadisticas
             'asignados' => $stats->asignados ?? 0,
             'con_ubicacion' => $stats->con_ubicacion ?? 0,
             'sin_asignar' => ($stats->total ?? 0) - ($stats->asignados ?? 0),
+            'promedio_dias_resolucion' => $promedioDiasResolucion,
             'porcentaje_finalizados' => $stats->total > 0 ? round(($stats->finalizados / $stats->total) * 100, 1) : 0,
             'porcentaje_con_ubicacion' => $stats->total > 0 ? round(($stats->con_ubicacion / $stats->total) * 100, 1) : 0
         ];

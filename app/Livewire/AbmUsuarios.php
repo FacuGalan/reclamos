@@ -61,9 +61,9 @@ class AbmUsuarios extends Component
         'dni' => 'required|numeric|digits_between:7,11|unique:users,dni',
         'name' => 'required|string|max:255',
         'email' => 'nullable|email|max:255|unique:users,email',
-        'telefono' => 'required|numeric|digits_between:10,15',
+        'telefono' => 'nullable|numeric|digits_between:10,15',
         'rol_id' => 'nullable|exists:user_rols,id',
-        'password' => 'required|string|min:8|confirmed',
+        'password' => 'required|string|min:6|confirmed',
         'areas_asignadas' => 'nullable|array',
     ];
 
@@ -75,10 +75,9 @@ class AbmUsuarios extends Component
         'name.required' => 'El nombre es obligatorio',
         'email.email' => 'Ingrese un email válido',
         'email.unique' => 'Ya existe un usuario con este email',
-        'telefono.required' => 'El teléfono es obligatorio',
         'telefono.digits_between' => 'El teléfono debe tener entre 10 y 15 dígitos',
         'password.required' => 'La contraseña es obligatoria',
-        'password.min' => 'La contraseña debe tener al menos 8 caracteres',
+        'password.min' => 'La contraseña debe tener al menos 6 caracteres',
         'password.confirmed' => 'Las contraseñas no coinciden',
     ];
 

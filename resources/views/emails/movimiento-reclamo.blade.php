@@ -55,7 +55,9 @@
             <strong>Estado Actual:</strong> {{ $reclamo->estado->nombre ?? 'Sin estado' }}<br>
             <strong>Fecha de Actualización:</strong> {{ date('d/m/Y H:i') }}
         </div>
-
+        @if($reclamo->no_aplica)
+            <p style="color:red;"><strong>No Aplica:</strong> Este reclamo no aplica para resolución municipal.</p>
+        @endif
         @if($observaciones)
             <p><strong>Observaciones:</strong></p>
             <p>{{ $observaciones }}</p>

@@ -106,13 +106,13 @@ class ModificarReclamo extends Component
         'persona_apellido' => 'required|string|max:255',
         'persona_telefono' => 'required|numeric|digits_between:10,15',
         'persona_email' => 'nullable|email|max:255',
-        'descripcion' => 'required|string|max:1000',
+        'descripcion' => 'nullable|string|max:500',
         'direccion' => 'required|string|max:255',
         'entre_calles' => 'nullable|string|max:255',
         'coordenadas' => 'nullable|string',
         'categoria_id' => 'required|exists:categorias,id',
         'estado_id' => 'required|exists:estados,id',
-        'edificio_id' => 'required|exists:edificios,id',
+        'edificio_id' => 'nullable|exists:edificios,id',
     ];
 
     protected $messages = [
@@ -124,7 +124,7 @@ class ModificarReclamo extends Component
         'persona_telefono.digits_between' => 'El teléfono debe tener entre 10 y 15 dígitos',
         'persona_email.email' => 'Ingrese un email válido',
         'descripcion.required' => 'La descripción del reclamo es obligatoria',
-        'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
+        'descripcion.max' => 'La descripción no puede exceder los 500 caracteres',
         'direccion.required' => 'La dirección es obligatoria',
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'estado_id.required' => 'Debe seleccionar un estado',
@@ -433,11 +433,9 @@ class ModificarReclamo extends Component
             // En tu función guardarMovimiento, cambia esta parte:
             if ($this->notificado && !empty($this->reclamo->persona->email)) {
                 try {
-                    Log::info('Intentando enviar email a: ' .  $this->reclamo->persona->email);
-                    
+  
                     Mail::to($this->reclamo->persona->email)->send(new MovimientoReclamoMail($this->reclamo, $this->observaciones));
-                    
-                    Log::info('Email enviado exitosamente a: ' . $this->reclamo->persona->email);
+                
                     
                 } catch (\Exception $emailException) {
                     Log::error('Error detallado al enviar email: ' . $emailException->getMessage(), [
@@ -607,6 +605,87 @@ class ModificarReclamo extends Component
     {
         $this->mostrarNotificacion = false;
         $this->mensajeNotificacion = '';
+    }
+
+    // Agregar este método a tu clase ModificarReclamo
+    public function prepararDatosImpresion()
+    {
+        \Log::info('Método prepararDatosImpresion iniciado');
+        
+        // ... mismo código que tenías en imprimirOrden, pero sin el dispatch
+        // Solo la parte de guardar en sesión, sin el evento
+        
+        $reclamo = Reclamo::with([
+            'persona', 'categoria', 'area', 'estado', 'edificio',
+            'movimientos' => function($query) {
+                $query->with(['tipoMovimiento', 'usuario'])->orderBy('created_at', 'desc');
+            }
+        ])->find($this->reclamoId);
+
+        if (!$reclamo) {
+            return false;
+        }
+
+        session(['datos_orden_impresion' => [
+            'numero_orden' => str_pad($reclamo->id, 5, '0', STR_PAD_LEFT),
+            'fecha_impresion' => now()->format('Y-m-d H:i:s'),
+            'sector' => $reclamo->area->nombre ?? 'N/A',
+            'motivo' => $reclamo->categoria->nombre ?? 'N/A',
+            'numero_reclamo' => $reclamo->id,
+            'fecha_reclamo' => $reclamo->created_at->format('Y-m-d - H:i:s'),
+            'persona_nombre' => $reclamo->persona->nombre . ' ' . $reclamo->persona->apellido,
+            'persona_telefono' => $reclamo->persona->telefono ?? 'N/A',
+            'direccion' => $reclamo->direccion ?? 'N/A',
+            'entre_calles' => $reclamo->entre_calles,
+            'descripcion' => $reclamo->descripcion,
+            'estado_actual' => $reclamo->estado->nombre ?? 'N/A',
+            'historial' => $reclamo->movimientos->map(function($mov) {
+                return [
+                    'fecha' => $mov->created_at->format('Y-m-d (H:i)'),
+                    'descripcion' => $mov->observaciones ?? 'Sin observaciones',
+                    'usuario' => $mov->usuario->name ?? 'Sistema'
+                ];
+            })->toArray()
+        ]]);
+        
+        \Log::info('Datos preparados para impresión');
+        return true;
+    }
+
+    public function abrirWhatsApp()
+    {
+        if (empty($this->persona_telefono)) {
+            $this->addError('persona_telefono', 'Por favor, ingrese un número de teléfono válido');
+            return;
+        }
+        
+        $numeroFormateado = $this->formatearNumeroWhatsApp($this->persona_telefono);
+        
+        if (!$numeroFormateado) {
+            $this->addError('persona_telefono', 'El número de teléfono contiene caracteres no válidos');
+            return;
+        }
+        
+        $this->dispatch('abrir-whatsapp', ['numeroFormateado' => $numeroFormateado]);
+    }
+
+    private function formatearNumeroWhatsApp($telefono)
+    {
+        $numeroLimpio = preg_replace('/[\s\-\(\)\+]/', '', $telefono);
+        
+        if (!preg_match('/^\d+$/', $numeroLimpio)) {
+            return false;
+        }
+        
+        if (str_starts_with($numeroLimpio, '0')) {
+            $numeroLimpio = substr($numeroLimpio, 1);
+        }
+        
+        if (!str_starts_with($numeroLimpio, '54')) {
+            $numeroLimpio = '549' . $numeroLimpio;
+        }
+        
+        return $numeroLimpio;
     }
 
     public function render()

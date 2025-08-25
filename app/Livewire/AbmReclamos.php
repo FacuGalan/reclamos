@@ -9,10 +9,12 @@ use App\Models\Area;
 use App\Models\Categoria;
 use App\Models\Estado;
 use App\Models\Barrio;
+use App\Models\Edificio;
 use Illuminate\Support\Facades\Auth;
 
 use App\Exports\GenericExport;
-use Maatwebsite\Excel\Facades\Excel;
+
+
 
 class AbmReclamos extends Component
 {
@@ -27,7 +29,8 @@ class AbmReclamos extends Component
     public $filtro_categoria = '';
     public $filtro_fecha_desde = '';
     public $filtro_fecha_hasta = '';
-    
+    public $filtro_edificio = '';
+
     // Propiedades para navegación entre vistas
     public $currentView = 'list'; // 'list', 'create', 'edit'
     public $reclamoEditable = true; // Para saber si se está editando un reclamo
@@ -41,6 +44,7 @@ class AbmReclamos extends Component
     public $barrios = [];
     public $areas = [];
     public $categorias = [];
+    public $edificios = [];
 
     public $listaTimestamp; // NUEVO: para forzar re-renderización
 
@@ -58,6 +62,7 @@ class AbmReclamos extends Component
         'filtro_categoria' => ['except' => ''],
         'filtro_fecha_desde' => ['except' => ''],
         'filtro_fecha_hasta' => ['except' => ''],
+        'filtro_edificio' => ['except' => ''],
         'currentView' => ['except' => 'list'],              // ← AGREGAR ESTO
         'selectedReclamoId' => ['except' => null, 'as' => 'reclamo'], // ← AGREGAR ESTO
     ];
@@ -85,7 +90,8 @@ class AbmReclamos extends Component
         $this->barrios = Barrio::orderBy('nombre')->get();
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::whereIn('id', $this->userAreas)->orderBy('nombre')->get();
-        $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
+        $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->where('privada', $this->ver_privada)->orderBy('nombre')->get();
+        $this->edificios = Edificio::orderBy('nombre')->get();
 
         // Validación: Si está en modo edit, verificar que el reclamo existe y pertenece a las áreas del usuario
         if ($this->currentView === 'edit' && $this->selectedReclamoId) {
@@ -129,9 +135,14 @@ class AbmReclamos extends Component
         $this->resetPage();
     }
 
+    public function updatingFiltroEdificio()
+    {
+        $this->resetPage();
+    }
+
     public function getReclamos($forExport = false)
     {
-        $query = Reclamo::with(['persona', 'categoria', 'area', 'estado','barrio', 'usuario', 'responsable'])
+        $query = Reclamo::with(['persona', 'categoria', 'area', 'estado','barrio','edificio', 'usuario', 'responsable'])
             ->whereIn('area_id', $this->userAreas) // ← FILTRO PRINCIPAL: Solo reclamos de áreas del usuario
             ->orderBy('created_at', 'desc');
 
@@ -186,6 +197,10 @@ class AbmReclamos extends Component
             $query->where('fecha', '<=', $this->filtro_fecha_hasta);
         }
 
+        if ($this->filtro_edificio) {
+            $query->where('edificio_id', $this->filtro_edificio);
+        }
+
         // FILTRO POR CATEGORÍAS PRIVADAS
 
         if(Auth::user()->rol->id > 1){
@@ -216,6 +231,7 @@ class AbmReclamos extends Component
         $this->filtro_categoria = '';
         $this->filtro_fecha_desde = '';
         $this->filtro_fecha_hasta = '';
+        $this->filtro_edificio = '';
         $this->resetPage();
     }
 
@@ -320,76 +336,75 @@ class AbmReclamos extends Component
 
     // Método para exportar a Excel
     public function exportarExcel()
-    {
-        // 1. Obtener los datos filtrados
-        $data = $this->getReclamos(true)->get();
-        
-        // 2. Definir encabezados
-        $headings = [
-            'ID',
-            'Fecha',
-            'Nombre',
-            'Apellido',
-            'DNI',
-            'Teléfono',
-            'Email',
-            'Categoría',
-            'Área',
-            'Descripción',
-            'Dirección',
-            'Barrio',
-            'Estado',
-            'Usuario Creador',
-            'Responsable',
-            'Fecha Creación'
-        ];
-        
-        // 3. Función de mapeo personalizada
-        $mappingCallback = function ($reclamo) {
-            return [
-                $reclamo->id,
-                \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y'),
-                $reclamo->persona->nombre,
-                $reclamo->persona->apellido,
-                $reclamo->persona->dni,
-                $reclamo->persona->telefono ?? 'N/A',
-                $reclamo->persona->email ?? 'N/A',
-                $reclamo->categoria->nombre,
-                $reclamo->area->nombre,
-                $reclamo->descripcion,
-                $reclamo->direccion,
-                $reclamo->barrio->nombre ?? 'N/A',
-                $reclamo->estado->nombre,
-                $reclamo->usuario?->name ?? 'N/A',
-                $reclamo->responsable?->name ?? 'Sin asignar',
-                $reclamo->created_at->format('d/m/Y H:i'),
+        {
+            // 1. Obtener los datos filtrados
+            $data = $this->getReclamos(true)->get();
+            
+            // 2. Definir encabezados
+            $headings = [
+                'ID',
+                'Fecha',
+                'Nombre',
+                'Apellido',
+                'DNI',
+                'Teléfono',
+                'Email',
+                'Categoría',
+                'Área',
+                'Descripción',
+                'Dirección',
+                'Barrio',
+                'Estado',
+                'Usuario Creador',
+                'Responsable',
+                'Fecha Creación'
             ];
-        };
-        
-        // 4. Estilo personalizado para encabezados
-        $headerStyle = [
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '77BF43'], // Tu color verde personalizado
-            ],
-        ];
-        
-        // 5. Crear la exportación
-        $export = new GenericExport(
-            $data,
-            $headings,
-            $mappingCallback,
-            'Reclamos - ' . date('d/m/Y'),
-            $headerStyle
-        );
-        
-        // 6. Descargar el archivo
-        return Excel::download($export, 'reclamos_' . date('Y-m-d_H-i-s') . '.xlsx');
-    }
+            
+            // 3. Función de mapeo personalizada
+            $mappingCallback = function ($reclamo) {
+                return [
+                    $reclamo->id,
+                    \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y'),
+                    $reclamo->persona->nombre,
+                    $reclamo->persona->apellido,
+                    $reclamo->persona->dni,
+                    $reclamo->persona->telefono ?? 'N/A',
+                    $reclamo->persona->email ?? 'N/A',
+                    $reclamo->categoria->nombre,
+                    $reclamo->area->nombre,
+                    $reclamo->descripcion,
+                    $reclamo->direccion,
+                    $reclamo->barrio->nombre ?? 'N/A',
+                    $reclamo->estado->nombre,
+                    $reclamo->usuario?->name ?? 'N/A',
+                    $reclamo->responsable?->name ?? 'Sin asignar',
+                    $reclamo->created_at->format('d/m/Y H:i'),
+                ];
+            };
+            
+            // 4. Estilo personalizado para encabezados (tu color verde)
+            $headerStyle = [
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF'],
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '77BF43'], // Tu color verde personalizado
+                ],
+            ];
+            
+            // 5. Crear y descargar la exportación
+            $export = new GenericExport(
+                $data,
+                $headings,
+                $mappingCallback,
+                'Reclamos - ' . date('d-m-Y'),
+                $headerStyle
+            );
+            
+            return $export->download();
+        }
 
     public function render()
     {

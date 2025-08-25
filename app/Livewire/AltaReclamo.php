@@ -15,6 +15,10 @@ use App\Models\Barrio;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+use App\Mail\ReclamoConfirmacion;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+
 /**
  * @property Collection $categorias
  * @property Collection $categoriasFiltradas
@@ -117,7 +121,7 @@ class AltaReclamo extends Component
     protected $messages = [
         'persona_dni.required' => 'El DNI es obligatorio',
         'persona_dni.numeric' => 'El DNI debe contener solo números',
-        'persona_dni.digits_between' => 'El DNI debe tener 8 dígitos',
+        'persona_dni.digits' => 'El DNI debe tener 8 dígitos',
         'persona_nombre.required' => 'El nombre es obligatorio',
         'persona_apellido.required' => 'El apellido es obligatorio',
         'persona_telefono.required' => 'El teléfono es obligatorio',
@@ -145,7 +149,7 @@ class AltaReclamo extends Component
         }
         $this->categorias = Categoria::where('privada', $this->isPrivateArea)
                                     ->whereIn('area_id', $this->userAreas)
-                                    ->orderBy('nombre')
+                                    ->orderBy($this->contexto === 'publico' ? 'nombre_publico' : 'nombre')
                                     ->get();
 
         $this->categoriasFiltradas = $this->categorias;
@@ -475,42 +479,41 @@ class AltaReclamo extends Component
     }
 
     public function obtenerBarrioPorCoordenadas($coordenadas)
-{
-    if (empty($coordenadas)) {
-        return null;
+    {
+        if (empty($coordenadas)) {
+            return null;
+        }
+        
+        $coords = explode(',', $coordenadas);
+        if (count($coords) != 2) {
+            return null;
+        }
+        
+        $lat = trim($coords[0]);
+        $lng = trim($coords[1]);
+        
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return null;
+        }
+        
+        // Construir el punto directamente en la consulta
+        $punto = "POINT({$lng} {$lat})";
+        
+        $barrio = DB::selectOne("
+            SELECT id 
+            FROM barrios 
+            WHERE ST_Contains(
+                ST_GeomFromText(poligono, 4326),
+                ST_GeomFromText(?, 4326)
+            )
+            LIMIT 1
+        ", [$punto]);
+        
+        return $barrio ? $barrio->id : null;
     }
-    
-    $coords = explode(',', $coordenadas);
-    if (count($coords) != 2) {
-        return null;
-    }
-    
-    $lat = trim($coords[0]);
-    $lng = trim($coords[1]);
-    
-    if (!is_numeric($lat) || !is_numeric($lng)) {
-        return null;
-    }
-    
-    // Construir el punto directamente en la consulta
-    $punto = "POINT({$lng} {$lat})";
-    
-    $barrio = DB::selectOne("
-        SELECT id 
-        FROM barrios 
-        WHERE ST_Contains(
-            ST_GeomFromText(poligono, 4326),
-            ST_GeomFromText(?, 4326)
-        )
-        LIMIT 1
-    ", [$punto]);
-    
-    return $barrio ? $barrio->id : null;
-}
 
     public function save()
     {
-        
         // Activar estado de guardado
         $this->isSaving = true;
 
@@ -564,6 +567,10 @@ class AltaReclamo extends Component
             $categoria = Categoria::find($this->categoria_id);
             $nombreCategoria = $categoria ? $categoria->nombre : 'Sin categoría';
 
+            if($this->edificio_id == ''){
+                $this->edificio_id = null; // Si no se seleccionó edificio, dejar como null
+            }
+            
             // Crear el reclamo
             $this->reclamoCreado = Reclamo::create([
                 'fecha' => now()->toDateString(),
@@ -579,7 +586,7 @@ class AltaReclamo extends Component
                 'domicilio_id' => $domicilio->id,
                 'barrio_id' => $barrio_encontrado,
                 'usuario_id' => Auth::id() ?? 1,
-                'responsable_id' => null //Auth::id() ?? 1,
+                'responsable_id' => null
             ]);
 
             Movimiento::create([
@@ -590,6 +597,32 @@ class AltaReclamo extends Component
                 'usuario_id' => Auth::id() ?? 1,
                 'estado_id' => 1
             ]);
+
+            // NUEVO: Enviar email de confirmación si la persona tiene email
+            if (!empty($persona->email) && filter_var($persona->email, FILTER_VALIDATE_EMAIL)) {
+                try {
+                    // Cargar el reclamo con todas sus relaciones para el email
+                    $reclamoCompleto = Reclamo::with(['persona', 'categoria', 'estado', 'edificio'])
+                        ->find($this->reclamoCreado->id);
+                    
+                    \Illuminate\Support\Facades\Mail::to($persona->email)
+                        ->send(new \App\Mail\ReclamoConfirmacion($reclamoCompleto));
+                        
+                    // Log para debugging (opcional)
+                    \Illuminate\Support\Facades\Log::info('Email de confirmación enviado', [
+                        'reclamo_id' => $this->reclamoCreado->id,
+                        'email' => $persona->email
+                    ]);
+                    
+                } catch (\Exception $mailException) {
+                    // Si falla el envío del email, log el error pero no interrumpir el proceso
+                    \Illuminate\Support\Facades\Log::error('Error enviando email de confirmación', [
+                        'reclamo_id' => $this->reclamoCreado->id,
+                        'email' => $persona->email,
+                        'error' => $mailException->getMessage()
+                    ]);
+                }
+            }
 
             DB::commit();
 
@@ -604,41 +637,36 @@ class AltaReclamo extends Component
                     'redirect_url' => $this->redirectAfterSave ?: route('reclamos')
                 ]);
             }
-                // Comportamiento diferente según el contexto
-                elseif ($this->contexto === 'privado') {
-                    // Área privada: mostrar animación del botón y redirigir inmediatamente
-                    $this->isSaving = false;
-                    
-                    // Emitir evento local para mostrar el botón de éxito
-                    $this->dispatch('reclamo-creado-exitoso');
-                    
-                    // Volver al ABM con un mensaje de éxito que se mostrará allí
-                    //session()->flash('reclamo_creado', 'Reclamo creado exitosamente');
+            // Comportamiento diferente según el contexto
+            elseif ($this->contexto === 'privado') {
+                // Área privada: mostrar animación del botón y redirigir inmediatamente
+                $this->isSaving = false;
+                
+                // Emitir evento local para mostrar el botón de éxito
+                $this->dispatch('reclamo-creado-exitoso');
+                
+                // Emitir evento que manejará el toast y la redirección
+                $this->dispatch('reclamo-guardado-con-redirect', [
+                    'mensaje' => 'Reclamo creado exitosamente',
+                    'redirect_url' => route('reclamos')
+                ]);
+                
+                $this->isSaving = false;
+                
+            } else {
+                // Área pública: mostrar notificación completa y redirigir al home
+                $this->isSaving = false;
+                
+                $this->dispatch('reclamo-creado-exitoso', [
+                    'id' => $this->reclamoCreado->id,
+                    'fecha' => $this->reclamoCreado->fecha,
+                    'nombre_completo' => $this->persona_nombre . ' ' . $this->persona_apellido,
+                    'categoria' => $nombreCategoria
+                ]);
 
-                    // Emitir evento que manejará el toast y la redirección
-                    $this->dispatch('reclamo-guardado-con-redirect', [
-                        'mensaje' => 'Reclamo creado exitosamente',
-                        'redirect_url' => route('reclamos')
-                    ]);
-                    
-                    // Área privada: emitir evento con información de redirección
-                    $this->isSaving = false;
-                    
-                    
-                } else {
-                    // Área pública: mostrar notificación completa y redirigir al home
-                    $this->isSaving = false;
-                    
-                    $this->dispatch('reclamo-creado-exitoso', [
-                        'id' => $this->reclamoCreado->id,
-                        'fecha' => $this->reclamoCreado->fecha,
-                        'nombre_completo' => $this->persona_nombre . ' ' . $this->persona_apellido,
-                        'categoria' => $nombreCategoria
-                    ]);
-
-                    // Redirigir al home después de un delay
-                    $this->js('setTimeout(() => { window.location.href = "' . route('home') . '" }, 10000)');
-                }
+                // Redirigir al home después de un delay
+                $this->js('setTimeout(() => { window.location.href = "' . route('home') . '" }, 10000)');
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();
