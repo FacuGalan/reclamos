@@ -142,7 +142,7 @@
             <!-- Texto -->
             <div class="w-full ml-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white pt-6">
-                    Guía de trámites    
+                    Preguntas Frecuentes    
                 </h3>
                 <p class="text-gray-600 dark:text-gray-300 mb-6 flex-1">
                     Accede a información útil sobre trámites

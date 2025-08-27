@@ -567,7 +567,7 @@ class AltaReclamo extends Component
             $categoria = Categoria::find($this->categoria_id);
             $nombreCategoria = $categoria ? $categoria->nombre : 'Sin categoría';
 
-            if($this->edificio_id == ''){
+            if(strlen($this->edificio_id) == 0){
                 $this->edificio_id = null; // Si no se seleccionó edificio, dejar como null
             }
             

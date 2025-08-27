@@ -652,42 +652,6 @@ class ModificarReclamo extends Component
         return true;
     }
 
-    public function abrirWhatsApp()
-    {
-        if (empty($this->persona_telefono)) {
-            $this->addError('persona_telefono', 'Por favor, ingrese un número de teléfono válido');
-            return;
-        }
-        
-        $numeroFormateado = $this->formatearNumeroWhatsApp($this->persona_telefono);
-        
-        if (!$numeroFormateado) {
-            $this->addError('persona_telefono', 'El número de teléfono contiene caracteres no válidos');
-            return;
-        }
-        
-        $this->dispatch('abrir-whatsapp', ['numeroFormateado' => $numeroFormateado]);
-    }
-
-    private function formatearNumeroWhatsApp($telefono)
-    {
-        $numeroLimpio = preg_replace('/[\s\-\(\)\+]/', '', $telefono);
-        
-        if (!preg_match('/^\d+$/', $numeroLimpio)) {
-            return false;
-        }
-        
-        if (str_starts_with($numeroLimpio, '0')) {
-            $numeroLimpio = substr($numeroLimpio, 1);
-        }
-        
-        if (!str_starts_with($numeroLimpio, '54')) {
-            $numeroLimpio = '549' . $numeroLimpio;
-        }
-        
-        return $numeroLimpio;
-    }
-
     public function render()
     {
         return view('livewire.modificar-reclamo');
