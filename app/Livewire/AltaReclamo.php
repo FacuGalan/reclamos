@@ -105,10 +105,10 @@ class AltaReclamo extends Component
     ];
 
     protected $rules = [
-        'persona_dni' => 'required|numeric|digits:8',
+        'persona_dni' => 'required|numeric|digits_between:7,11',
         'persona_nombre' => 'required|string|max:255',
         'persona_apellido' => 'required|string|max:255',
-        'persona_telefono' => 'required|numeric|digits_between:10,15',
+        'persona_telefono' => 'required|numeric|digits:10',
         'persona_email' => 'nullable|email|max:255',
         'descripcion' => 'nullable|string|max:500',
         'direccion' => 'required|string|max:255',
@@ -121,11 +121,11 @@ class AltaReclamo extends Component
     protected $messages = [
         'persona_dni.required' => 'El DNI es obligatorio',
         'persona_dni.numeric' => 'El DNI debe contener solo números',
-        'persona_dni.digits' => 'El DNI debe tener 8 dígitos',
+        'persona_dni.digits_between' => 'El DNI debe tener entre 7 y 11 dígitos',
         'persona_nombre.required' => 'El nombre es obligatorio',
         'persona_apellido.required' => 'El apellido es obligatorio',
         'persona_telefono.required' => 'El teléfono es obligatorio',
-        'persona_telefono.digits_between' => 'El teléfono debe tener 10 dígitos',
+        'persona_telefono.digits' => 'El teléfono debe tener 10 dígitos',
         'persona_email.email' => 'Ingrese un email válido',
         'direccion.required' => 'La dirección es obligatoria',
         'coordenadas.required' => 'Dirección no validada - Use el mapa para mayor precisión',
@@ -567,10 +567,17 @@ class AltaReclamo extends Component
             $categoria = Categoria::find($this->categoria_id);
             $nombreCategoria = $categoria ? $categoria->nombre : 'Sin categoría';
 
-            if(strlen($this->edificio_id) == 0){
-                $this->edificio_id = null; // Si no se seleccionó edificio, dejar como null
-            }
             
+            
+
+            if($this->isPrivateArea){
+                if(strlen($this->edificio_id) == 0){
+                    $this->edificio_id = null; // Si no se seleccionó edificio, dejar como null
+                }
+            }else{
+                $this->edificio_id = null;
+            }
+         
             // Crear el reclamo
             $this->reclamoCreado = Reclamo::create([
                 'fecha' => now()->toDateString(),
@@ -580,7 +587,7 @@ class AltaReclamo extends Component
                 'coordenadas' => $this->coordenadas,
                 'area_id' => $this->area_id,
                 'categoria_id' => $this->categoria_id,
-                'edificio_id' => $this->edificio_id,
+                'edificio_id' => $this->edificio_id === '' ? null : $this->edificio_id,
                 'estado_id' => $estadoInicial->id,
                 'persona_id' => $persona->id,
                 'domicilio_id' => $domicilio->id,

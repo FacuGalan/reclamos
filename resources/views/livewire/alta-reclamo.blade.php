@@ -1121,6 +1121,7 @@
     @endif
 
   @push('scripts')
+  
     <script>
         // Variables globales para control de inicialización
         if (typeof mapa === 'undefined') {

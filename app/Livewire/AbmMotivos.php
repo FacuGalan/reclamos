@@ -251,6 +251,7 @@ class AbmMotivos extends Component
             if (!$this->isEditing) {
                 Categoria::create([
                     'nombre' => $this->nombre,
+                    'nombre_publico' => $this->nombre,
                     'area_id' => $this->area_id,
                     'privada' => $this->ver_privada ? 1 : 0,
                 ]);
@@ -268,6 +269,7 @@ class AbmMotivos extends Component
                 
                 $motivo->update([
                     'nombre' => $this->nombre,
+                    'nombre_publico' => $this->nombre,
                     'area_id' => $this->area_id
                 ]);
                 

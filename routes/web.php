@@ -75,8 +75,11 @@ Route::get('reclamos/create/interno', function () {
     ->middleware(['auth', 'verified'])
     ->name('reclamos.create.interno');
 
-// Ruta para modificar reclamo, recibe el ID del reclamo y un parámetro opcional editable
-Route::view('modificar-reclamo/{reclamo}', 'modificar-reclamo')
+
+// Ruta para modificar reclamo, recibe el ID del reclamo
+Route::get('modificar-reclamo/{reclamo}', function ($reclamo) {
+    return view('modificar-reclamo', ['reclamo' => $reclamo]);
+})
     ->middleware(['auth', 'verified'])
     ->name('modificar-reclamo');
 

@@ -125,10 +125,6 @@ class AbmReclamos extends Component
         $this->resetPage();
     }
 
-    public function updatingFiltroArea()
-    {
-        $this->resetPage();
-    }
 
     public function updatingFiltroCategoria()
     {
@@ -244,9 +240,8 @@ class AbmReclamos extends Component
             return;
         }
 
-        $this->selectedReclamoId = $reclamoId;
-        $this->reclamoEditable = $edita;
-        $this->currentView = 'edit';
+        // Redirigir a la ruta de modificar reclamo
+        return $this->redirect(route('modificar-reclamo', ['reclamo' => $reclamoId]), navigate: true);
     }
 
     public function volverALista()

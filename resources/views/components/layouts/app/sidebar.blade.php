@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+    <title>Atención Ciudadana</title>
     <head>
         @include('partials.head')
         <!-- CSS de SweetAlert2 -->

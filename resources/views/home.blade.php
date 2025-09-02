@@ -110,7 +110,7 @@
             </div>
             <div class="p-6 flex flex-col flex-1">
                 <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">
-                    Guía de trámites
+                    Preguntas Frecuentes
                 </h3>
                 <p class="text-gray-600 dark:text-gray-300 mb-6 flex-1">
                     Accede a información sobre trámites, horarios de atención y contactos útiles.
@@ -142,7 +142,7 @@
             <!-- Texto -->
             <div class="w-full ml-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white pt-6">
-                    Preguntas Frecuentes    
+                    Preguntas Frecuentes  
                 </h3>
                 <p class="text-gray-600 dark:text-gray-300 mb-6 flex-1">
                     Accede a información útil sobre trámites

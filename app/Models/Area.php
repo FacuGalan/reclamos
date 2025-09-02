@@ -35,4 +35,11 @@ class Area extends Model
     {
         return $this->hasMany(TipoMovimiento::class);   
     }
+    /**
+     * Relación uno a muchos con preguntas
+     */
+    public function preguntas()
+    {
+        return $this->hasMany(Pregunta::class);   
+    }
 }
