@@ -34,19 +34,27 @@ class AbmReportes extends Component
 
     // Métodos para el modal
     public function abrirModal($reporteId)
-    {
-        \Log::info('=== DIRECTO - abrirModal ID: ' . $reporteId);
-        
-        // Buscar directamente
-        $this->reporteSeleccionado = Reporte::with(['persona', 'categoria', 'domicilio'])->find($reporteId);
-        
-        \Log::info('=== DIRECTO - Reporte encontrado: ', [
-            'id' => $this->reporteSeleccionado ? $this->reporteSeleccionado->id : 'NULL',
-            'observaciones' => $this->reporteSeleccionado ? $this->reporteSeleccionado->observaciones : 'NULL'
-        ]);
-        
-        $this->mostrarModal = true;
+{
+    \Log::info('=== DIRECTO - abrirModal ID: ' . $reporteId);
+    
+    $this->reporteSeleccionado = Reporte::with(['persona', 'categoria', 'domicilio'])->find($reporteId);
+    
+    \Log::info('=== DIRECTO - Reporte encontrado: ', [
+        'id' => $this->reporteSeleccionado ? $this->reporteSeleccionado->id : 'NULL',
+        'observaciones' => $this->reporteSeleccionado ? $this->reporteSeleccionado->observaciones : 'NULL',
+        'tiene_domicilio' => $this->reporteSeleccionado && $this->reporteSeleccionado->domicilio ? 'SI' : 'NO'
+    ]);
+    
+    $this->mostrarModal = true;
+    
+    // MODIFICADO: Pasar los parámetros directamente, no en un array
+    if ($this->reporteSeleccionado && $this->reporteSeleccionado->domicilio && $this->reporteSeleccionado->domicilio->coordenadas) {
+        $this->dispatch('inicializar-mapa-reporte', 
+            reporteId: $this->reporteSeleccionado->id,
+            coordenadas: $this->reporteSeleccionado->domicilio->coordenadas
+        );
     }
+}
 
     public function cerrarModal()
     {

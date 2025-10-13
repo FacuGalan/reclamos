@@ -47,7 +47,8 @@ class AltaReporte extends Component
     public $latitud = null;
     public $longitud = null;
     public $direccionCompleta = '';
-
+    public $direccion_rural = '';
+   
     protected $listeners = [
         'confirmar-ubicacion-mapa' => 'confirmarUbicacionMapa'
     ];
@@ -62,6 +63,9 @@ class AltaReporte extends Component
         'direccion' => 'required|string|max:255',
         'descripcion' => 'required|string|max:1000',
         'fecha_incidente' => 'nullable|date',
+        'entre_calles' => 'required|string|max:255', 
+        'direccion_rural' => 'nullable|string|max:255', 
+        'coordenadas' => 'required|string',
     ];
     
 
@@ -76,6 +80,7 @@ class AltaReporte extends Component
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'categoria_id.exists' => 'La categoría seleccionada no es válida',
         'direccion.required' => 'La dirección es obligatoria',
+        'entre_calles.required' => 'Debe indicar entre qué calles se encuentra',
         'coordenadas.required' => 'Dirección no validada - Use el mapa para mayor precisión',
         'descripcion.required' => 'La descripción del reclamo es obligatoria',
         'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
@@ -246,6 +251,7 @@ class AltaReporte extends Component
             $this->validate([
                 'categoria_id' => $this->rules['categoria_id'],
                 'direccion' => $this->rules['direccion'],
+                'entre_calles' => $this->rules['entre_calles'],
                 'descripcion' => $this->rules['descripcion'],
                 'fecha_incidente' => $this->rules['fecha_incidente'],
             ]);
@@ -278,6 +284,8 @@ class AltaReporte extends Component
                 $domicilio = Domicilios::create([
                     'persona_id' => $this->persona_id,
                     'direccion' => $this->direccion,
+                    'entre_calles' => $this->entre_calles, 
+                    'direccion_rural' => $this->direccion_rural, 
                     'coordenadas' => $this->coordenadas
                 ]);
             }

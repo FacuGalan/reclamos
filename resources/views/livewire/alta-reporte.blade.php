@@ -281,98 +281,102 @@
                 @endif
 
             @elseif ($step == 2)
-                <!-- Paso 2: Datos del reporte -->
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos del Reporte</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Categoría *
-                        </label>
-                        <select 
-                            wire:model="categoria_id"
-                            class="w-full px-3 py-2 border border-gray-300 bg-white dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                            <option value="">Seleccione una categoría</option>
-                            @foreach ($categorias as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->nombre }}</option>
-                            @endforeach
-                        </select>
-                        @error('categoria_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                 <!-- Paso 2: Datos del reporte -->
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos del Reporte</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Categoría -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Categoría *
+                            </label>
+                            <select 
+                                wire:model="categoria_id"
+                                class="w-full px-3 py-2 border border-gray-300 bg-white dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                <option value="">Seleccione una categoría</option>
+                                @foreach ($categorias as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('categoria_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Dirección *
-                        </label>
-                        <div class="flex gap-2">
-                            <div class="flex-1 relative">
-                                <input 
-                                    type="text" 
-                                    id="direccion-autocomplete"
-                                    wire:model="direccion"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                                    placeholder="Busque y seleccione una dirección..."
-                                    autocomplete="off">
+                        <!-- Dirección y Entre calles -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Dirección (Calle, número) *
+                                </label>
+                                <div class="flex gap-2">
+                                    <div class="flex-1 relative">
+                                        <input 
+                                            type="text" 
+                                            id="direccion-autocomplete"
+                                            wire:model="direccion"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                            placeholder="Busque y seleccione una dirección..."
+                                            autocomplete="off">
+                                        
+                                        <!-- Indicador de validación -->
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                            <div id="direccion-status" class="hidden">
+                                                <!-- Icono de éxito -->
+                                                <svg id="direccion-success" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                <!-- Icono de error -->
+                                                <svg id="direccion-error" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        type="button"
+                                        wire:click="abrirMapa"
+                                        class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
+                                        title="Seleccionar en el mapa">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                @error('coordenadas') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                 
-                                <!-- Indicador de validación -->
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                    <div id="direccion-status" class="hidden">
-                                        <!-- Icono de éxito -->
-                                        <svg id="direccion-success" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                <!-- Mensaje de estado de la dirección -->
+                                <div id="direccion-mensaje" class="mt-2 text-sm hidden">
+                                    <div id="direccion-validada" class="text-green-600 dark:text-green-400 flex items-center hidden">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
-                                        <!-- Icono de error -->
-                                        <svg id="direccion-error" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        <span>Dirección validada</span>
+                                    </div>
+                                    <div id="direccion-no-validada" class="text-amber-600 dark:text-amber-400 flex items-center hidden">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                                         </svg>
+                                        <span>Dirección no validada - Use el mapa para mayor precisión</span>
                                     </div>
                                 </div>
                             </div>
-                            <button 
-                                type="button"
-                                wire:click="abrirMapa"
-                                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
-                                title="Seleccionar en el mapa">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        @error('coordenadas') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        
-                        <!-- Mensaje de estado de la dirección -->
-                        <div id="direccion-mensaje" class="mt-2 text-sm hidden">
-                            <div id="direccion-validada" class="text-green-600 dark:text-green-400 flex items-center hidden">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>Dirección validada</span>
-                            </div>
-                            <div id="direccion-no-validada" class="text-amber-600 dark:text-amber-400 flex items-center hidden">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                </svg>
-                                <span>Dirección no validada - Use el mapa para mayor precisión</span>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Entre calles *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model="entre_calles"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                    placeholder="Entre qué calles se encuentra">
+                                @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
                         </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Entre calles
-                        </label>
-                        <input 
-                            type="text" 
-                            wire:model="entre_calles"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                            placeholder="Entre qué calles se encuentra">
-                        @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
 
-                 @if($coordenadas)
-                       <div class="md:col-span-2">
+                        <!-- Mensaje de ubicación confirmada -->
+                        @if($coordenadas)
                             <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
                                 <p class="text-sm text-green-700 dark:text-green-300 flex items-center">
                                     <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -381,47 +385,62 @@
                                     Ubicación confirmada: {{ $direccionCompleta ?: $direccion }} 
                                 </p>
                             </div>
-                       </div>
-                    @endif
+                        @endif
 
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Descripción del reporte *
-                        </label>
-                        <textarea 
-                        wire:model="descripcion"
-                        rows="4"
-                        class="w-full px-3 py-2 bg-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Describa detalladamente lo que quiere reportar"></textarea>
-                        @error('descripcion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
+                        <!-- Aclaraciones -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Fecha del incidente
+                                Aclaraciones
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">(Describa la dirección que se autocompletó si considera que es necesario)</span>
                             </label>
                             <input 
-                            type="date"
-                            wire:model="fecha_incidente"
-                            class="w-full px-3 py-2 bg-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                            @error('fecha_incidente') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                type="text" 
+                                wire:model="direccion_rural"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                placeholder="Describa aclaraciones adicionales sobre la ubicación">
+                            @error('direccion_rural') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-4">
-                                ¿Es un hecho que se repite?
-                            </label>
-                                <input 
-                                    type="checkbox" 
-                                    wire:model="habitual"
-                                    class="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700">
-                                    Sí, es habitual
-                            @error('habitual') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <!-- Descripción y Fecha -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Descripción del reporte *
+                                </label>
+                                <textarea 
+                                    wire:model="descripcion"
+                                    rows="4"
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                    placeholder="Describa detalladamente lo que quiere reportar"></textarea>
+                                @error('descripcion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Fecha del incidente
+                                    </label>
+                                    <input 
+                                        type="date"
+                                        wire:model="fecha_incidente"
+                                        class="w-full px-3 py-2 bg-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                    @error('fecha_incidente') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-4">
+                                        ¿Es un hecho que se repite?
+                                    </label>
+                                    <input 
+                                        type="checkbox" 
+                                        wire:model="habitual"
+                                        class="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700">
+                                        Sí, es habitual
+                                    @error('habitual') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
             @elseif ($step == 3)
                 <!-- Paso 3: Confirmación -->
@@ -453,7 +472,11 @@
                             <h3 class="font-medium text-gray-800 dark:text-white mb-3">Datos del Reporte</h3>
                             <div class="text-sm space-y-1">
                                 <p><strong>Categoría:</strong> {{ collect($categorias)->firstWhere('id', $categoria_id)?->nombre }}</p>
-                                <p><strong>Dirección:</strong> {{ $direccion }}</p>
+                                <p><strong>Dirección:</strong> {{ Str::before($direccion, ',') }}</p>
+                                <p><strong>Entre calles:</strong> {{ $entre_calles }}</p>
+                                @if($direccion_rural)
+                                    <p><strong>Aclaraciones:</strong> {{ $direccion_rural }}</p>
+                                @endif
                                 <p><strong>Fecha del incidente:</strong> {{ $fecha_incidente ?: 'No especificada' }}</p>
                                 <p><strong>Descripción:</strong> {{ $descripcion }}</p>
                             </div>
@@ -691,16 +714,45 @@
                         google.maps.event.clearInstanceListeners(autocompleteFormulario);
                     }
 
-                    autocompleteFormulario = new google.maps.places.Autocomplete(input, {
-                        bounds: new google.maps.LatLngBounds(
-                            new google.maps.LatLng(-34.7549, -59.5307),
-                            new google.maps.LatLng(-34.5549, -59.3307)
+                    // Centro de Mercedes, Buenos Aires
+                    const centroMercedes = new google.maps.LatLng(-34.6549, -59.4307);
+                    
+                    // Calcular bounds para 22km de radio
+                    const radioEnGrados = 0.198; // Aproximadamente 22km
+                    const boundsRestrictivos = new google.maps.LatLngBounds(
+                        new google.maps.LatLng(
+                            centroMercedes.lat() - radioEnGrados, 
+                            centroMercedes.lng() - radioEnGrados
                         ),
-                        strictBounds: false,
+                        new google.maps.LatLng(
+                            centroMercedes.lat() + radioEnGrados, 
+                            centroMercedes.lng() + radioEnGrados
+                        )
+                    );
+
+                    autocompleteFormulario = new google.maps.places.Autocomplete(input, {
+                        bounds: boundsRestrictivos,
+                        strictBounds: true, // CLAVE: Esto fuerza que solo muestre resultados dentro del bounds
                         componentRestrictions: { country: 'ar' },
                         types: ['address'],
                         fields: ['geometry', 'formatted_address', 'address_components', 'name']
                     });
+
+                    // Variable para rastrear si hay predicciones disponibles
+                    let tienePredictones = false;
+                    let service = new google.maps.places.AutocompleteService();
+
+                    // Función para calcular distancia entre dos puntos (fórmula de Haversine)
+                    function calcularDistancia(lat1, lng1, lat2, lng2) {
+                        const R = 6371; // Radio de la Tierra en km
+                        const dLat = (lat2 - lat1) * Math.PI / 180;
+                        const dLng = (lng2 - lng1) * Math.PI / 180;
+                        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                                Math.sin(dLng/2) * Math.sin(dLng/2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        return R * c; // Distancia en km
+                    }
 
                     autocompleteFormulario.addListener('place_changed', function() {
                         const place = autocompleteFormulario.getPlace();
@@ -714,7 +766,23 @@
                         const location = place.geometry.location;
                         const direccionCompleta = place.formatted_address;
                         
-                        // NUEVO: Guardar esta posición como la última conocida para el mapa
+                        // Verificar distancia (filtro adicional de seguridad)
+                        const distancia = calcularDistancia(
+                            centroMercedes.lat(), 
+                            centroMercedes.lng(),
+                            location.lat(), 
+                            location.lng()
+                        );
+
+                        if (distancia > 22) {
+                            console.log(`Dirección fuera del rango permitido: ${distancia.toFixed(2)}km`);
+                            mostrarEstadoDireccion('error');
+                            alert('La dirección seleccionada está fuera del área de servicio');
+                            input.value = '';
+                            return;
+                        }
+
+                        // Guardar esta posición como la última conocida para el mapa
                         ultimaPosicionConocida = {
                             lat: location.lat(),
                             lng: location.lng()
@@ -726,24 +794,129 @@
                         @this.set('direccionCompleta', direccionCompleta);
 
                         mostrarEstadoDireccion('success');
-
                     });
 
-                    // Manejar cambios manuales
+                    // Manejar el evento keydown para detectar Enter
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault(); // Prevenir el submit del formulario
+                            
+                            // Si hay predicciones disponibles, forzar la selección de la primera
+                            if (tienePredictones && input.value.trim()) {
+                                // Obtener predicciones manualmente con bounds restrictivos
+                                const request = {
+                                    input: input.value,
+                                    bounds: boundsRestrictivos,
+                                    componentRestrictions: { country: 'ar' },
+                                    types: ['address']
+                                };
+
+                                service.getPlacePredictions(request, (predictions, status) => {
+                                    if (status === google.maps.places.PlacesServiceStatus.OK && predictions && predictions.length > 0) {
+                                        // Filtrar predicciones por distancia antes de seleccionar
+                                        const prediccionesFiltradas = [];
+                                        let procesadas = 0;
+                                        
+                                        predictions.forEach((prediction) => {
+                                            const placesService = new google.maps.places.PlacesService(document.createElement('div'));
+                                            
+                                            placesService.getDetails({
+                                                placeId: prediction.place_id,
+                                                fields: ['geometry', 'formatted_address']
+                                            }, (place, status) => {
+                                                procesadas++;
+                                                
+                                                if (status === google.maps.places.PlacesServiceStatus.OK && place && place.geometry) {
+                                                    const distancia = calcularDistancia(
+                                                        centroMercedes.lat(), 
+                                                        centroMercedes.lng(),
+                                                        place.geometry.location.lat(), 
+                                                        place.geometry.location.lng()
+                                                    );
+                                                    
+                                                    if (distancia <= 22) {
+                                                        prediccionesFiltradas.push({
+                                                            place: place,
+                                                            distancia: distancia
+                                                        });
+                                                    }
+                                                }
+                                                
+                                                // Cuando terminamos de procesar todas las predicciones
+                                                if (procesadas === predictions.length) {
+                                                    if (prediccionesFiltradas.length > 0) {
+                                                        // Ordenar por distancia y tomar la más cercana
+                                                        prediccionesFiltradas.sort((a, b) => a.distancia - b.distancia);
+                                                        const mejorOpcion = prediccionesFiltradas[0].place;
+                                                        
+                                                        // Actualizar el input con la dirección seleccionada
+                                                        input.value = mejorOpcion.formatted_address;
+                                                        
+                                                        const location = mejorOpcion.geometry.location;
+                                                        
+                                                        // Guardar posición
+                                                        ultimaPosicionConocida = {
+                                                            lat: location.lat(),
+                                                            lng: location.lng()
+                                                        };
+                                                        
+                                                        // Actualizar Livewire
+                                                        @this.set('direccion', mejorOpcion.formatted_address);
+                                                        @this.set('coordenadas', location.lat() + ',' + location.lng());
+                                                        @this.set('direccionCompleta', mejorOpcion.formatted_address);
+
+                                                        mostrarEstadoDireccion('success');
+                                                    } else {
+                                                        alert('No se encontraron direcciones dentro del área de servicio');
+                                                        mostrarEstadoDireccion('error');
+                                                    }
+                                                }
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    // Manejar cambios manuales y detectar si hay predicciones
                     let timeoutId;
                     input.addEventListener('input', function(e) {
                         clearTimeout(timeoutId);
                         
                         if (!e.target.value.trim()) {
                             mostrarEstadoDireccion('reset');
+                            tienePredictones = false;
                             return;
                         }
                         
+                        // Verificar si hay predicciones disponibles dentro del área
                         timeoutId = setTimeout(() => {
-                            if (!autocompleteFormulario.getPlace() || !autocompleteFormulario.getPlace().geometry) {
-                                //mostrarEstadoDireccion('warning');
-                            }
-                        }, 1000);
+                            const request = {
+                                input: e.target.value,
+                                bounds: boundsRestrictivos,
+                                componentRestrictions: { country: 'ar' },
+                                types: ['address']
+                            };
+
+                            service.getPlacePredictions(request, (predictions, status) => {
+                                if (status === google.maps.places.PlacesServiceStatus.OK && predictions && predictions.length > 0) {
+                                    tienePredictones = true;
+                                } else {
+                                    tienePredictones = false;
+                                    if (!autocompleteFormulario.getPlace() || !autocompleteFormulario.getPlace().geometry) {
+                                        // mostrarEstadoDireccion('warning');
+                                    }
+                                }
+                            });
+                        }, 300);
+                    });
+
+                    // Prevenir el submit del formulario cuando se presiona Enter en el input
+                    input.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                        }
                     });
 
                     // Marcar como inicializado
