@@ -22,7 +22,10 @@ class UserRol extends Model
         'lMotivosAbm',
         'lTiposMovAbm',
         'lEstadosAbm',
-        'lUsuariosAbm'
+        'lUsuariosAbm',
+        'lPreguntasFrecAbm',
+        'lCuadrillasAbm',
+        'lEstadisticas'
     ];
 
     protected $casts = [
@@ -39,6 +42,9 @@ class UserRol extends Model
         'lTiposMovAbm' => 'boolean',
         'lEstadosAbm' => 'boolean',
         'lUsuariosAbm' => 'boolean',
+        'lPreguntasFrecAbm' => 'boolean',
+        'lCuadrillasAbm' => 'boolean',
+        'lEstadisticas' => 'boolean'
     ];
 
     /**

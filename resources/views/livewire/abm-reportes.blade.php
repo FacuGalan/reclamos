@@ -126,7 +126,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900 dark:text-white">
                                     {{ $reporte->categoria->nombre }}
                                 </div>
@@ -139,11 +139,12 @@
                                     {{ $reporte->domicilio->entre_calles ? 'Entre calles: ' . $reporte->domicilio->entre_calles : 'Sin entrecalles' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 dark:text-white">
-                                    {{ $reporte->observaciones }}
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900 dark:text-white" title="{{ $reporte->observaciones }}">
+                                        {{ strlen($reporte->observaciones) > 150 ? substr($reporte->observaciones, 0, 150) . '...' : $reporte->observaciones }}
                                 </div>
                             </td>
+                           
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <button 
                                     wire:click="abrirModal({{ $reporte->id }})"

@@ -256,9 +256,19 @@
             <div class="info-item">
                 <span class="info-label">Teléfono:</span> {{ $datos['persona_telefono'] }}
             </div>
+            @if($datos['numero_tranquera'])
+                <div class="info-item">
+                    <span class="info-label">Tranquera:</span> N° {{ $datos['numero_tranquera'] }}
+                </div>
+            @endif
             <div class="info-item">
                 <span class="info-label">Dirección:</span> {{ $datos['direccion'] }}
             </div>
+            @if($datos['direccion_rural'])
+                <div class="info-item">
+                    <span class="info-label">Aclaración:</span> {{ $datos['direccion_rural'] }}
+                </div>
+            @endif
             @if($datos['entre_calles'])
                 <div class="info-item">
                     <span class="info-label">Entre calles:</span> {{ $datos['entre_calles'] }}

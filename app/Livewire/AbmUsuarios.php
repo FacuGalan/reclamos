@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
+use App\Models\Cuadrilla;
 use App\Models\Area;
 use App\Models\UserRol;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,7 @@ class AbmUsuarios extends Component
     
     // Datos para los selects
     public $roles = [];
+    public $cuadrillas = [];
     public $areas = [];
     public $userAreas = []; // Áreas del usuario autenticado
     public $puedeVerTodos = false; // Nueva propiedad para saber si puede ver todos
@@ -40,6 +42,7 @@ class AbmUsuarios extends Component
     public $email = '';
     public $telefono = '';
     public $rol_id = '';
+    public $cuadrilla_id = '';
     public $password = '';
     public $password_confirmation = '';
     public $areas_asignadas = []; // Array de IDs de áreas asignadas
@@ -92,6 +95,12 @@ class AbmUsuarios extends Component
 
         // Cargar datos para los selects
         $this->roles = UserRol::where('id', '>', Auth::user()->rol_id)->orderBy('nombre')->get();
+
+        if ($this->puedeVerTodos) {
+            $this->cuadrillas = Cuadrilla::orderBy('nombre')->get();
+        } else {
+            $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
+        }
 
         $this->ver_privada = Auth::user()->ver_privada;
         
@@ -215,6 +224,7 @@ class AbmUsuarios extends Component
         $this->email = $usuario->email;
         $this->telefono = $usuario->telefono;
         $this->rol_id = $usuario->rol_id;
+        $this->cuadrilla_id = $usuario->cuadrilla_id;
         $this->areas_asignadas = $usuario->areas->pluck('id')->toArray();
     }
 
@@ -225,6 +235,7 @@ class AbmUsuarios extends Component
         $this->email = '';
         $this->telefono = '';
         $this->rol_id = '';
+        $this->cuadrilla_id = '';
         $this->password = '';
         $this->password_confirmation = '';
         $this->areas_asignadas = [];
@@ -309,6 +320,7 @@ class AbmUsuarios extends Component
                     'email' => $this->email,
                     'telefono' => $this->telefono,
                     'rol_id' => $this->rol_id ?: null,
+                    'cuadrilla_id' => $this->cuadrilla_id ?: null,
                     'password' => Hash::make($this->password),
                     'ver_privada' => $this->ver_privada ? 1 : 0,
                 ]);
@@ -327,6 +339,7 @@ class AbmUsuarios extends Component
                     'email' => $this->email,
                     'telefono' => $this->telefono,
                     'rol_id' => $this->rol_id ?: null,
+                    'cuadrilla_id' => $this->cuadrilla_id ?: null,
                     'ver_privada' => $this->ver_privada ? 1 : 0,
                 ];
 

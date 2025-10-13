@@ -151,6 +151,7 @@
                             placeholder="Ingrese el email">
                         @error('persona_email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
+
                 </div>
             </div>
 
@@ -188,7 +189,7 @@
                                 }" 
                                 class="relative">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Categoría *
+                                        Motivo *
                                     </label>
                                     
                                     <!-- Input principal -->
@@ -262,7 +263,7 @@
                     <!-- Ubicación -->
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-2">
                         @if(!$reclamo->categoria->privada)
-                            
+                            @if(!$reclamo->numero_tranquera)
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Dirección *
@@ -336,18 +337,89 @@
                                 </div>
 
                                 
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Aclaraciones
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            wire:model="direccion_rural"
+                                            class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
+                                            placeholder="Aclaraciones">
+                                        @error('direccion_rural') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    <div>                                        
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Entre calles
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            wire:model="entre_calles"
+                                            class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
+                                            placeholder="Entre qué calles se encuentra">
+                                        @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                            @else 
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Número de Tranquera *
+                                        </label>
+                                        <div class="relative">
+                                            
+                                            <input 
+                                                type="number" 
+                                                wire:model.live.debounce.300ms="numero_tranquera"
+                                                min="1"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                                placeholder="Ej: 145"
+                                                @wheel.prevent>
+                                        </div>
+                                        @error('numero_tranquera') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Dirección *
+                                        </label>
+                                        <div class="flex gap-2">
+                                            <div class="flex-1 relative">
+                                                <input 
+                                                    type="text" 
+                                                    wire:model="direccion"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                                    placeholder="Ingrese la dirección donde ocurrió el problema">
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                wire:click="abrirMapa"
+                                                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
+                                                title="Seleccionar en el mapa">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Entre calles
+                                        Aclaraciones
                                     </label>
                                     <input 
                                         type="text" 
-                                        wire:model="entre_calles"
+                                        wire:model="direccion_rural"
                                         class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
-                                        placeholder="Entre qué calles se encuentra">
-                                    @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                        placeholder="Aclaraciones">
+                                    @error('direccion_rural') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                 </div>
-                            
+
+                            @endif
                         @else 
                                 <div x-data="{
                                     search: @entangle('edificioBusqueda'),
@@ -635,12 +707,14 @@
                             @error('observaciones') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
 
-                        @if($tipoMovimientoId == 4)
+                        @if($tipoMovimientoId == 4 || $tipoMovimientoId == 5)
                             <div class="mb-4">
-                                <label class="inline-flex items-center">
-                                    <input type="checkbox" wire:model="noAplica" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
-                                </label>
+                                @if($tipoMovimientoId == 4)
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" wire:model="noAplica" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">El reclamo no aplica</span>
+                                    </label>
+                                @endif
                                 <label class="inline-flex items-center ml-4" {{ $reclamo->categoria->privada ? 'hidden' : '' }}>
                                     <input type="checkbox" wire:model="notificado" class="form-checkbox h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43]">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Notificar al vecino</span>
@@ -736,55 +810,69 @@
                         </div>
                     </div>
 
+                    
                     <!-- Contenido del mapa -->
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6">
                         <!-- Contenedor del mapa -->
                         <div id="mapa-container" class="w-full h-96 bg-gray-200 dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></div>
-                        
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
-                            <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center">
+                        @if(!$reclamo->numero_tranquera)
+                            <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                                <p class="text-sm text-blue-700 dark:text-blue-300 flex items-center">
+                                    <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Haga clic en el mapa para seleccionar la ubicación exacta del reclamo. El marcador se puede arrastrar para ajustar la posición.</span>
+                                </p>
+                            </div>
+
+                            <!-- Información de ubicación seleccionada -->
+                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ubicación seleccionada:</p>
+                                <p id="direccion-seleccionada" class="text-sm text-gray-600 dark:text-gray-400">
+                                    Seleccione una ubicación en el mapa
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                    
+
+                    @if($reclamo->numero_tranquera)
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3 sm:px-6 border-t border-yellow-200 dark:border-yellow-800 rounded-b-lg mb-4 mx-4">
+                            <p class="text-sm text-yellow-700 dark:text-yellow-300 flex items-center">
                                 <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span>Haga clic en el mapa para seleccionar la ubicación exacta del reclamo. El marcador se puede arrastrar para ajustar la posición.</span>
+                                <span>La dirección actual del reclamo se completó automáticamente desde el número de tranquera seleccionado.</span>
                             </p>
                         </div>
+                    @else
+                        <!-- Footer -->
+                        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
+                            <div class="flex items-center justify-end space-x-4">
+                                
+                                <!-- Botón Cancelar -->
+                                <button 
+                                    wire:click="cerrarMapa"
+                                    type="button" 
+                                    class="cursor-pointer inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-500 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
+                                    Cancelar
+                                </button>
 
-                        <!-- Información de ubicación seleccionada -->
-                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ubicación seleccionada:</p>
-                            <p id="direccion-seleccionada" class="text-sm text-gray-600 dark:text-gray-400">
-                                Seleccione una ubicación en el mapa
-                            </p>
+                                <!-- Botón Confirmar -->
+                                <button 
+                                    id="btn-confirmar-ubicacion"
+                                    type="button" 
+                                    onclick="confirmarUbicacionSeleccionada()"
+                                    disabled
+                                    class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-300 text-white cursor-not-allowed text-base font-medium sm:text-sm transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Confirmar Ubicación
+                                </button>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
-                        <div class="flex items-center justify-end space-x-4">
-                            
-                            <!-- Botón Cancelar -->
-                            <button 
-                                wire:click="cerrarMapa"
-                                type="button" 
-                                class="cursor-pointer inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-500 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
-                                Cancelar
-                            </button>
-
-                            <!-- Botón Confirmar -->
-                            <button 
-                                id="btn-confirmar-ubicacion"
-                                type="button" 
-                                onclick="confirmarUbicacionSeleccionada()"
-                                disabled
-                                class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-300 text-white cursor-not-allowed text-base font-medium sm:text-sm transition-colors">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Confirmar Ubicación
-                            </button>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -7,6 +7,9 @@ use App\Models\Reclamo;
 use App\Models\Categoria;
 use App\Models\Area;
 use App\Models\Barrio;
+use App\Models\Cuadrilla;
+use App\Models\Edificio;
+use App\Models\User;
 use App\Traits\ManejadorEstadisticas;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,12 +23,16 @@ class Estadisticas extends Component
     public $filtro_categoria = '';
     public $filtro_area = '';
     public $filtro_barrio = '';
-    
+    public $filtro_edificio = '';
+    public $filtro_cuadrilla = '';
+
     // Datos para selects
     public $categorias = [];
     public $areas = [];
     public $barrios = [];
+    public $cuadrillas = [];
     public $userAreas = [];
+    public $edificios = [];
     
     // Datos del mapa de calor
     public $reclamosCoords = [];
@@ -37,10 +44,13 @@ class Estadisticas extends Component
     public $mostrarMapaCalor = false;
     public $cargando = false;
 
+    public $ver_privada = false;
+
     public function mount()
     {
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
+        $this->ver_privada = Auth::user()->ver_privada;
 
         // Si el usuario no tiene áreas asignadas, mostrar todas
         if (empty($this->userAreas)) {
@@ -49,8 +59,10 @@ class Estadisticas extends Component
 
         // Cargar datos para filtros
         $this->areas = Area::whereIn('id', $this->userAreas)->orderBy('nombre')->get();
-        $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->where('privada', false)->orderBy('nombre')->get();
+        $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->where('privada', $this->ver_privada)->orderBy('nombre')->get();
         $this->barrios = Barrio::orderBy('nombre')->get();
+        $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
+        $this->edificios = Edificio::orderBy('nombre')->get();
         
         
         // Establecer fechas por defecto (último mes)
@@ -64,7 +76,10 @@ class Estadisticas extends Component
             $this->filtro_fecha_hasta,
             $this->filtro_categoria,
             $this->filtro_area,
-            $this->filtro_barrio
+            $this->filtro_barrio,
+            $this->filtro_cuadrilla,
+            $this->filtro_edificio
+            
         );
 
         $this->generarResumenInicial();
@@ -73,14 +88,12 @@ class Estadisticas extends Component
     public function generarResumenInicial()
     {
         // Construir query optimizada
-            $query = Reclamo::with(['categoria:id,nombre', 'area:id,nombre', 'estado:id,nombre','barrio:id,nombre'])
+            $query = Reclamo::with(['categoria:id,nombre,cuadrilla_id', 'area:id,nombre', 'estado:id,nombre','barrio:id,nombre', 'edificio:id,nombre','categoria.cuadrilla:id,nombre'])
                 ->select([
                     'id', 'coordenadas', 'descripcion', 'direccion', 'fecha', 
-                    'categoria_id', 'area_id', 'estado_id','barrio_id'
+                    'categoria_id', 'area_id', 'estado_id','barrio_id', 'edificio_id'
                 ])
-                ->whereIn('area_id', $this->userAreas)
-                ->whereNotNull('coordenadas')
-                ->where('coordenadas', '!=', '');
+                ->whereIn('area_id', $this->userAreas);
 
             // Aplicar filtros de fecha
             if ($this->filtro_fecha_desde) {
@@ -103,9 +116,23 @@ class Estadisticas extends Component
                 $query->where('barrio_id', $this->filtro_barrio);
             }
 
+            if ($this->filtro_cuadrilla) {
+                $query->where('categoria.cuadrilla.id', $this->filtro_cuadrilla);
+            }
+
+            if ($this->filtro_edificio) {
+                $query->where('edificio_id', $this->filtro_edificio);
+            }
+
+            if(!$this->ver_privada){
+                $query->whereNotNull('coordenadas')
+                      ->where('coordenadas', '!=', '');
+            }
+
             $query->whereHas('categoria', function ($q) {
-                $q->where('privada', false);
+                $q->where('privada', $this->ver_privada);
             });
+
 
             // Obtener reclamos
             $reclamos = $query->get();
@@ -141,14 +168,12 @@ class Estadisticas extends Component
 
         try {
             // Construir query optimizada
-            $query = Reclamo::with(['categoria:id,nombre,privada', 'area:id,nombre', 'estado:id,nombre','barrio:id,nombre'])
+            $query = Reclamo::with(['categoria:id,nombre,cuadrilla_id,privada', 'area:id,nombre', 'estado:id,nombre','barrio:id,nombre', 'edificio:id,nombre','categoria.cuadrilla:id,nombre'])
                 ->select([
                     'id', 'coordenadas', 'descripcion', 'direccion', 'fecha', 
-                    'categoria_id', 'area_id', 'estado_id','barrio_id'
+                    'categoria_id', 'area_id', 'estado_id','barrio_id', 'edificio_id'
                 ])
-                ->whereIn('area_id', $this->userAreas)
-                ->whereNotNull('coordenadas')
-                ->where('coordenadas', '!=', '');
+                ->whereIn('area_id', $this->userAreas);
 
             // Aplicar filtros de fecha
             if ($this->filtro_fecha_desde) {
@@ -171,8 +196,23 @@ class Estadisticas extends Component
                 $query->where('barrio_id', $this->filtro_barrio);
             }
 
+            if ($this->filtro_cuadrilla) {
+                $query->whereHas('categoria', function ($q) {
+                    $q->where('cuadrilla_id', $this->filtro_cuadrilla);
+                });
+            }
+
+            if ($this->filtro_edificio) {
+                $query->where('edificio_id', $this->filtro_edificio);
+            }
+
+            if(!$this->ver_privada){
+                $query->whereNotNull('coordenadas')
+                      ->where('coordenadas', '!=', '');
+            }
+
             $query->whereHas('categoria', function ($q) {
-                $q->where('privada', false);
+                $q->where('privada', $this->ver_privada);
             });
 
             // Obtener reclamos
@@ -188,7 +228,9 @@ class Estadisticas extends Component
                 $this->filtro_fecha_hasta,
                 $this->filtro_categoria,
                 $this->filtro_area,
-                $this->filtro_barrio
+                $this->filtro_barrio,
+                $this->filtro_cuadrilla,
+                $this->filtro_edificio
             );
 
             if($generarMapa){
@@ -212,7 +254,9 @@ class Estadisticas extends Component
                                     'categoria' => $reclamo->categoria->nombre ?? 'Sin categoría',
                                     'area' => $reclamo->area->nombre ?? 'Sin área',
                                     'barrio' => $reclamo->barrio->nombre ?? 'Sin barrio',
-                                    'estado' => $reclamo->estado->nombre ?? 'Sin estado'
+                                    'cuadrilla' => $reclamo->categoria->cuadrilla->nombre ?? 'Sin cuadrilla',
+                                    'estado' => $reclamo->estado->nombre ?? 'Sin estado',
+                                    'edificio' => $reclamo->edificio->nombre ?? 'Sin edificio'
                                 ];
                             }
                         }
@@ -237,6 +281,8 @@ class Estadisticas extends Component
                         'categoria' => $this->filtro_categoria,
                         'area' => $this->filtro_area,
                         'barrio' => $this->filtro_barrio,
+                        'cuadrilla' => $this->filtro_cuadrilla,
+                        'edificio' => $this->filtro_edificio,
                     ]
                 ]);
 
@@ -261,6 +307,8 @@ class Estadisticas extends Component
         $this->filtro_categoria = '';
         $this->filtro_area = '';
         $this->filtro_barrio = '';
+        $this->filtro_cuadrilla = '';
+        $this->filtro_edificio = '';
         $this->mostrarMapaCalor = false;
         $this->reclamosCoords = [];
         $this->resumenEstadisticas = [];
@@ -272,7 +320,9 @@ class Estadisticas extends Component
             $this->filtro_fecha_hasta,
             $this->filtro_categoria,
             $this->filtro_area,
-            $this->filtro_barrio
+            $this->filtro_barrio,
+            $this->filtro_cuadrilla,
+            $this->filtro_edificio
         );
 
          $this->generarResumenInicial();
@@ -300,6 +350,8 @@ class Estadisticas extends Component
                 'area' => $this->filtro_area ? $this->areas->find($this->filtro_area)?->nombre : 'Todas',
                 'categoria' => $this->filtro_categoria ? $this->categorias->find($this->filtro_categoria)?->nombre : 'Todas',
                 'barrio' => $this->filtro_barrio ? $this->barrios->find($this->filtro_barrio)?->nombre : 'Todos',
+                'cuadrilla' => $this->filtro_cuadrilla ? $this->cuadrillas->find($this->filtro_cuadrilla)?->nombre : 'Todas',
+                'edificio' => $this->filtro_edificio ? $this->edificios->find($this->filtro_edificio)?->nombre : 'Todos',
             ],
             'resumen' => $this->resumenEstadisticas,
             'coordenadas_reclamos' => $this->reclamosCoords,
@@ -337,7 +389,7 @@ class Estadisticas extends Component
         if($this->filtro_area) {
             $this->categorias = Categoria::where('area_id', $this->filtro_area)->orderBy('nombre')->get();
         }else {
-            $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->where('privada', false)->orderBy('nombre')->get();
+            $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->where('privada', $this->ver_privada)->orderBy('nombre')->get();
         }
         $this->generarMapaCalor(false);
     }
@@ -348,6 +400,16 @@ class Estadisticas extends Component
     }
 
     public function updatedFiltroBarrio()
+    {
+        $this->generarMapaCalor(false);
+    }
+
+    public function updatedFiltroCuadrilla()
+    {
+        $this->generarMapaCalor(false);
+    }
+
+    public function updatedFiltroEdificio()
     {
         $this->generarMapaCalor(false);
     }
@@ -369,7 +431,9 @@ class Estadisticas extends Component
             $this->filtro_fecha_hasta,
             $this->filtro_categoria,
             $this->filtro_area,
-            $this->filtro_barrio
+            $this->filtro_barrio,
+            $this->filtro_cuadrilla,
+            $this->filtro_edificio
         );
 
         $estadisticasAnteriores = $this->estadisticasRendimiento(
@@ -378,7 +442,9 @@ class Estadisticas extends Component
             $fechaFinAnterior->format('Y-m-d'),
             $this->filtro_categoria,
             $this->filtro_area,
-            $this->filtro_barrio
+            $this->filtro_barrio,
+            $this->filtro_cuadrilla,
+            $this->filtro_edificio
         );
 
         return [
@@ -393,6 +459,57 @@ class Estadisticas extends Component
             ]
         ];
     }
+
+   public function exportarPDF()
+{
+    if (empty($this->resumenEstadisticas)) {
+        session()->flash('error', 'Primero debe generar el mapa de calor para exportar las estadísticas.');
+        return;
+    }
+
+    try {
+        // Convertir Collections a arrays
+        $resumenArray = [];
+        foreach ($this->resumenEstadisticas as $key => $value) {
+            $resumenArray[$key] = $value instanceof \Illuminate\Support\Collection 
+                ? $value->toArray() 
+                : $value;
+        }
+
+        // Preparar datos para la vista PDF
+        $datos = [
+            'periodo' => [
+                'desde' => \Carbon\Carbon::parse($this->filtro_fecha_desde)->format('d/m/Y'),
+                'hasta' => \Carbon\Carbon::parse($this->filtro_fecha_hasta)->format('d/m/Y')
+            ],
+            'filtros_aplicados' => [
+                'area' => $this->filtro_area ? $this->areas->find($this->filtro_area)?->nombre : 'Todas',
+                'categoria' => $this->filtro_categoria ? $this->categorias->find($this->filtro_categoria)?->nombre : 'Todas',
+                'barrio' => $this->filtro_barrio ? $this->barrios->find($this->filtro_barrio)?->nombre : 'Todos',
+                'cuadrilla' => $this->filtro_cuadrilla ? $this->cuadrillas->find($this->filtro_cuadrilla)?->nombre : 'Todas',
+                'edificio' => $this->filtro_edificio ? $this->edificios->find($this->filtro_edificio)?->nombre : 'Todos',
+            ],
+            'estadisticas_rendimiento' => $this->estadisticasRendimiento,
+            'resumen' => $resumenArray, // Usar el array convertido
+            'total_reclamos' => $this->totalReclamos,
+            'fecha_exportacion' => now()->format('d/m/Y H:i:s'),
+            'usuario' => Auth::user()->name
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.estadisticas', $datos);
+        $pdf->setPaper('A4', 'portrait');
+        
+        $nombreArchivo = 'estadisticas_reclamos_' . date('Y-m-d_H-i-s') . '.pdf';
+        
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $nombreArchivo);
+        
+    } catch (\Exception $e) {
+        session()->flash('error', 'Error al generar el PDF: ' . $e->getMessage());
+        logger('Error en exportación PDF:', ['error' => $e->getMessage()]);
+    }
+}
 
     public function render()
     {

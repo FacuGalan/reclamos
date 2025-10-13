@@ -13,7 +13,9 @@ class Reclamo extends Model
         'fecha', 
         'descripcion',        
         'direccion',            
-        'entre_calles',         
+        'entre_calles',  
+        'direccion_rural', 
+        'numero_tranquera',
         'observaciones', 
         'estado_id', 
         'coordenadas', 
@@ -69,6 +71,10 @@ class Reclamo extends Model
     public function edificio()
     {
         return $this->belongsTo(Edificio::class, 'edificio_id');
+    }
+    public function tranquera()
+    {
+        return $this->belongsTo(Tranquera::class, 'numero_tranquera', 'tranquera');
     }
     
     // NUEVOS MÉTODOS PARA ESTADÍSTICAS

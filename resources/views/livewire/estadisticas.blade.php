@@ -15,6 +15,16 @@
         <div class="flex flex-col md:flex-row justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros de Análisis</h3>
             <div class="flex flex-col md:flex-row items-center gap-2 mt-4 md:mt-0">
+                @if(!empty($resumenEstadisticas))
+                    <button 
+                        wire:click="exportarPDF"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Exportar PDF
+                    </button>
+                @endif
                 <button 
                     wire:click="limpiarFiltros"
                     class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors cursor-pointer">
@@ -68,18 +78,45 @@
                 </select>
             </div>
 
-            <!-- Filtro por barrio -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
-                <select 
-                    wire:model.live="filtro_barrio"
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-                    <option value="">Todos los barrios</option>
-                    @foreach($barrios as $barrio)
-                        <option value="{{ $barrio->id }}">{{ $barrio->nombre }}</option>
-                    @endforeach
-                </select>
-            </div>
+            @if(!$ver_privada)
+                <!-- Filtro por barrio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
+                    <select 
+                        wire:model.live="filtro_barrio"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        <option value="">Todos los barrios</option>
+                        @foreach($barrios as $barrio)
+                            <option value="{{ $barrio->id }}">{{ $barrio->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cuadrilla</label>
+                    <select 
+                        wire:model.live="filtro_cuadrilla"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        <option value="">Todas las cuadrillas</option>
+                        @foreach($cuadrillas as $cuadrilla)
+                            <option value="{{ $cuadrilla->id }}">{{ $cuadrilla->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @else
+                <!-- Filtro por edificio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio</label>
+                    <select 
+                        wire:model.live="filtro_edificio"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        <option value="">Todos los edificios</option>
+                        @foreach($edificios as $edificio)
+                            <option value="{{ $edificio->id }}">{{ $edificio->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif  
         </div>
     </div>
 
@@ -237,34 +274,36 @@
         </div>
     @endif
 
-    <div class="flex flex-col mt-0 items-center justify-between pt-0 dark:border-gray-600" >
-        <button 
-            wire:click="generarMapaCalor({{ true }})"
-            wire:loading.attr="disabled"
-            class="px-6 py-3 bg-[#77BF43] hover:bg-[#5a9032] text-white rounded-lg transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            <span wire:loading.remove>
-                {{ $mostrarMapaCalor ? 'Actualizar' : 'Generar' }} Mapas
-            </span>
-            <span wire:loading class="flex items-center">
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {{ $mostrarMapaCalor ? 'Actualizando...' : 'Generando...' }}
-            </span>
-        </button>
-        <!-- EL EXPORTAR POR AHORA LO SACO, HAY QUE VER QUE PUEDEN LLEGAR A QUERER EXPORTAR -->
-        @if($mostrarMapaCalor && !empty($resumenEstadisticas) && false) 
+    @if(!$ver_privada)
+        <div class="flex flex-col mt-0 items-center justify-between pt-0 dark:border-gray-600" >
             <button 
-                wire:click="exportarEstadisticas"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors cursor-pointer flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Exportar Datos
+                wire:click="generarMapaCalor({{ true }})"
+                wire:loading.attr="disabled"
+                class="px-6 py-3 bg-[#77BF43] hover:bg-[#5a9032] text-white rounded-lg transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span wire:loading.remove>
+                    {{ $mostrarMapaCalor ? 'Actualizar' : 'Generar' }} Mapas
+                </span>
+                <span wire:loading class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ $mostrarMapaCalor ? 'Actualizando...' : 'Generando...' }}
+                </span>
             </button>
-        @endif
-    </div>
+            <!-- EL EXPORTAR POR AHORA LO SACO, HAY QUE VER QUE PUEDEN LLEGAR A QUERER EXPORTAR -->
+            @if($mostrarMapaCalor && !empty($resumenEstadisticas) && false) 
+                <button 
+                    wire:click="exportarEstadisticas"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Exportar Datos
+                </button>
+            @endif
+        </div>
+    @endif
 
     <!-- Mapas -->
     @if($mostrarMapaCalor)

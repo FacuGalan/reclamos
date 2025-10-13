@@ -128,9 +128,21 @@ Route::view('tipos-movimiento', 'tipos-movimiento')
     ->middleware(['auth', 'verified'])
     ->name('tipos-movimiento');
 
+Route::view('preguntas-frecuentes', 'preguntas-frecuentes')
+    ->middleware(['auth', 'verified'])
+    ->name('preguntas-frecuentes');
+
 Route::view('estados', 'estados')
     ->middleware(['auth', 'verified'])
     ->name('estados');
+
+Route::view('cuadrillas', 'cuadrillas')
+    ->middleware(['auth', 'verified'])
+    ->name('cuadrillas');
+
+Route::view('edificios', 'edificios')
+    ->middleware(['auth', 'verified'])
+    ->name('edificios');
 
 Route::view('mapa-barrios', 'mapa-barrios')
     ->middleware(['auth', 'verified'])

@@ -10,6 +10,8 @@ use App\Models\ReporteCategoria;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+
+
 class AltaReporte extends Component
 {
     // Estado del formulario
@@ -295,6 +297,45 @@ class AltaReporte extends Component
             ]);
 
             DB::commit();
+
+
+            try {
+                $reporteCompleto = Reporte::with(['persona', 'categoria'])
+                    ->find($this->reporteCreado->id);
+                
+                $destinatarios = [
+                    'reportesdeseguridad@mercedes.gob.ar',
+                    'segmatias24@gmail.com',
+                    'victorpalazzo86@gmail.com',
+                    'cmsoft70@gmail.com'
+                ];
+                
+                $exitosos = [];
+                $fallidos = [];
+                
+                foreach ($destinatarios as $email) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($email)
+                            ->send(new \App\Mail\ReporteConfirmacion($reporteCompleto));
+                        $exitosos[] = $email;
+                    } catch (\Exception $e) {
+                        $fallidos[] = ['email' => $email, 'error' => $e->getMessage()];
+                    }
+                }
+                
+                \Illuminate\Support\Facades\Log::info('Emails enviados', [
+                    'reporte_id' => $this->reporteCreado->id,
+                    'exitosos' => $exitosos,
+                    'fallidos' => $fallidos
+                ]);
+                
+            } catch (\Exception $mailException) {
+                \Illuminate\Support\Facades\Log::error('Error general enviando emails', [
+                    'reporte_id' => $this->reporteCreado->id,
+                    'error' => $mailException->getMessage()
+                ]);
+            }
+      
 
             // AQUÍ ESTÁ LA CORRECCIÓN: Obtener el nombre de la categoría
             $categoria = ReporteCategoria::find($this->categoria_id);

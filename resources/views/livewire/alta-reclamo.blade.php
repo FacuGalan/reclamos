@@ -19,7 +19,7 @@
     @endif
     
     <!-- Notificación de éxito centrada (solo para área pública) -->
-    @if($contexto === 'publico')
+    @if($contexto === 'publico' || $contexto === 'externo')
         <div 
             x-data="{ show: false, reclamoData: {} }"
             x-show="show"
@@ -217,6 +217,151 @@
                 <!-- Paso 1: Datos personales -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos Personales</h2>
                 
+                @if($isPrivateArea && empty($this->datosPrecargados))
+                    <!-- Campo de búsqueda de empleado -->
+                    <div class="md:col-span-2 mb-6">
+                        <div x-data="{
+                                search: @entangle('empleadosBusqueda'),
+                                open: @entangle('mostrarDropdownEmpleados'),
+                                empleados: @js($empleados),
+                                
+                                selectEmpleado(empleadoId) {
+                                    $wire.seleccionarEmpleado(empleadoId);
+                                },
+                                
+                                limpiarBusqueda() {
+                                    $wire.limpiarEmpleado();
+                                },
+                                
+                                get filteredEmpleados() {
+                                    const trimmedSearch = this.search.trim();
+                                    if (trimmedSearch.length < 1) {
+                                        return this.empleados.slice(0, 10);
+                                    }
+                                    return this.empleados.filter(empleado => {
+                                        const searchLower = trimmedSearch.toLowerCase();
+                                        const nombreCompleto = ((empleado.nombre || '') + ' ' + (empleado.apellido || '')).toLowerCase();
+                                        return nombreCompleto.includes(searchLower) ||
+                                            (empleado.dni && empleado.dni.toString().includes(trimmedSearch));
+                                    });
+                                }
+                            }" 
+                            class="relative">
+                            
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Buscar Empleado
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">(opcional - busque por nombre, apellido o DNI)</span>
+                            </label>
+                            
+                            <!-- Input principal con botón de limpiar -->
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    x-model="search"
+                                    @focus="open = search.trim().length >= 1"
+                                    @input="open = search.trim().length >= 1"
+                                    @blur="setTimeout(() => { if (!$el.closest('.relative').querySelector(':hover')) { open = false; } }, 300)"
+                                    @keydown.space="$event.stopPropagation()"
+                                    class="w-full pl-3 pr-20 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                    placeholder="Escriba el nombre, apellido o DNI del empleado..."
+                                    autocomplete="off">
+                                
+                                <!-- Botones de acción -->
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <!-- Botón limpiar (solo si hay búsqueda) -->
+                                    <button 
+                                        x-show="search.length > 0"
+                                        @click="limpiarBusqueda()"
+                                        type="button"
+                                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mr-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Ícono de búsqueda -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Dropdown de resultados -->
+                            <div x-show="open && (filteredEmpleados.length > 0 || (search.trim().length >= 1 && filteredEmpleados.length === 0))" 
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95"
+                                @mouseenter="clearTimeout(window.dropdownTimeout)"
+                                @mouseleave="window.dropdownTimeout = setTimeout(() => open = false, 200)"
+                                class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                
+                                <template x-for="empleado in filteredEmpleados" :key="empleado.id">
+                                    <div @click="selectEmpleado(empleado.id)"
+                                        class="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition-colors border-b border-gray-100 dark:border-gray-600 last:border-b-0">
+                                        
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-medium text-sm">
+                                                    <span x-text="empleado.nombre || ''"></span>
+                                                    <span x-text="empleado.apellido || ''"></span>
+                                                </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    DNI: <span x-text="empleado.dni || 'Sin DNI'"></span>
+                                                </div>
+                                            </div>
+                                            <div class="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                                Seleccionar
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <!-- Mensaje de no resultados -->
+                                <div x-show="search.trim().length >= 1 && filteredEmpleados.length === 0" 
+                                    class="px-4 py-6 text-gray-500 dark:text-gray-400 text-center text-sm">
+                                    <div class="flex flex-col items-center space-y-2">
+                                        
+                                        <div>
+                                            No se encontraron empleados que coincidan con "<span x-text="search" class="font-medium"></span>"
+                                        </div>
+                                        <div class="text-xs text-gray-400">
+                                            Intente buscar por nombre, apellido o DNI
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mensaje informativo cuando hay empleado seleccionado -->
+                            @if($empleadoSeleccionado && isset($empleadoSeleccionado->nombre))
+                                <div class="mt-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-green-800 dark:text-green-300">
+                                                Empleado seleccionado: {{ $empleadoSeleccionado->nombre ?? '' }} {{ $empleadoSeleccionado->apellido ?? '' }}
+                                            </p>
+                                            <p class="text-xs text-green-600 dark:text-green-400">
+                                                DNI: {{ $empleadoSeleccionado->dni ?? 'Sin DNI' }}
+                                            </p>
+                                        </div>
+                                        <button 
+                                            wire:click="limpiarEmpleado"
+                                            type="button"
+                                            class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -521,7 +666,7 @@
                         @if(count($persona_domicilios) > 0 && !$isPrivateArea)
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Domicilio *
+                                    Domicilios guardados *
                                 </label>
                                 <select 
                                     wire:model.live="domicilio_id"
@@ -529,7 +674,7 @@
                                     <option value="">Seleccione un domicilio</option>
                                     <option value="nuevo">Nuevo Domicilio</option>
                                     @foreach($persona_domicilios as $domicilio)
-                                        <option value="{{ $domicilio->id }}">{{ $domicilio->direccion }}</option>
+                                        <option value="{{ $domicilio->id }}">{{ $domicilio->direccion }} {{ $domicilio->numero_tranquera ? ' - Tranquera: ' . $domicilio->numero_tranquera : '' }}</option>
                                     @endforeach
                                 </select>
                                 @error('domicilio_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -538,89 +683,203 @@
                     </div>
         
                     @if(!$isPrivateArea)
-                        <div x-show="$wire.mostrar_inputs_direccion" 
-                                x-transition>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Dirección *
-                                    </label>
-                                    <div class="flex gap-2">
-                                        <div class="flex-1 relative">
-                                            <input 
-                                                type="text" 
-                                                id="direccion-autocomplete"
-                                                wire:model="direccion"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                                                placeholder="Busque y seleccione una dirección..."
-                                                autocomplete="off">
-                                            
-                                            <!-- Indicador de validación -->
-                                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                                <div id="direccion-status" class="hidden">
-                                                    <!-- Icono de éxito -->
-                                                    <svg id="direccion-success" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                    <!-- Icono de error -->
-                                                    <svg id="direccion-error" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button 
-                                            type="button"
-                                            wire:click="abrirMapa"
-                                            class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
-                                            title="Seleccionar en el mapa">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            </svg>
-                                        </button>
+                        <!-- Campos específicos según el tipo de ubicación seleccionado -->
+                        <div x-show="$wire.mostrar_inputs_direccion" x-transition>
+                            
+                            <!-- NUEVA SECCIÓN: Radio de opciones para tipo de ubicación -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                    Tipo de ubicación *
+                                </label>
+                                
+                                <div class="flex space-x-6 gap-4">
+                                    <!-- Opción: Dirección por mapa -->
+                                    <div class="flex items-center">
+                                        <input 
+                                            id="tipo_mapa" 
+                                            type="radio" 
+                                            wire:model.live="tipo_ubicacion" 
+                                            value="mapa"
+                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                                        <label for="tipo_mapa" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            <span class="flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                Dirección por mapa
+                                            </span>
+                                        </label>
                                     </div>
-                                    @error('coordenadas') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                                    @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                     
-                                    <!-- Mensaje de estado de la dirección -->
-                                    <div id="direccion-mensaje" class="mt-2 text-sm hidden">
-                                        <div id="direccion-validada" class="text-green-600 dark:text-green-400 flex items-center hidden">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <span>Dirección validada</span>
-                                        </div>
-                                        <div id="direccion-no-validada" class="text-amber-600 dark:text-amber-400 flex items-center hidden">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                            </svg>
-                                            <span>Dirección no validada - Use el mapa para mayor precisión</span>
-                                        </div>
+                                    <!-- Opción: Tranquera -->
+                                    <div class="flex items-center">
+                                        <input 
+                                            id="tipo_tranquera" 
+                                            type="radio" 
+                                            wire:model.live="tipo_ubicacion" 
+                                            value="tranquera"
+                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                                        <label for="tipo_tranquera" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                            <span class="flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                                </svg>
+                                                Tranquera
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
+                                
+                                @error('tipo_ubicacion') 
+                                    <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                                @enderror
+                            </div>
+
+                        
                             
+                            <!-- CASO 1: Dirección por mapa (campos existentes) -->
+                            @if($tipo_ubicacion === 'mapa')
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Dirección (Calle, número) *
+                                        </label>
+                                        <div class="flex gap-2">
+                                            <div class="flex-1 relative">
+                                                <input 
+                                                    type="text" 
+                                                    id="direccion-autocomplete"
+                                                    wire:model="direccion"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                                    placeholder="Busque y seleccione una dirección..."
+                                                    autocomplete="off">
+                                                
+                                                <!-- Indicador de validación -->
+                                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                                    <div id="direccion-status" class="hidden">
+                                                        <!-- Icono de éxito -->
+                                                        <svg id="direccion-success" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        <!-- Icono de error -->
+                                                        <svg id="direccion-error" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                wire:click="abrirMapa"
+                                                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
+                                                title="Seleccionar en el mapa">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        @error('coordenadas') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                        @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                        
+                                        <!-- Mensaje de estado de la dirección -->
+                                        <div id="direccion-mensaje" class="mt-2 text-sm hidden">
+                                            <div id="direccion-validada" class="text-green-600 dark:text-green-400 flex items-center hidden">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                <span>Dirección validada</span>
+                                            </div>
+                                            <div id="direccion-no-validada" class="text-amber-600 dark:text-amber-400 flex items-center hidden">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                                </svg>
+                                                <span>Dirección no validada - Use el mapa para mayor precisión</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Entre calles *
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            wire:model="entre_calles"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                            placeholder="Entre qué calles se encuentra">
+                                        @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
+                                @if($coordenadas)
+                                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mt-2">
+                                        <p class="text-sm text-green-700 dark:text-green-300 flex items-center">
+                                            <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Ubicación confirmada: {{ $direccionCompleta ?: $direccion }} 
+                                        </p>
+                                    </div>
+                                @endif
+                                
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Entre calles
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-6">
+                                        Aclaraciones
+                                        <span class="text-gray-500 dark:text-gray-400 text-sm">(Describa la dirección que se autocompletó si considera que es necesario)</span>
                                     </label>
                                     <input 
                                         type="text" 
-                                        wire:model="entre_calles"
+                                        wire:model="direccion_rural"
                                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                                        placeholder="Entre qué calles se encuentra">
-                                    @error('entre_calles') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                        placeholder="Describa aclaraciones adicionales sobre la ubicación">
+                                    @error('direccion_rural') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                 </div>
-                            </div>
+                                
+                            @elseif($tipo_ubicacion === 'tranquera')
+                                <!-- CASO 2: Tranquera (solo input numérico) -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Número de Tranquera *
+                                        </label>
+                                        <div class="relative">
+                                            
+                                            <input 
+                                                type="number" 
+                                                wire:model.live.debounce.300ms="numero_tranquera"
+                                                min="1"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                                placeholder="Ej: 145"
+                                                @wheel.prevent>
+                                        </div>
+                                        @error('numero_tranquera') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
 
-                            @if($coordenadas)
-                                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mt-2">
-                                    <p class="text-sm text-green-700 dark:text-green-300 flex items-center">
-                                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Ubicación confirmada: {{ $direccionCompleta ?: $direccion }} 
-                                    </p>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Dirección *
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            wire:model="direccion"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                            placeholder="Entre qué calles se encuentra">
+                                        @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-6">
+                                        Aclaraciones
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        wire:model="direccion_rural"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                        placeholder="Describa aclaraciones adicionales sobre la ubicación">
+                                    @error('direccion_rural') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                 </div>
                             @endif
                         </div>
@@ -714,8 +973,8 @@
                                 <input 
                                     type="text" 
                                     wire:model.live="direccion"
-                                    readonly
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                                    {{ !empty($this->datosPrecargados) ? 'readonly' : '' }}
                                     placeholder="Entre qué calles se encuentra">
                                 @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
@@ -778,9 +1037,15 @@
                                         @endif
                                     </p>
                                     @if (!$isPrivateArea)
+                                        @if($numero_tranquera)
+                                            <p><strong>Tranquera:</strong> N° {{ $numero_tranquera }}</p>
+                                        @endif
                                         <p><strong>Dirección:</strong> {{ Str::before($direccion,',')}}</p>
                                         @if($entre_calles)
                                             <p><strong>Entre calles:</strong> {{ $entre_calles }}</p>
+                                        @endif
+                                        @if($direccion_rural)
+                                            <p><strong>Aclaraciones:</strong> {{ $direccion_rural }}</p>
                                         @endif
                                     @else
                                         <p><strong>Edificio:</strong> {{ $edificios->find($edificio_id)->nombre ?? 'Edificio no encontrado' }}</p>
@@ -1236,7 +1501,8 @@
                 const centroMercedes = new google.maps.LatLng(-34.6549, -59.4307);
                 
                 // Calcular bounds para 10km de radio (aproximadamente 0.09 grados = ~10km)
-                const radioEnGrados = 0.09; // Aproximadamente 10km
+                //const radioEnGrados = 0.09; // Aproximadamente 10km
+                const radioEnGrados = 0.198; // Aproximadamente 22km
                 const boundsRestrictivos = new google.maps.LatLngBounds(
                     new google.maps.LatLng(
                         centroMercedes.lat() - radioEnGrados, 
@@ -1292,10 +1558,11 @@
                         location.lng()
                     );
 
-                    if (distancia > 10) {
+               
+                    if (distancia > 22) {
                         console.log(`Dirección fuera del rango permitido: ${distancia.toFixed(2)}km`);
                         mostrarEstadoDireccion('error');
-                        alert('La dirección seleccionada está fuera del área de servicio (10km de radio)');
+                        alert('La dirección seleccionada está fuera del área de servicio');
                         input.value = '';
                         return;
                     }
@@ -1352,7 +1619,7 @@
                                                     place.geometry.location.lng()
                                                 );
                                                 
-                                                if (distancia <= 10) {
+                                                if (distancia <= 22) {
                                                     prediccionesFiltradas.push({
                                                         place: place,
                                                         distancia: distancia
@@ -1385,7 +1652,7 @@
 
                                                     mostrarEstadoDireccion('success');
                                                 } else {
-                                                    alert('No se encontraron direcciones dentro del área de servicio (10km)');
+                                                    alert('No se encontraron direcciones dentro del área de servicio');
                                                     mostrarEstadoDireccion('error');
                                                 }
                                             }

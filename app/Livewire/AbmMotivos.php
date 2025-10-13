@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Area;
 use App\Models\Categoria;
+use App\Models\Cuadrilla;
 use Illuminate\Support\Facades\Auth;
 
 class AbmMotivos extends Component
@@ -23,14 +24,18 @@ class AbmMotivos extends Component
     public $showFormModal = false;
     public $isEditing = false;
     public $selectedMotivo = null;
+    public $showToggleModal = false;
+    public $showCambiarEstadoModal = false;
     
     // Datos para los selects
     public $areas = [];
     public $userAreas = []; // Áreas del usuario logueado
+    public $cuadrillas = [];
 
     // Datos del formulario
     public $nombre = '';
     public $area_id = '';
+    public $cuadrilla_id = '';
     public $privada = false;
 
     // Estado de guardado
@@ -154,7 +159,10 @@ class AbmMotivos extends Component
         } else {
             $this->area_id = ''; // Dejar vacío para que el usuario seleccione
         }
+        $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->get();
     }
+
+    // Editar motivo
 
     public function editarMotivo($motivoId)
     {
@@ -182,6 +190,8 @@ class AbmMotivos extends Component
     {
         $this->nombre = $motivo->nombre;
         $this->area_id = $motivo->area_id;
+        $this->cuadrilla_id = $motivo->cuadrilla_id;
+        $this->cuadrillas = Cuadrilla::where('area_id', $motivo->area_id)->get();
     }
 
     public function resetForm()
@@ -191,6 +201,56 @@ class AbmMotivos extends Component
         $this->isSaving = false;
         $this->resetErrorBag();
     }
+
+    // Habilitar/Deshabilitar motivo
+
+   // Agregar esta propiedad en la clase del componente
+
+    public function confirmarCambioEstado($motivoId)
+    {
+        $motivo = Categoria::whereIn('area_id', $this->userAreas)->find($motivoId);
+        if (!$motivo) {
+            $this->mostrarNotificacionError('No tienes permisos para modificar este motivo.');
+            return;
+        }
+        
+        $this->selectedMotivo = $motivo;
+        $this->showCambiarEstadoModal = true;
+    }
+
+    public function cambiarEstadoMotivo()
+    {
+        if ($this->selectedMotivo) {
+            try {
+                // Verificar una vez más que el usuario tiene permisos
+                if (in_array($this->selectedMotivo->area_id, $this->userAreas)) {
+                    $nuevoEstado = !$this->selectedMotivo->activo;
+                    $this->selectedMotivo->update(['activo' => $nuevoEstado]);
+                    
+                    $this->showCambiarEstadoModal = false;
+                    $mensaje = $nuevoEstado ? 'Motivo habilitado exitosamente' : 'Motivo deshabilitado exitosamente';
+                    $this->mostrarNotificacionExito($mensaje);
+                    
+                    $this->selectedMotivo = null;
+                } else {
+                    $this->mostrarNotificacionError('No tienes permisos para modificar este motivo.');
+                    $this->showCambiarEstadoModal = false;
+                    $this->selectedMotivo = null;
+                }
+            } catch (\Exception $e) {
+                $this->mostrarNotificacionError('Error al cambiar el estado del motivo: ' . $e->getMessage());
+            }
+        }
+    }
+
+    public function cerrarModalCambioEstado()
+    {
+        $this->showCambiarEstadoModal = false;
+        $this->selectedMotivo = null;
+    }
+    
+
+    // Eliminar motivo
 
     public function confirmarEliminacion($motivoId)
     {
@@ -232,6 +292,8 @@ class AbmMotivos extends Component
         $this->selectedMotivo = null;
     }
 
+
+
     public function save()
     {
         $this->isSaving = true;
@@ -253,6 +315,7 @@ class AbmMotivos extends Component
                     'nombre' => $this->nombre,
                     'nombre_publico' => $this->nombre,
                     'area_id' => $this->area_id,
+                    'cuadrilla_id' => $this->cuadrilla_id,
                     'privada' => $this->ver_privada ? 1 : 0,
                 ]);
                 
@@ -270,7 +333,8 @@ class AbmMotivos extends Component
                 $motivo->update([
                     'nombre' => $this->nombre,
                     'nombre_publico' => $this->nombre,
-                    'area_id' => $this->area_id
+                    'area_id' => $this->area_id,
+                    'cuadrilla_id' => $this->cuadrilla_id
                 ]);
                 
                 $mensaje = 'Motivo actualizado exitosamente';

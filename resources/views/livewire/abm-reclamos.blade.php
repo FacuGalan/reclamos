@@ -1,10 +1,10 @@
-<div class="max-w-7xl mx-auto p-6 pt-0 space-y-6">
+<div class="max-w-7xl mx-auto p-2 pt-0 space-y-6" >
 
     @if($currentView === 'list')
         <!-- Vista de Lista de Reclamos -->
         
         <!-- Header Optimizado -->
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-2 mt-0 pt-0">
             <div class="flex-1 min-w-0">
                 <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Reclamos</h1>
                 <div class="flex items-center gap-2 mt-1">
@@ -116,53 +116,101 @@
                 </div>
             @endif
         </div>
+        
         <!-- Filtros -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
-                <div class="flex flex-col md:flex-row  items-center gap-2">
+        <div x-data="{ mostrarMas: false }" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 py-2 mb-2">
+           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-2 space-y-4 lg:space-y-0">
+                <!-- Columna 1: Título (izquierda en desktop, arriba en móvil) -->
+                <div class="flex-shrink-0">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white text-center lg:text-left">Filtros {{ $filtrosActivos ? "($filtrosActivos activo" . ($filtrosActivos > 1 ? 's' : '') . ")" : '' }}</h3> 
+                    
+                </div>
+                
+                <!-- Columna 2: Contadores y área (centro) -->
+                <div class="flex-1 flex flex-col items-center justify-center space-y-3">
+                    <!-- Contadores - en columna en móvil, en fila en desktop -->
+                    <div class="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-2 sm:space-y-0">
+                        <!-- Total de Reclamos -->
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-600 text-sm"><strong>Total:</strong></span>
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium text-sm">
+                                {{ number_format($contadorTotales) }}
+                            </span>
+                        </div>
+                        
+                        <!-- Reclamos Pendientes -->
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-600 text-sm"><strong>Sin procesar:</strong></span>
+                            <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium text-sm">
+                                {{ number_format($contadorSinProcesar) }}
+                            </span>
+                        </div>
+                        
+                        <!-- Reclamos en Trámite -->
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-600 text-sm"><strong>Procesado:</strong></span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium text-sm">
+                                {{ number_format($contadorTotales - $contadorSinProcesar) }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Área (debajo de los contadores si existe) -->
+                    @if($filtro_area)
+                        <div class="text-gray-500 text-xs text-center">
+                            <span>Área:</span> 
+                            <span>{{ $areas->where('id', $filtro_area)->first()->nombre ?? 'Seleccionada' }}</span>
+                        </div>
+                    @endif
+                </div>
+                
+                <!-- Columna 3: Botones (derecha en desktop, abajo en móvil) -->
+                <div class="flex-shrink-0 flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                     <button 
                         wire:click="exportarExcel"
-                        class="px-4 py-2 bg-[#217346] hover:bg-[#2e8b5c] text-white rounded-lg transition-colors cursor-pointer">
+                        class="w-full sm:w-auto px-4 py-2 bg-[#217346] hover:bg-[#2e8b5c] text-white rounded-lg transition-colors cursor-pointer text-sm">
                         Exportar Excel
                     </button>
                     <button 
                         wire:click="limpiarFiltros"
-                        class="px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer">
+                        class="w-full sm:w-auto px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer text-sm">
                         Limpiar Filtros
                     </button>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
 
                 <!-- Búsqueda por id -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Búsqueda ID</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Búsqueda ID</label>
                     <input 
                         type="text" 
                         wire:model.live.debounce.300ms="busqueda_id"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $busqueda_id ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}"
                         placeholder="Buscar por ID">
                 </div>
 
                 <!-- Búsqueda general -->
                 <div >
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Búsqueda</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Búsqueda</label>
                     <input 
                         type="text" 
                         wire:model.live.debounce.300ms="busqueda"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $busqueda ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}"
                         placeholder="Buscar por descripción, dirección, DNI o nombre...">
                 </div>
 
                 @if($this->ver_privada)
                     <!-- Filtro por edificio -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Edificio</label>
                         <select 
                             wire:model.live="filtro_edificio"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                            {{ $filtro_edificio ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
                             <option value="">Todos los edificios</option>
                             @foreach($edificios as $edificio)
                                 <option value="{{ $edificio->id }}">{{ $edificio->nombre }}</option>
@@ -173,10 +221,11 @@
                 @else
                     <!-- Filtro por barrio -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Barrio</label>
                         <select 
                             wire:model.live="filtro_barrio"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                            {{ $filtro_barrio ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
                             <option value="">Todos los barrios</option>
                             @foreach($barrios as $barrio)
                                 <option value="{{ $barrio->id }}">{{ $barrio->nombre }}</option>
@@ -187,10 +236,11 @@
 
                 <!-- Filtro por estado -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Estado</label>
                     <select 
                         wire:model.live="filtro_estado"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_estado ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
                         <option value="">Todos los estados</option>
                         @foreach($estados as $estado)
                             <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
@@ -200,10 +250,11 @@
 
                 <!-- Filtro por área -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Área</label>
                     <select 
                         wire:model.live="filtro_area"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_area ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
                         <option value="">Todas las áreas</option>
                         @foreach($areas as $area)
                             <option value="{{ $area->id }}">{{ $area->nombre }}</option>
@@ -213,10 +264,11 @@
 
                 <!-- Filtro por categoría -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Categoría</label>
                     <select 
                         wire:model.live="filtro_categoria"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_categoria ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
                         <option value="">Todas las categorías</option>
                         @foreach($categorias as $categoria)
                             <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
@@ -226,25 +278,100 @@
 
                 <!-- Fecha desde -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fecha desde</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Fecha desde</label>
                     <input 
                         type="date" 
                         wire:model.live="filtro_fecha_desde"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_fecha_desde ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
                 </div>
 
                 <!-- Fecha hasta -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fecha hasta</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Fecha hasta</label>
                     <input 
                         type="date" 
                         wire:model.live="filtro_fecha_hasta"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_fecha_hasta ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
                 </div>
 
-            
+                <!-- Usuario alta -->
+                <div x-show="mostrarMas" x-cloak>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Usuario alta</label>
+                    <select 
+                        wire:model.live="filtro_usuario"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_usuario ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
+                        <option value="">Todos los usuarios</option>
+                        @foreach($usuarios as $usuario)
+                            <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Responsable -->
+                <div x-show="mostrarMas" x-cloak>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Usuario último contacto</label>
+                    <select 
+                        wire:model.live="filtro_responsable"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_responsable ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
+                        <option value="">Todos los usuarios</option>
+                        @foreach($usuarios as $usuario)
+                            <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Cuadrilla -->
+                <div x-show="mostrarMas" x-cloak>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Cuadrilla</label>
+                    <select 
+                        wire:model.live="filtro_cuadrilla"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_cuadrilla ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
+                        <option value="">Todas las cuadrillas</option>
+                        @foreach($cuadrillas as $cuadrilla)
+                            <option value="{{ $cuadrilla->id }}">{{ $cuadrilla->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
             </div>
+
+            <!-- Botón ver más -->
+            <div class="mt-2 flex items-center">
+                <!-- Línea izquierda -->
+                <div class="flex-1 border-t border-gray-300 mx-4"></div>
+
+                <!-- Botón centrado -->
+                <button 
+                    type="button" 
+                    @click="mostrarMas = !mostrarMas"
+                    class="mx-3 text-black text-sm font-medium cursor-pointer transition-all duration-300 flex items-center space-x-1"
+                >
+                    <span x-show="!mostrarMas" class="flex items-center space-x-1 bg-gray-100 border border-gray-300 px-2 py-1 rounded hover:bg-gray-200">
+                        <span>Búsqueda avanzada</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </span>
+                    <span x-show="mostrarMas" class="flex items-center space-x-1 bg-gray-100 border border-gray-300 px-2 py-1 rounded hover:bg-gray-200">
+                        <span>Búsqueda avanzada</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <!-- Línea derecha -->
+                <div class="flex-1 border-t border-gray-300 mx-4"></div>
+</div>
         </div>
+
+
+
 
         <!-- Tabla de reclamos -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -296,10 +423,13 @@
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($reclamos as $reclamo)
                             <tr class="
-                                    {{ is_null($reclamo->responsable_id) 
-                                        ? 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30' 
-                                        : 'hover:bg-gray-200 dark:hover:bg-gray-700' 
-                                    }} 
+                                    {{ $reclamo->estado_id == 6
+    ? 'bg-orange-100 hover:bg-orange-200 dark:bg-orange-900/20 dark:hover:bg-orange-900/30'
+    : (is_null($reclamo->responsable_id) 
+        ? 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30' 
+        : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+    )
+}}
                                     transition-colors
                                 ">
                                 <td class="px-6 py-4">
@@ -337,7 +467,11 @@
                                                 {{ Str::before($reclamo->direccion, ',') }}
                                             </span>
                                         @else
-                                            {{ Str::before($reclamo->direccion, ',') }}
+                                            @if($reclamo->numero_tranquera)
+                                                Tranquera: N° {{ $reclamo->numero_tranquera }}
+                                                <br>
+                                            @endif
+                                             {{ strlen(Str::before($reclamo->direccion, ',')." ".$reclamo->direccion_rural) > 50 ? substr(Str::before($reclamo->direccion, ',')." ".$reclamo->direccion_rural, 0, 50) . '...' : Str::before($reclamo->direccion, ',')." ".$reclamo->direccion_rural}}
                                             @if($reclamo->barrio_id > 0)
                                                 <br>
                                                 <span class="truncate block" title="Barrio: {{ $reclamo->barrio->nombre}}">

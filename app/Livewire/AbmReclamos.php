@@ -10,7 +10,11 @@ use App\Models\Categoria;
 use App\Models\Estado;
 use App\Models\Barrio;
 use App\Models\Edificio;
+use App\Models\User;
+use App\Models\Cuadrilla;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Session;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 use App\Exports\GenericExport;
 
@@ -21,15 +25,36 @@ class AbmReclamos extends Component
     use WithPagination;
 
     // Propiedades para filtros
+    #[Session]
     public $busqueda = '';
+    #[Session]
     public $busqueda_id = '';
+    #[Session]
     public $filtro_barrio = '';
+    #[Session]
     public $filtro_estado = '';
+    #[Session]
     public $filtro_area = '';
+    #[Session]
     public $filtro_categoria = '';
+    #[Session]
     public $filtro_fecha_desde = '';
+    #[Session]
     public $filtro_fecha_hasta = '';
+    #[Session]
     public $filtro_edificio = '';
+    #[Session]
+    public $filtro_usuario = '';
+    #[Session]
+    public $filtro_responsable = '';
+    #[Session]
+    public $filtro_cuadrilla = '';
+
+    public $filtrosActivos = 0; // Contador de filtros activos
+
+    // Contadores
+    public $contadorTotales = 0;
+    public $contadorSinProcesar = 0;
 
     // Propiedades para navegación entre vistas
     public $currentView = 'list'; // 'list', 'create', 'edit'
@@ -45,6 +70,8 @@ class AbmReclamos extends Component
     public $areas = [];
     public $categorias = [];
     public $edificios = [];
+    public $usuarios = [];
+    public $cuadrillas = [];
 
     public $listaTimestamp; // NUEVO: para forzar re-renderización
 
@@ -63,6 +90,9 @@ class AbmReclamos extends Component
         'filtro_fecha_desde' => ['except' => ''],
         'filtro_fecha_hasta' => ['except' => ''],
         'filtro_edificio' => ['except' => ''],
+        'filtro_usuario' => ['except' => ''],
+        'filtro_responsable' => ['except' => ''],
+        'filtro_cuadrilla' => ['except' => ''],
         'currentView' => ['except' => 'list'],              // ← AGREGAR ESTO
         'selectedReclamoId' => ['except' => null, 'as' => 'reclamo'], // ← AGREGAR ESTO
     ];
@@ -92,6 +122,8 @@ class AbmReclamos extends Component
         $this->areas = Area::whereIn('id', $this->userAreas)->orderBy('nombre')->get();
         $this->categorias = Categoria::whereIn('area_id', $this->userAreas)->where('privada', $this->ver_privada)->orderBy('nombre')->get();
         $this->edificios = Edificio::orderBy('nombre')->get();
+        $this->usuarios = User::getUsuariosDeAreas();
+        $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
 
         // Validación: Si está en modo edit, verificar que el reclamo existe y pertenece a las áreas del usuario
         if ($this->currentView === 'edit' && $this->selectedReclamoId) {
@@ -136,10 +168,47 @@ class AbmReclamos extends Component
         $this->resetPage();
     }
 
+    public function updatedFiltroArea()
+    {
+        // Actualizar las categorías cuando cambia el área
+        if ($this->filtro_area) {
+            $this->categorias = Categoria::where('area_id', $this->filtro_area)
+                ->where('privada', $this->ver_privada)
+                ->orderBy('nombre')
+                ->get();
+        } else {
+            // Si no hay área seleccionada, mostrar todas las categorías permitidas
+            $this->categorias = Categoria::whereIn('area_id', $this->userAreas)
+                ->where('privada', $this->ver_privada)
+                ->orderBy('nombre')
+                ->get();
+        }
+
+        // Resetear el filtro de categoría al cambiar el área
+        $this->filtro_categoria = '';
+
+    }
+
+    public function updatedFiltroUsuario()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltroResponsable()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltroCuadrilla()
+    {
+        $this->resetPage();
+    }
+
     public function getReclamos($forExport = false)
     {
         $query = Reclamo::with(['persona', 'categoria', 'area', 'estado','barrio','edificio', 'usuario', 'responsable'])
             ->whereIn('area_id', $this->userAreas) // ← FILTRO PRINCIPAL: Solo reclamos de áreas del usuario
+            ->orderByRaw('CASE WHEN estado_id = 6 THEN 0 ELSE 1 END')
             ->orderBy('created_at', 'desc');
 
         // Aplicar filtros adicionales
@@ -197,6 +266,22 @@ class AbmReclamos extends Component
             $query->where('edificio_id', $this->filtro_edificio);
         }
 
+        if ($this->filtro_usuario) {
+            $query->where('usuario_id', $this->filtro_usuario);
+        }
+
+        if ($this->filtro_responsable) {
+            $query->where('responsable_id', $this->filtro_responsable);
+        }
+
+        if ($this->filtro_cuadrilla) {
+            // Filtrar reclamos cuya categoría pertenece a la cuadrilla seleccionada
+            $query->whereHas('categoria', function ($q) {
+                $q->where('cuadrilla_id', $this->filtro_cuadrilla);
+            });
+        }
+
+
         // FILTRO POR CATEGORÍAS PRIVADAS
 
         if(Auth::user()->rol->id > 1){
@@ -208,6 +293,9 @@ class AbmReclamos extends Component
         
 
         $this->listaTimestamp = microtime(true);
+
+        $this->contadorTotales = $query->count();
+        $this->contadorSinProcesar = (clone $query)->where('responsable_id', null)->count();
 
         // Condicional según el parámetro
         if ($forExport) {
@@ -228,6 +316,11 @@ class AbmReclamos extends Component
         $this->filtro_fecha_desde = '';
         $this->filtro_fecha_hasta = '';
         $this->filtro_edificio = '';
+        $this->filtro_usuario = '';
+        $this->filtro_responsable = '';
+        $this->filtro_cuadrilla = '';
+
+
         $this->resetPage();
     }
 
@@ -346,13 +439,16 @@ class AbmReclamos extends Component
                 'Email',
                 'Categoría',
                 'Área',
-                'Descripción',
+                'Tranquera',
                 'Dirección',
+                'Entre calles',
+                'Aclaración Dirección',
                 'Barrio',
                 'Estado',
                 'Usuario Creador',
                 'Responsable',
-                'Fecha Creación'
+                'Fecha Creación',
+                'Descripción'
             ];
             
             // 3. Función de mapeo personalizada
@@ -367,13 +463,16 @@ class AbmReclamos extends Component
                     $reclamo->persona->email ?? 'N/A',
                     $reclamo->categoria->nombre,
                     $reclamo->area->nombre,
-                    $reclamo->descripcion,
+                    $reclamo->numero_tranquera ?? 'N/A',
                     $reclamo->direccion,
+                    $reclamo->entre_calles ?? 'N/A',
+                    $reclamo->direccion_rural,
                     $reclamo->barrio->nombre ?? 'N/A',
                     $reclamo->estado->nombre,
                     $reclamo->usuario?->name ?? 'N/A',
                     $reclamo->responsable?->name ?? 'Sin asignar',
                     $reclamo->created_at->format('d/m/Y H:i'),
+                    $reclamo->descripcion,
                 ];
             };
             
@@ -384,7 +483,7 @@ class AbmReclamos extends Component
                     'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'fillType' => Fill::FILL_SOLID,
                     'startColor' => ['rgb' => '77BF43'], // Tu color verde personalizado
                 ],
             ];
@@ -401,11 +500,35 @@ class AbmReclamos extends Component
             return $export->download();
         }
 
+    public function contarFiltrosActivos()
+    {
+        $filtros = [
+            $this->busqueda,
+            $this->busqueda_id,
+            $this->filtro_barrio,
+            $this->filtro_estado,
+            $this->filtro_area,
+            $this->filtro_categoria,
+            $this->filtro_fecha_desde,
+            $this->filtro_fecha_hasta,
+            $this->filtro_edificio,
+            $this->filtro_usuario,
+            $this->filtro_responsable,
+            $this->filtro_cuadrilla,
+        ];
+
+        $this->filtrosActivos = collect($filtros)->filter(function($valor) {
+            return !empty($valor);
+        })->count();
+    }
+
     public function render()
     {
         // Solo obtener reclamos si estamos en la vista de lista
         $reclamos = $this->currentView === 'list' ? $this->getReclamos() : collect();
         
+        $this->contarFiltrosActivos();
+
         return view('livewire.abm-reclamos', [
             'reclamos' => $reclamos
         ]);

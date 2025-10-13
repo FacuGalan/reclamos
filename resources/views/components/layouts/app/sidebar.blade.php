@@ -54,16 +54,26 @@
                         @if(Auth::user()->rol->lTiposMovAbm)
                             <flux:navlist.item class="flux-nav-custom" icon="arrows-right-left" :href="route('tipos-movimiento')" :current="request()->routeIs('tipos-movimiento')" wire:navigate>Tipos de Movimiento</flux:navlist.item>
                         @endif
+                        @if(Auth::user()->rol->lPreguntasFrecAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="question-mark-circle" :href="route('preguntas-frecuentes')" :current="request()->routeIs('preguntas-frecuentes')" wire:navigate>Preguntas Frecuentes</flux:navlist.item>
+                        @endif
                         @if(Auth::user()->rol->lEstadosAbm)
                             <flux:navlist.item class="flux-nav-custom" icon="adjustments-horizontal" :href="route('estados')" :current="request()->routeIs('estados')" wire:navigate>Estados</flux:navlist.item>
                         @endif
-
+                        @if(Auth::user()->rol->lCuadrillasAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="user-group" :href="route('cuadrillas')" :current="request()->routeIs('cuadrillas')" wire:navigate>Cuadrillas</flux:navlist.item>
+                        @endif
+                        @if(Auth::user()->ver_privada)
+                            <flux:navlist.item class="flux-nav-custom" icon="map" :href="route('edificios')" :current="request()->routeIs('edificios')" wire:navigate>Edificios</flux:navlist.item>
+                        @endif
                     </flux:navlist.group>
                 @endif
 
-                <flux:navlist.group :heading="__('Estadisticas')" class="grid">
-                    <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('estadisticas')" :current="request()->routeIs('estadisticas')" >Estadisticas</flux:navlist.item>
-                </flux:navlist.group>
+                @if(Auth::user()->rol->lEstadisticas)     
+                    <flux:navlist.group :heading="__('Estadisticas')" class="grid">
+                        <flux:navlist.item class="flux-nav-custom" icon="chart-bar" :href="route('estadisticas')" :current="request()->routeIs('estadisticas')" >Estadisticas</flux:navlist.item>
+                    </flux:navlist.group>
+                @endif
 
                 @if(Auth::user()->rol->lUsuariosAbm)
                     <flux:navlist.group :heading="__('Administración')" class="grid">
@@ -218,7 +228,6 @@
 
             window.addEventListener('reclamo-guardado-con-redirect', (event) => {
                 if (typeof Swal !== 'undefined') {
-                    // Mostrar el toast
                     Swal.fire({
                         title: '',
                         text: event.detail[0].mensaje,
@@ -227,16 +236,16 @@
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 4000,
-                        timerProgressBar: true
-                    }).then(() => {
-                        // Después de que termine el toast, redirigir
-                        window.location.href = event.detail[0].redirect_url;
+                        timerProgressBar: true,
+                        didClose: () => {
+                            // Usar didClose en lugar de then()
+                            window.location.href = event.detail[0].redirect_url;
+                        }
                     });
                 } else {
-                    // Si no hay SweetAlert, redirigir inmediatamente
                     window.location.href = event.detail[0].redirect_url;
                 }
-            });
+            }, { once: true });
         </script>
 
         @stack('scripts')

@@ -13,8 +13,10 @@ use App\Models\Persona;
 use App\Models\Domicilios;
 use App\Models\Movimiento;
 use App\Models\TipoMovimiento;
+use App\Models\Tranquera;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +31,7 @@ use App\Mail\MovimientoReclamoMail;
 class ModificarReclamo extends Component
 {
     public $editable = true;
+    public $tipo_ubicacion = 'mapa'; // 'mapa' o 'tranquera'
 
     // ID del reclamo a modificar
     public $reclamoId;
@@ -62,12 +65,17 @@ class ModificarReclamo extends Component
     public $descripcion = '';
     public $direccion = '';
     public $entre_calles = '';
+    public $direccion_rural = '';
+    public $numero_tranquera = '';
     public $coordenadas = '';
     public $area_id = '';
     public $area_nombre = '';
     public $categoria_id = '';
     public $estado_id = '';
     public $edificio_id = '';
+
+    public $tranqueraEncontrada = null; // Para almacenar los datos de la tranquera encontrada
+    public $tranqueraValida = false; // Para indicar si la tranquera es válida
 
     // Datos de la persona
     public $persona_dni = '';
@@ -120,11 +128,12 @@ class ModificarReclamo extends Component
         'persona_email' => 'nullable|email|max:255',
         'descripcion' => 'nullable|string|max:500',
         'direccion' => 'required|string|max:255',
-        'entre_calles' => 'nullable|string|max:255',
+        'entre_calles' => 'required|string|max:255',
         'coordenadas' => 'nullable|string',
         'categoria_id' => 'required|exists:categorias,id',
         'estado_id' => 'required|exists:estados,id',
         'edificio_id' => 'nullable|exists:edificios,id',
+        'numero_tranquera' => 'required_if:tipo_ubicacion,tranquera|nullable|numeric|min:1|exists:tr_tranqueras,tranquera',
     ];
 
     protected $messages = [
@@ -140,6 +149,11 @@ class ModificarReclamo extends Component
         'direccion.required' => 'La dirección es obligatoria',
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'estado_id.required' => 'Debe seleccionar un estado',
+        'entre_calles.required' => 'Debe indicar entre calles',
+        'numero_tranquera.required_if' => 'El número de tranquera es obligatorio',
+        'numero_tranquera.numeric' => 'El número de tranquera debe ser numérico',
+        'numero_tranquera.min' => 'El número de tranquera debe ser mayor a 0',
+        'numero_tranquera.exists' => 'La tranquera ingresada no existe en el sistema de tranqueras',
     ];
 
     public function placeholder()
@@ -184,6 +198,95 @@ class ModificarReclamo extends Component
 
         // Cargar historial inicial
         $this->cargarHistorial();
+    }
+
+    // NUEVO MÉTODO: Cuando cambia el número de tranquera
+    public function updatedNumeroTranquera()
+    {
+        // Limpiar errores previos
+        $this->resetErrorBag('numero_tranquera');
+        
+        // Si está vacío, limpiar datos
+        if (empty($this->numero_tranquera)) {
+            $this->tranqueraEncontrada = null;
+            $this->tranqueraValida = false;
+            $this->direccion = '';
+            $this->direccion_rural = '';
+            $this->coordenadas = '';
+            return;
+        }
+        
+        // Validar que sea numérico
+        if (!is_numeric($this->numero_tranquera)) {
+            $this->addError('numero_tranquera', 'El número de tranquera debe ser numérico');
+            $this->tranqueraValida = false;
+            return;
+        }
+        
+        // Buscar la tranquera en la base de datos
+        $this->buscarTranquera();
+    }
+
+    // NUEVO MÉTODO: Buscar tranquera por número
+    public function buscarTranquera()
+    {
+        try {
+            $tranquera = Tranquera::buscarPorNumero($this->numero_tranquera);
+            
+            if ($tranquera) {
+                // Tranquera encontrada
+                $this->tranqueraEncontrada = $tranquera;
+                $this->tranqueraValida = true;
+                
+                // Llenar campos automáticamente
+                $this->direccion = $tranquera->domicilio_limpio;
+                $this->direccion_rural = $tranquera->aclaraciones;
+                
+                // Usar las coordenadas del campo puntomapa si están disponibles
+                if (!empty($tranquera->coordenadas) && $tranquera->tieneCoordenadasValidas()) {
+                    $this->coordenadas = $tranquera->coordenadas;
+                } else {
+                    // Fallback al formato anterior si no tiene coordenadas válidas
+                    $this->coordenadas = "tranquera:" . $tranquera->tranquera;
+                }
+                
+                // Limpiar errores
+                $this->resetErrorBag('numero_tranquera');
+                
+                // Emitir evento de éxito (opcional, para notificaciones visuales)
+                $this->dispatch('tranquera-encontrada', [
+                    'numero' => $tranquera->tranquera,
+                    'domicilio' => $tranquera->domicilio_limpio,
+                    'aclaraciones' => $tranquera->aclaraciones,
+                    'coordenadas' => $this->coordenadas,
+                    'tiene_coordenadas' => $tranquera->tieneCoordenadasValidas()
+                ]);
+                
+            } else {
+                // Tranquera no encontrada
+                $this->tranqueraEncontrada = null;
+                $this->tranqueraValida = false;
+                
+                $this->addError('numero_tranquera', 'La tranquera N° ' . $this->numero_tranquera . ' no existe en el sistema');
+                
+                // Limpiar campos derivados
+                $this->direccion = '';
+                $this->direccion_rural = '';
+                $this->coordenadas = '';
+            }
+            
+        } catch (\Exception $e) {
+            // Error en la búsqueda
+            $this->tranqueraEncontrada = null;
+            $this->tranqueraValida = false;
+            $this->addError('numero_tranquera', 'Error al buscar la tranquera');
+            
+            // Log del error (opcional)
+            \Illuminate\Support\Facades\Log::error('Error buscando tranquera', [
+                'numero' => $this->numero_tranquera,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function abrirMapa()
@@ -280,6 +383,8 @@ class ModificarReclamo extends Component
         $this->descripcion = $this->reclamo->descripcion;
         $this->direccion = $this->reclamo->direccion;
         $this->entre_calles = $this->reclamo->entre_calles;
+        $this->direccion_rural = $this->reclamo->direccion_rural;
+        $this->numero_tranquera = $this->reclamo->numero_tranquera;
         $this->coordenadas = $this->reclamo->coordenadas;
         $this->categoria_id = $this->reclamo->categoria_id;
         $this->area_id = $this->reclamo->area_id;
@@ -288,6 +393,12 @@ class ModificarReclamo extends Component
         $this->noAplica = $this->reclamo->no_aplica;
         $this->notificado = $this->reclamo->notificado; // Asignar valor de notificado si existe
         $this->edificio_id = $this->reclamo->edificio_id;
+
+        if ($this->numero_tranquera) {
+            $this->tipo_ubicacion = 'tranquera';
+        } else {
+            $this->tipo_ubicacion = 'mapa';
+        }
          
         // Configurar categoria seleccionada para el dropdown
         if ($this->categoria_id) {
@@ -613,7 +724,34 @@ class ModificarReclamo extends Component
         $this->isSaving = true; // Indicar que se está guardando
 
         // Validar todos los campos
-        $this->validate();
+        //$this->validate();
+        $this->validate([
+            'persona_dni' => $this->rules['persona_dni'],
+            'persona_nombre' => $this->rules['persona_nombre'],
+            'persona_apellido' => $this->rules['persona_apellido'],
+            'persona_telefono' => $this->rules['persona_telefono'],
+            'persona_email' => $this->rules['persona_email'],
+        ]);
+        if($this->isPrivateArea){
+            $this->validate([
+                'edificio_id' => $this->rules['edificio_id'],
+            ]);
+        }else{
+            $this->validate([
+                'direccion' => $this->rules['direccion'],
+                'coordenadas' => $this->rules['coordenadas'],
+            ]);
+            if($this->tipo_ubicacion == 'tranquera'){
+                $this->validate([
+                    'numero_tranquera' => $this->rules['numero_tranquera'],
+                ]);
+            }else{
+                $this->validate([
+                    'entre_calles' => $this->rules['entre_calles'],
+                ]);
+            }
+
+        }
 
         try {
             DB::beginTransaction();
@@ -634,6 +772,8 @@ class ModificarReclamo extends Component
                 $domicilio->update([
                     'direccion' => $this->direccion,
                     'entre_calles' => $this->entre_calles,
+                    'direccion_rural' => $this->direccion_rural,
+                    'numero_tranquera' => $this->numero_tranquera,
                     'coordenadas' => $this->coordenadas,
                 ]);
             }
@@ -643,6 +783,8 @@ class ModificarReclamo extends Component
                 'descripcion' => $this->descripcion,
                 'direccion' => $this->direccion,
                 'entre_calles' => $this->entre_calles,
+                'direccion_rural' => $this->direccion_rural,
+                'numero_tranquera' => $this->numero_tranquera,
                 'coordenadas' => $this->coordenadas,
                 'area_id' => $this->area_id,
                 'categoria_id' => $this->categoria_id,
@@ -723,7 +865,9 @@ class ModificarReclamo extends Component
             'fecha_reclamo' => $reclamo->created_at->format('Y-m-d - H:i:s'),
             'persona_nombre' => $reclamo->persona->nombre . ' ' . $reclamo->persona->apellido,
             'persona_telefono' => $reclamo->persona->telefono ?? 'N/A',
-            'direccion' => $reclamo->direccion ?? 'N/A',
+            'direccion' =>  Str::before($reclamo->direccion, ',') ?? 'N/A',
+            'direccion_rural' => $reclamo->direccion_rural,
+            'numero_tranquera' => $reclamo->numero_tranquera,
             'entre_calles' => $reclamo->entre_calles,
             'descripcion' => $reclamo->descripcion,
             'estado_actual' => $reclamo->estado->nombre ?? 'N/A',

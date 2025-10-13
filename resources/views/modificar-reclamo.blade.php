@@ -2,7 +2,7 @@
     @php
         // Detectar si el reclamo está en estado finalizado o cancelado
         $reclamoModel = \App\Models\Reclamo::find($reclamo);
-        $editable = !in_array($reclamoModel->estado_id, [4, 5]) && Auth::user()->rol_id != 5;
+        $editable = !in_array($reclamoModel->estado_id, [4, 5]); // && Auth::user()->rol_id != 5;
     @endphp
     
     <div class="mb-6">

@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Reclamo;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -39,6 +40,30 @@ trait ManejadorEstadisticas
                       ->map->count()
                       ->sortDesc();
     }
+
+    /**
+     * Generar estadísticas de reclamos por edificio
+     */
+    protected function estadisticasPorEdificio(Collection $reclamos, int $limite = 10): Collection
+    {
+        return $reclamos->filter(fn($r) => $r->edificio)
+                      ->groupBy('edificio.nombre')
+                      ->map->count()
+                      ->sortDesc()
+                      ->take($limite);
+    }   
+
+    /**
+     * Generar estadísticas de reclamos por cuadrilla
+     */
+    protected function estadisticasPorCuadrilla(Collection $reclamos, int $limite = 10): Collection
+    {
+        return $reclamos->filter(fn($r) => $r->categoria && $r->categoria->cuadrilla)
+                      ->groupBy('categoria.cuadrilla.nombre')
+                      ->map->count()
+                      ->sortDesc()
+                      ->take($limite);
+    }   
 
     /**
      * Generar estadísticas temporales (por mes)
@@ -165,6 +190,8 @@ trait ManejadorEstadisticas
                 'por_estado' => collect(),
                 'por_mes' => collect(),
                 'por_barrio' => collect(),
+                'por_cuadrilla' => collect(),
+                'por_edificio' => collect(),
                 'promedio_por_dia' => 0,
                 'tiempo_promedio_resolucion' => 0,
                 'porcentaje_finalizados' => 0
@@ -176,6 +203,8 @@ trait ManejadorEstadisticas
         $porArea = $this->estadisticasPorArea($reclamos, 5);
         $porEstado = $this->estadisticasPorEstado($reclamos);
         $porMes = $this->estadisticasTemporales($reclamos);
+        $porEdificio = $this->estadisticasPorEdificio($reclamos);
+        $porCuadrilla = $this->estadisticasPorCuadrilla($reclamos);
 
         // Estadísticas por barrio
         $porBarrio = $reclamos->filter(fn($r) => $r->barrio)
@@ -200,6 +229,8 @@ trait ManejadorEstadisticas
             'por_estado' => $porEstado,
             'por_mes' => $porMes,
             'por_barrio' => $porBarrio,
+            'por_cuadrilla' => $porCuadrilla,
+            'por_edificio' => $porEdificio,
             'promedio_por_dia' => $promedioPorDia,
             'porcentaje_finalizados' => $porcentajeFinalizados,
             'periodo_analizado' => [
@@ -214,9 +245,12 @@ trait ManejadorEstadisticas
      * Obtener estadísticas de rendimiento
      */
     protected function estadisticasRendimiento(array $userAreas, ?string $fechaDesde = null, ?string $fechaHasta = null,
-                                           ?string $categoria, ?string $area, ?string $barrio ): array
+                                           ?string $categoria, ?string $area, ?string $barrio, ?string $cuadrilla, ?string $edificio): array
     {
         $query = Reclamo::with(['categoria'])
+            ->whereHas('categoria', function ($q) {
+                $q->where('privada', Auth::user()->ver_privada);
+            })
             ->whereIn('area_id', $userAreas);
 
         if ($fechaDesde) {
@@ -239,6 +273,16 @@ trait ManejadorEstadisticas
             $query->where('barrio_id', $barrio);
         }
 
+        if ($cuadrilla) {
+            $query->whereHas('categoria', function ($q) use ($cuadrilla) {
+                $q->where('cuadrilla_id', $cuadrilla);
+            });
+        }
+
+        if ($edificio) {
+            $query->where('edificio_id', $edificio);
+        }
+
         // Usar consultas agregadas para mejor rendimiento
         $stats = $query->selectRaw('
             COUNT(*) as total,
@@ -248,9 +292,7 @@ trait ManejadorEstadisticas
             COUNT(CASE WHEN responsable_id IS NOT NULL THEN 1 END) as asignados,
             COUNT(CASE WHEN coordenadas IS NOT NULL AND coordenadas != "" THEN 1 END) as con_ubicacion,
             AVG(CASE WHEN estado_id = 4 THEN DATEDIFF(updated_at, created_at) END) as promedio_dias_resolucion
-        ')->whereHas('categoria', function ($q) {
-                $q->where('privada', false);
-        })->first();    
+        ')->first();    
 
         // Redondear el promedio de días de resolución
         $promedioDiasResolucion = $stats->promedio_dias_resolucion 

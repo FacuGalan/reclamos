@@ -347,6 +347,22 @@
                                                 placeholder="Ej: 2324421370">
                                             @error('telefono') <span class="text-red-500 text-sm block mt-1">{{ $message }}</span> @enderror
                                         </div>
+
+                                        <!-- Rol -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Cuadrilla
+                                            </label>
+                                            <select 
+                                                wire:model="cuadrilla_id"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white">
+                                                <option value="">Sin cuadrilla específica</option>
+                                                @foreach($cuadrillas as $cuadrilla)
+                                                    <option value="{{ $cuadrilla->id }}">{{ $cuadrilla->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('cuadrilla_id') <span class="text-red-500 text-sm block mt-1">{{ $message }}</span> @enderror
+                                        </div>
                                     </div>
                                 </div>
 

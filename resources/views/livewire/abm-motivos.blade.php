@@ -130,24 +130,30 @@
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($motivos as $motivo)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <tr class="
+                            {{ $motivo->activo 
+                                ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700' 
+                                : 'bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800' 
+                            }} 
+                            transition-colors
+                        ">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                <div class="text-sm font-medium {{ $motivo->activo ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500' }}">
                                     #{{ $motivo->id }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                <div class="text-sm font-medium {{ $motivo->activo ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500' }}">
                                     {{ $motivo->nombre }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 dark:text-white">
+                                <div class="text-sm font-medium {{ $motivo->activo ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500' }}">
                                     {{ $motivo->area->nombre }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                <div class="text-sm font-medium {{ $motivo->activo ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500' }}">
                                     {{ \Carbon\Carbon::parse($motivo->created_at)->format('d/m/Y') }}
                                 </div>
                             </td>
@@ -161,6 +167,24 @@
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
+                                        </button>
+
+                                        <!-- Habilitar/Deshabilitar -->
+                                        <button 
+                                            wire:click="confirmarCambioEstado({{ $motivo->id }})"
+                                            class="{{ $motivo->activo ? 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300' : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300' }} cursor-pointer"
+                                            title="{{ $motivo->activo ? 'Deshabilitar' : 'Habilitar' }}">
+                                            @if($motivo->activo)
+                                                <!-- Icono de "inactivo/deshabilitado" (x circle) -->
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            @else
+                                                <!-- Icono de "activo/habilitado" (check circle) -->
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            @endif
                                         </button>
 
                                         <!-- Eliminar -->
@@ -279,6 +303,22 @@
                             </div>
                         @enderror
 
+                        <!-- Cuadrilla -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Cuadrilla (opcional)
+                            </label>
+                            <select 
+                                wire:model.live="cuadrilla_id"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white
+                                    @error('cuadrilla_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                                <option value="">Ninguna</option>
+                                @foreach($cuadrillas as $cuadrilla)
+                                    <option value="{{ $cuadrilla->id }}">{{ $cuadrilla->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <!-- Botones -->
                         <div class="flex justify-end space-x-3 pt-4">
                             <button 
@@ -358,4 +398,46 @@
         </div>
     @endif
 
+    <!-- Modal de cambio de estado -->
+    @if($showCambiarEstadoModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
+                <div class="flex items-start mb-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.349 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                            Cambiar Motivo
+                        </h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            ¿Estás seguro de que deseas cambiar el estado del motivo "{{ $selectedMotivo?->nombre }}"?
+                        </p>
+                        @if($selectedMotivo)
+                            <div class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                                <p><strong>Área:</strong> {{ $selectedMotivo->area->nombre }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button     
+                        wire:click="cerrarModalCambioEstado" 
+                        type="button" 
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button 
+                        wire:click="cambiarEstadoMotivo" 
+                        type="button" 
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
+                        Cambiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

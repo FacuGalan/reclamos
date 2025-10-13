@@ -14,6 +14,7 @@ use App\Models\Movimiento;
 use App\Models\Barrio;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Tranquera;
 
 use App\Mail\ReclamoConfirmacion;
 use Illuminate\Support\Facades\Mail;
@@ -31,10 +32,16 @@ class AltaReclamo extends Component
     public $contexto = 'publico';
     public $datosPrecargados = [];
 
+    public $tipo_ubicacion = 'mapa'; // 'mapa' o 'tranquera'
+    public $numero_tranquera = '';
+    public $tranqueraEncontrada = null; // Para almacenar los datos de la tranquera encontrada
+    public $tranqueraValida = false; // Para indicar si la tranquera es válida
+
     // Datos del reclamo
     public $descripcion = '';
     public $direccion = '';
     public $entre_calles = '';
+    public $direccion_rural = '';
     public $coordenadas = '';
     public $area_id = '';
     public $categoria_id = '';
@@ -97,6 +104,12 @@ class AltaReclamo extends Component
     public $direccionCompleta = '';
 
     public $barrio_encontrado;
+
+    // Propiedades para búsqueda de empleados (solo área privada)
+    public $empleados = [];
+    public $empleadosBusqueda = '';
+    public $empleadoSeleccionado = null;
+    public $mostrarDropdownEmpleados = false;
     
 
     // Agregar esta propiedad a tu clase
@@ -110,12 +123,15 @@ class AltaReclamo extends Component
         'persona_apellido' => 'required|string|max:255',
         'persona_telefono' => 'required|numeric|digits:10',
         'persona_email' => 'nullable|email|max:255',
-        'descripcion' => 'nullable|string|max:500',
+        'descripcion' => 'nullable|string|max:1000',
         'direccion' => 'required|string|max:255',
-        'entre_calles' => 'nullable|string|max:255',
+        'entre_calles' => 'required|string|max:255',
+        'direccion_rural' => 'nullable|string|max:255,',
         'coordenadas' => 'required|string',
         'categoria_id' => 'required|exists:categorias,id',
         'edificio_id' => 'required|exists:edificios,id',
+        'tipo_ubicacion' => 'required|in:mapa,tranquera',
+        'numero_tranquera' => 'required_if:tipo_ubicacion,tranquera|nullable|numeric|min:1|exists:tr_tranqueras,tranquera',
     ];
 
     protected $messages = [
@@ -129,9 +145,16 @@ class AltaReclamo extends Component
         'persona_email.email' => 'Ingrese un email válido',
         'direccion.required' => 'La dirección es obligatoria',
         'coordenadas.required' => 'Dirección no validada - Use el mapa para mayor precisión',
-        'descripcion.max' => 'La descripción no puede exceder los 500 caracteres',
+        'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'edificio_id.required' => 'Debe seleccionar un edificio',
+        'entre_calles' => 'Debe indicar entre calles',
+        'tipo_ubicacion.required' => 'Debe seleccionar el tipo de ubicación',
+        'tipo_ubicacion.in' => 'El tipo de ubicación debe ser mapa o tranquera',
+        'numero_tranquera.required_if' => 'El número de tranquera es obligatorio',
+        'numero_tranquera.numeric' => 'El número de tranquera debe ser numérico',
+        'numero_tranquera.min' => 'El número de tranquera debe ser mayor a 0',
+        'numero_tranquera.exists' => 'La tranquera ingresada no existe en el sistema de tranqueras',
     ];
 
     public function mount()
@@ -149,6 +172,7 @@ class AltaReclamo extends Component
         }
         $this->categorias = Categoria::where('privada', $this->isPrivateArea)
                                     ->whereIn('area_id', $this->userAreas)
+                                    ->where('activo', true)
                                     ->orderBy($this->contexto === 'publico' ? 'nombre_publico' : 'nombre')
                                     ->get();
 
@@ -156,6 +180,21 @@ class AltaReclamo extends Component
 
         $this->edificios = Edificio::orderBy('nombre')->get();
         $this->edificiosFiltrados = $this->edificios;
+
+        if ($this->isPrivateArea) {
+            try {
+                $this->empleados = \App\Models\Persona::select('id', 'dni', 'nombre', 'apellido')
+                    ->whereNotNull('dni')
+                    ->where('dni', '!=', '')
+                    ->orderBy('nombre')
+                    ->orderBy('apellido')
+                    ->get();
+            } catch (\Exception $e) {
+                $this->empleados = collect([]);
+                // Opcional: log del error
+                \Log::warning('Error al cargar empleados: ' . $e->getMessage());
+            }
+        }
 
         if (!empty($this->datosPrecargados)) {
             $this->persona_dni = $this->datosPrecargados['dni'] ?? '';
@@ -182,6 +221,119 @@ class AltaReclamo extends Component
             $this->persona_telefono = $user->telefono;
             $this->persona_email = $user->email;
             $this->step = 2; // Saltar al paso 2
+        }
+    }
+
+    // NUEVO MÉTODO: Cuando cambia el tipo de ubicación
+    public function updatedTipoUbicacion($value)
+    {
+        // Limpiar campos cuando cambia el tipo
+        if ($value === 'tranquera') {
+            // Limpiar campos de mapa
+            $this->direccion = '';
+            $this->entre_calles = '';
+            $this->direccion_rural = '';
+            $this->coordenadas = '';
+            $this->direccionCompleta = '';
+            $this->latitud = null;
+            $this->longitud = null;
+        } else {
+            // Limpiar campos de tranquera
+            $this->numero_tranquera = '';
+            $this->tranqueraEncontrada = null;
+            $this->tranqueraValida = false;
+        }
+        
+        // Resetear errores de validación
+        $this->resetErrorBag(['direccion', 'entre_calles', 'coordenadas', 'numero_tranquera']);
+    }
+
+    // NUEVO MÉTODO: Cuando cambia el número de tranquera
+    public function updatedNumeroTranquera()
+    {
+        // Limpiar errores previos
+        $this->resetErrorBag('numero_tranquera');
+        
+        // Si está vacío, limpiar datos
+        if (empty($this->numero_tranquera)) {
+            $this->tranqueraEncontrada = null;
+            $this->tranqueraValida = false;
+            $this->direccion = '';
+            $this->direccion_rural = '';
+            $this->coordenadas = '';
+            return;
+        }
+        
+        // Validar que sea numérico
+        if (!is_numeric($this->numero_tranquera)) {
+            $this->addError('numero_tranquera', 'El número de tranquera debe ser numérico');
+            $this->tranqueraValida = false;
+            return;
+        }
+        
+        // Buscar la tranquera en la base de datos
+        $this->buscarTranquera();
+    }
+
+    // NUEVO MÉTODO: Buscar tranquera por número
+    public function buscarTranquera()
+    {
+        try {
+            $tranquera = Tranquera::buscarPorNumero($this->numero_tranquera);
+            
+            if ($tranquera) {
+                // Tranquera encontrada
+                $this->tranqueraEncontrada = $tranquera;
+                $this->tranqueraValida = true;
+                
+                // Llenar campos automáticamente
+                $this->direccion = $tranquera->domicilio_limpio;
+                $this->direccion_rural = $tranquera->aclaraciones;
+                
+                // Usar las coordenadas del campo puntomapa si están disponibles
+                if (!empty($tranquera->coordenadas) && $tranquera->tieneCoordenadasValidas()) {
+                    $this->coordenadas = $tranquera->coordenadas;
+                } else {
+                    // Fallback al formato anterior si no tiene coordenadas válidas
+                    $this->coordenadas = "tranquera:" . $tranquera->tranquera;
+                }
+                
+                // Limpiar errores
+                $this->resetErrorBag('numero_tranquera');
+                
+                // Emitir evento de éxito (opcional, para notificaciones visuales)
+                $this->dispatch('tranquera-encontrada', [
+                    'numero' => $tranquera->tranquera,
+                    'domicilio' => $tranquera->domicilio_limpio,
+                    'aclaraciones' => $tranquera->aclaraciones,
+                    'coordenadas' => $this->coordenadas,
+                    'tiene_coordenadas' => $tranquera->tieneCoordenadasValidas()
+                ]);
+                
+            } else {
+                // Tranquera no encontrada
+                $this->tranqueraEncontrada = null;
+                $this->tranqueraValida = false;
+                
+                $this->addError('numero_tranquera', 'La tranquera N° ' . $this->numero_tranquera . ' no existe en el sistema');
+                
+                // Limpiar campos derivados
+                $this->direccion = '';
+                $this->direccion_rural = '';
+                $this->coordenadas = '';
+            }
+            
+        } catch (\Exception $e) {
+            // Error en la búsqueda
+            $this->tranqueraEncontrada = null;
+            $this->tranqueraValida = false;
+            $this->addError('numero_tranquera', 'Error al buscar la tranquera');
+            
+            // Log del error (opcional)
+            \Illuminate\Support\Facades\Log::error('Error buscando tranquera', [
+                'numero' => $this->numero_tranquera,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -273,6 +425,14 @@ class AltaReclamo extends Component
         // Limpiar errores previos del DNI
         $this->resetErrorBag('persona_dni');
         
+        // Si se cambió el DNI manualmente, limpiar selección de empleado
+        if ($this->empleadoSeleccionado && 
+            isset($this->empleadoSeleccionado->dni) && 
+            $this->empleadoSeleccionado->dni != $this->persona_dni) {
+            $this->empleadoSeleccionado = null;
+            $this->empleadosBusqueda = '';
+        }
+        
         // Solo buscar si el DNI tiene al menos 7 dígitos y es numérico
         if (strlen($this->persona_dni) >= 7 && is_numeric($this->persona_dni)) {
             $this->buscarPersonaPorDni();
@@ -281,6 +441,139 @@ class AltaReclamo extends Component
             $this->limpiarDatosPersona();
         }
     }
+
+    // Método para actualizar la búsqueda de empleados
+    public function updatedEmpleadosBusqueda()
+    {
+        if (!$this->isPrivateArea) {
+            return;
+        }
+        
+        $searchTerm = trim($this->empleadosBusqueda);
+        $this->mostrarDropdownEmpleados = !empty($searchTerm);
+        
+        try {
+            if (strlen($searchTerm) >= 1) {
+                $this->empleados = \App\Models\Persona::select('id', 'dni', 'nombre', 'apellido')
+                    ->whereNotNull('dni')
+                    ->where('dni', '!=', '')
+                    ->where(function($query) use ($searchTerm) {
+                        $searchPattern = '%' . $searchTerm . '%';
+                        
+                        // Buscar por DNI exacto
+                        $query->where('dni', 'like', $searchPattern);
+                        
+                        // Buscar por nombre individual
+                        $query->orWhere('nombre', 'like', $searchPattern);
+                        
+                        // Buscar por apellido individual  
+                        $query->orWhere('apellido', 'like', $searchPattern);
+                        
+                        // Buscar por nombre completo concatenado
+                        $query->orWhereRaw("CONCAT(nombre, ' ', apellido) LIKE ?", [$searchPattern]);
+                        $query->orWhereRaw("CONCAT(apellido, ' ', nombre) LIKE ?", [$searchPattern]);
+                    })
+                    ->orderByRaw("CASE 
+                        WHEN CONCAT(nombre, ' ', apellido) LIKE ? THEN 1 
+                        WHEN nombre LIKE ? THEN 2 
+                        WHEN apellido LIKE ? THEN 3 
+                        ELSE 4 
+                    END", [$searchPattern, $searchPattern, $searchPattern])
+                    ->orderBy('nombre')
+                    ->orderBy('apellido')
+                    ->limit(10)
+                    ->get();
+            } else {
+                // Si la búsqueda está vacía, cargar empleados limitados
+                $this->empleados = \App\Models\Persona::select('id', 'dni', 'nombre', 'apellido')
+                    ->whereNotNull('dni')
+                    ->where('dni', '!=', '')
+                    ->orderBy('nombre')
+                    ->orderBy('apellido')
+                    ->limit(20)
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            $this->empleados = collect([]);
+            \Log::warning('Error en búsqueda de empleados: ' . $e->getMessage());
+        }
+    }
+
+    public function seleccionarEmpleado($empleadoId)
+    {
+        try {
+            $empleado = \App\Models\Persona::find($empleadoId);
+            
+            if ($empleado) {
+                $this->empleadoSeleccionado = $empleado;
+                $this->empleadosBusqueda = trim(($empleado->nombre ?? '') . ' ' . ($empleado->apellido ?? ''));
+                
+                // Cargar el DNI del empleado en persona_dni
+                $this->persona_dni = $empleado->dni;
+                
+                // Como ya tenemos la persona seleccionada, cargar todos sus datos
+                $this->persona_nombre = $empleado->nombre ?? '';
+                $this->persona_apellido = $empleado->apellido ?? '';
+                $this->persona_telefono = $empleado->telefono ?? '';
+                $this->persona_email = $empleado->email ?? '';
+                $this->personaEncontrada = true;
+                $this->personaId = $empleado->id;
+                
+                // Cargar domicilios de la persona
+                $this->persona_domicilios = \App\Models\Domicilios::where('persona_id', $empleado->id)->get();
+                $this->domicilio_id = null;
+                
+                if($this->persona_domicilios->isEmpty()) {
+                    $this->persona_domicilios = [];
+                    $this->mostrar_inputs_direccion = true;
+                } else {
+                    $this->mostrar_inputs_direccion = false;
+                }
+                
+                // Cargar historial de reclamos de esta persona
+                if ($this->contexto === 'privado' || $this->contexto === 'externo') {
+                    $this->cargarReclamosPersona($empleado->id);
+                }
+                
+                $this->mostrarDropdownEmpleados = false;
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error al seleccionar empleado: ' . $e->getMessage());
+            $this->addError('empleado', 'Error al seleccionar empleado');
+        }
+    }
+
+    // Método para limpiar selección de empleado
+    public function limpiarEmpleado()
+    {
+        $this->empleadoSeleccionado = null;
+        $this->empleadosBusqueda = '';
+        $this->mostrarDropdownEmpleados = false;
+        $this->persona_dni = '';
+        $this->limpiarDatosPersona();
+        
+        // Recargar empleados si es área privada
+        if ($this->isPrivateArea) {
+            try {
+                $this->empleados = \App\Models\Persona::select('id', 'dni', 'nombre', 'apellido')
+                    ->whereNotNull('dni')
+                    ->where('dni', '!=', '')
+                    ->orderBy('nombre')
+                    ->orderBy('apellido')
+                    ->limit(20)
+                    ->get();
+            } catch (\Exception $e) {
+                $this->empleados = collect([]);
+            }
+        }
+    }
+
+    // Método para ocultar dropdown de empleados
+    public function ocultarDropdownEmpleados()
+    {
+        $this->mostrarDropdownEmpleados = false;
+    }
+
 
     // DNI: Buscar persona por DNI
     public function buscarPersonaPorDni()
@@ -350,6 +643,7 @@ class AltaReclamo extends Component
             $this->direccion = '';
             $this->coordenadas = '';
             $this->entre_calles = '';
+            $this->direccion_rural = '';
         } else {
             // Eligió un domicilio existente, ocultar inputs
             $this->mostrar_inputs_direccion = false;
@@ -360,6 +654,13 @@ class AltaReclamo extends Component
                 $this->direccion = $domicilio->direccion;
                 $this->coordenadas = $domicilio->coordenadas;
                 $this->entre_calles = $domicilio->entre_calles;
+                $this->direccion_rural = $domicilio->direccion_rural;
+                $this->numero_tranquera = $domicilio->numero_tranquera;
+                if($domicilio->numero_tranquera){
+                    $this->tipo_ubicacion = 'tranquera';
+                } else {
+                    $this->tipo_ubicacion = 'mapa';
+                }
             }
         }
     }
@@ -385,7 +686,14 @@ class AltaReclamo extends Component
         $this->persona_email = '';
         $this->personaEncontrada = false;
         $this->personaId = null;
-        $this->reclamosPersona = []; // Limpiar historial
+        $this->reclamosPersona = [];
+        
+        // No limpiar empleado automáticamente en área privada
+        // Solo si explícitamente no es área privada
+        if (!$this->isPrivateArea) {
+            $this->empleadoSeleccionado = null;
+            $this->empleadosBusqueda = '';
+        }
     }
 
 
@@ -465,17 +773,34 @@ class AltaReclamo extends Component
                 'categoria_id' => $this->rules['categoria_id'],
                 'edificio_id' => $this->rules['edificio_id'],
             ]);
-        }else{
-            $this->validate([
+        } else {
+            // Validación diferente según el tipo de ubicación
+            $rules = [
                 'descripcion' => $this->rules['descripcion'],
-                'direccion' => $this->rules['direccion'],
-                'entre_calles' => $this->rules['entre_calles'],
-                'coordenadas' => $this->rules['coordenadas'],
                 'categoria_id' => $this->rules['categoria_id'],
-            ]);
-
+                'tipo_ubicacion' => $this->rules['tipo_ubicacion'],
+            ];
+            
+            if ($this->tipo_ubicacion === 'mapa') {
+                $rules['direccion'] = $this->rules['direccion'];
+                $rules['entre_calles'] = $this->rules['entre_calles'];
+                $rules['coordenadas'] = $this->rules['coordenadas'];
+            } else if ($this->tipo_ubicacion === 'tranquera') {
+                $rules['numero_tranquera'] = $this->rules['numero_tranquera'];
+                
+                // Validación adicional: verificar que la tranquera exista
+                if (!$this->tranqueraValida) {
+                    $this->addError('numero_tranquera', 'Debe ingresar un número de tranquera válido');
+                }
+                
+                // Validación adicional: verificar que se hayan cargado los datos
+                if (empty($this->direccion)) {
+                    $this->addError('numero_tranquera', 'No se pudieron cargar los datos de la tranquera');
+                }
+            }
+            
+            $this->validate($rules);
         }
-        
     }
 
     public function obtenerBarrioPorCoordenadas($coordenadas)
@@ -520,7 +845,18 @@ class AltaReclamo extends Component
         try {
             DB::beginTransaction();
             
-            $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);
+            // Para tranqueras, los datos ya están cargados en las propiedades
+            if (!$this->isPrivateArea && $this->tipo_ubicacion === 'tranquera') {
+                // Si la tranquera tiene coordenadas válidas, intentar calcular el barrio
+                if ($this->tranqueraEncontrada && $this->tranqueraEncontrada->tieneCoordenadasValidas()) {
+                    $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);
+                } else {
+                    $barrio_encontrado = null; // Sin coordenadas válidas, no se puede calcular barrio
+                }
+            } else {
+                // Flujo normal para direcciones con mapa
+                $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);
+            }
 
             // Buscar o crear la persona
             $persona = Persona::where('dni', $this->persona_dni)->first();
@@ -528,54 +864,63 @@ class AltaReclamo extends Component
             if (!$persona) {
                 $persona = Persona::create([
                     'dni' => $this->persona_dni,
-                    'nombre' => $this->persona_nombre,
-                    'apellido' => $this->persona_apellido,
+                    'nombre' => mb_convert_case($this->persona_nombre, MB_CASE_TITLE, "UTF-8"),
+                    'apellido' =>  mb_convert_case($this->persona_apellido, MB_CASE_TITLE, "UTF-8"),
                     'telefono' => $this->persona_telefono,
                     'email' => $this->persona_email,
                 ]);
             } else {
                 // Actualizar datos si la persona ya existe
                 $persona->update([
-                    'nombre' => $this->persona_nombre,
-                    'apellido' => $this->persona_apellido,
+                    'nombre' => mb_convert_case($this->persona_nombre, MB_CASE_TITLE, "UTF-8"),
+                    'apellido' => mb_convert_case($this->persona_apellido, MB_CASE_TITLE, "UTF-8"),
                     'telefono' => $this->persona_telefono,
                     'email' => $this->persona_email,
                 ]);
             }
 
-            $domicilio = Domicilios::where('coordenadas', $this->coordenadas)->where('persona_id', $persona->id)->first();
+            // Buscar domicilio por coordenadas (funciona tanto para tranqueras como para mapa)
+            $domicilio = Domicilios::where('coordenadas', $this->coordenadas)
+                ->where('persona_id', $persona->id)
+                ->first();
             
             if (!$domicilio) {
                 $domicilio = Domicilios::create([
                     'persona_id' => $persona->id,
                     'direccion' => $this->direccion,
-                    'entre_calles' => $this->entre_calles,
+                    'entre_calles' => $this->entre_calles ?: '', // Para tranqueras puede estar vacío
+                    'direccion_rural' => $this->direccion_rural,
+                    'numero_tranquera' => $this->numero_tranquera,
                     'coordenadas' => $this->coordenadas,
                     'barrio_id' => $barrio_encontrado
                 ]);
             }
 
-            // Obtener estado inicial
+            // Resto del método save permanece igual...
             $estadoInicial = Estado::where('nombre', 'Pendiente')->first();
             if (!$estadoInicial) {
                 $estadoInicial = Estado::first();
             }
 
             $this->area_id = Categoria::find($this->categoria_id)->area_id ?? null;
-            
-            // Obtener el nombre de la categoría
             $categoria = Categoria::find($this->categoria_id);
             $nombreCategoria = $categoria ? $categoria->nombre : 'Sin categoría';
 
-            
-            
-
             if($this->isPrivateArea){
                 if(strlen($this->edificio_id) == 0){
-                    $this->edificio_id = null; // Si no se seleccionó edificio, dejar como null
+                    $this->edificio_id = null;
                 }
             }else{
                 $this->edificio_id = null;
+            }
+
+            if($this->isPrivateArea){
+                $edificio = Edificio::where('id', $this->edificio_id)->first();
+                if ($edificio) {
+                    $edificio->update([
+                        'direccion' => $this->direccion,
+                    ]);
+                }
             }
          
             // Crear el reclamo
@@ -583,7 +928,9 @@ class AltaReclamo extends Component
                 'fecha' => now()->toDateString(),
                 'descripcion' => $this->descripcion,
                 'direccion' => $this->direccion,
-                'entre_calles' => $this->entre_calles,
+                'entre_calles' => $this->entre_calles ?: '', // Puede estar vacío para tranqueras
+                'direccion_rural' => $this->direccion_rural,
+                'numero_tranquera' => $this->numero_tranquera,
                 'coordenadas' => $this->coordenadas,
                 'area_id' => $this->area_id,
                 'categoria_id' => $this->categoria_id,
@@ -599,11 +946,13 @@ class AltaReclamo extends Component
             Movimiento::create([
                 'reclamo_id' => $this->reclamoCreado->id,
                 'tipo_movimiento_id' => 1,
-                'observaciones' => 'Inicio del reclamo',
+                'observaciones' => 'Inicio del reclamo' . ($this->tipo_ubicacion === 'tranquera' ? ' - Tranquera N° ' . $this->numero_tranquera : ''),
                 'fecha' => now()->toDateString(),
                 'usuario_id' => Auth::id() ?? 1,
                 'estado_id' => 1
             ]);
+
+
 
             // NUEVO: Enviar email de confirmación si la persona tiene email
             if (!empty($persona->email) && filter_var($persona->email, FILTER_VALIDATE_EMAIL)) {
@@ -636,13 +985,17 @@ class AltaReclamo extends Component
             $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
             
             if ($this->contexto === 'externo') {
-                $this->isSaving = false;
+                 $this->isSaving = false;
                 
-                // Emitir evento para mostrar éxito con redirección personalizada
-                $this->dispatch('reclamo-guardado-con-redirect', [
-                    'mensaje' => $this->successMessage . ' (#' . $this->reclamoCreado->id . ')',
-                    'redirect_url' => $this->redirectAfterSave ?: route('reclamos')
+                $this->dispatch('reclamo-creado-exitoso', [
+                    'id' => $this->reclamoCreado->id,
+                    'fecha' => $this->reclamoCreado->fecha,
+                    'nombre_completo' => $this->persona_nombre . ' ' . $this->persona_apellido,
+                    'categoria' => $nombreCategoria
                 ]);
+
+                // Redirigir al home después de un delay
+                $this->js('setTimeout(() => { window.location.href = "' . route('home') . '" }, 10000)');
             }
             // Comportamiento diferente según el contexto
             elseif ($this->contexto === 'privado') {
@@ -650,11 +1003,11 @@ class AltaReclamo extends Component
                 $this->isSaving = false;
                 
                 // Emitir evento local para mostrar el botón de éxito
-                $this->dispatch('reclamo-creado-exitoso');
+                //$this->dispatch('reclamo-creado-exitoso');
                 
                 // Emitir evento que manejará el toast y la redirección
                 $this->dispatch('reclamo-guardado-con-redirect', [
-                    'mensaje' => 'Reclamo creado exitosamente',
+                    'mensaje' => $this->successMessage . ' (#' . $this->reclamoCreado->id . ')',
                     'redirect_url' => route('reclamos')
                 ]);
                 
@@ -685,10 +1038,17 @@ class AltaReclamo extends Component
     public function resetForm()
     {
         $this->reset([
-            'descripcion', 'direccion', 'entre_calles', 'coordenadas',
+            'descripcion', 'direccion', 'entre_calles', 'direccion_rural', 'coordenadas',
             'area_id', 'categoria_id', 'persona_dni', 'persona_nombre',
-            'persona_apellido', 'persona_telefono', 'persona_email'
+            'persona_apellido', 'persona_telefono', 'persona_email',
+            'tipo_ubicacion', 'numero_tranquera'
         ]);
+
+        // Resetear propiedades específicas de tranqueras
+        $this->tipo_ubicacion = 'mapa';
+        $this->tranqueraEncontrada = null;
+        $this->tranqueraValida = false;
+
         $this->step = $this->showPersonaForm ? 1 : 2;
         $this->showSuccess = false;
         $this->reclamoCreado = null;
