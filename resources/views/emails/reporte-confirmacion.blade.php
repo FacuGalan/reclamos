@@ -38,6 +38,27 @@
             font-weight: bold;
             color: #495057;
         }
+        .seguimiento {
+            background-color: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn-seguimiento {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+        .btn-seguimiento:hover {
+            background-color: #0056b3;
+        }
         .footer {
             margin-top: 20px;
             padding: 15px;
@@ -80,10 +101,20 @@
             <span class="label">Categoría:</span> {{ $categoria->nombre }}
         </div>
         
-        @if($reporte->direccion)
-        <div class="info-item">
-            <span class="label">Dirección:</span> {{ $reporte->direccion }}
-        </div>
+        @if($domicilio->direccion)
+            <div class="info-item">
+                <span class="label">Dirección:</span> {{ $domicilio->direccion }}
+            </div>
+        @endif
+        @if($domicilio->entre_calles)
+            <div class="info-item">
+                <span class="label">Entre Calles:</span> {{ $domicilio->entre_calles }}
+            </div>
+        @endif
+        @if($domicilio->direccion_rural)
+            <div class="info-item">
+                <span class="label">Aclaraciones:</span> {{ $domicilio->direccion_rural }}
+            </div>
         @endif
         
         
@@ -93,6 +124,11 @@
         </div>
         @endif
         
+    </div>
+    
+    <div class="seguimiento">
+        <p><strong>Para ver más detalles y realizar el seguimiento de su reclamo</strong>, debe iniciar sesión en el Panel de Atención Ciudadana.</p>
+        <a href="https://atencionciudadana.mercedes.gob.ar/login" class="btn-seguimiento">Acceder al Panel</a>
     </div>
     
     <div class="footer">

@@ -2,7 +2,7 @@
     <!-- Sección Hero: imagen en desktop, solo título en mobile -->
     <div class="w-full relative mb-10">
         <!-- Imagen de fondo (solo desktop) -->
-        <img src="{{ asset('fotos/Recurso 15modif.png') }}" 
+        <img src="{{ asset('fotos/Recurso_15modif.png') }}" 
             alt="Foto 1" 
             class="hidden sm:block w-full object-cover m-0 p-0">
 
@@ -31,13 +31,13 @@
         <div class="relative hidden sm:flex bg-white dark:bg-zinc-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-1 max-w-xs mx-auto lg:mx-0 flex-col">
             <!-- Imagen -->
             <div class="h-36 flex items-center justify-center bg-[#77BF43] relative">
-                <img src="{{ asset('fotos/Recurso 14.png') }}" alt="Foto 1" class="w-full h-full object-cover">
+                <img src="{{ asset('fotos/Recurso_14.png') }}" alt="Foto 1" class="w-full h-full object-cover">
             </div>
 
             <!-- Círculo flotante mitad/mitad -->
             <div class="absolute left-5 top-[9rem] -translate-y-1/2 w-12 h-12 rounded-full overflow-hidden z-10">
                 <img 
-                    src="{{ asset('fotos/Recurso 3.png') }}" 
+                    src="{{ asset('fotos/Recurso_3.png') }}" 
                     alt="" 
                     class="w-full h-full object-cover"
                 >
@@ -67,7 +67,7 @@
             <div class="w-32 h-full flex items-center justify-center bg-[#bed630]">
                 <div class="w-16 h-16 rounded-full overflow-hidden">
                     <img 
-                        src="{{ asset('fotos/Recurso 3.png') }}" 
+                        src="{{ asset('fotos/Recurso_3.png') }}" 
                         alt="" 
                         class="w-full h-full object-cover"
                     >
@@ -91,13 +91,13 @@
         <div class="relative hidden sm:flex bg-white dark:bg-zinc-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-1 max-w-xs mx-auto lg:mx-0 flex-col">
             <!-- Imagen -->
             <div class="h-36 flex items-center justify-center bg-white relative">
-                <img src="{{ asset('fotos/Recurso 13.png') }}" alt="Foto 1" class="w-full h-full object-cover object-center">
+                <img src="{{ asset('fotos/Recurso_13.png') }}" alt="Foto 1" class="w-full h-full object-cover object-center">
             </div>
 
             <!-- Círculo flotante mitad/mitad -->
             <div class="absolute left-5 top-[9rem] -translate-y-1/2 w-12 h-12 rounded-full overflow-hidden z-10">
                 <img 
-                    src="{{ asset('fotos/Recurso 2.png') }}" 
+                    src="{{ asset('fotos/Recurso_2.png') }}" 
                     alt="" 
                     class="w-full h-full object-cover"
                 >
@@ -112,7 +112,7 @@
                     Presenta un reporte de seguridad, anónimos o con identificación.
                 </p>
                 <a 
-                    href="/nuevo-reclamo" 
+                    href="/nuevo-reporte" 
                     wire:navigate
                     class="w-32 h-6 px-2 py-1 text-xs font-extrabold bg-[#91d5e2] hover:bg-[#8fe2f3] rounded-full flex items-center justify-center transition-colors duration-300">
                     Realizar reporte
@@ -127,7 +127,7 @@
             <div class="w-32 h-full flex items-center justify-center bg-[#91d5e2]">
                 <div class="w-16 h-16 rounded-full overflow-hidden">
                     <img 
-                        src="{{ asset('fotos/Recurso 2.png') }}" 
+                        src="{{ asset('fotos/Recurso_2.png') }}" 
                         alt="" 
                         class="w-full h-full object-cover"
                     >
@@ -151,13 +151,13 @@
         <div class="relative hidden sm:flex bg-white dark:bg-zinc-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-zinc-700 flex-1 max-w-xs mx-auto lg:mx-0 flex-col">
             <!-- Imagen -->
             <div class="h-36 flex items-center justify-center bg-[#77BF43] relative">
-                <img src="{{ asset('fotos/Recurso 12.png') }}" alt="Foto 1" class="w-full h-full object-cover">
+                <img src="{{ asset('fotos/Recurso_12.png') }}" alt="Foto 1" class="w-full h-full object-cover">
             </div>
 
             <!-- Círculo flotante mitad/mitad -->
             <div class="absolute left-5 top-[9rem] -translate-y-1/2 w-12 h-12 rounded-full overflow-hidden z-10">
                 <img 
-                    src="{{ asset('fotos/Recurso 1.png') }}" 
+                    src="{{ asset('fotos/Recurso_1.png') }}" 
                     alt="" 
                     class="w-full h-full object-cover"
                 >
@@ -172,7 +172,7 @@
                     Accede a información sobre trámites, horarios de atención y contactos útiles.
                 </p>
                 <a 
-                    href="/nuevo-reclamo" 
+                    href="/tramites" 
                     wire:navigate
                     class="w-32 h-6 px-2 py-1 text-xs font-extrabold bg-[#77bf43] hover:bg-[#88dc4c] rounded-full flex items-center justify-center transition-colors duration-300">
                     Ver información
@@ -187,7 +187,7 @@
             <div class="w-32 h-full flex items-center justify-center bg-[#77bf43]">
                 <div class="w-16 h-16 rounded-full overflow-hidden">
                     <img 
-                        src="{{ asset('fotos/Recurso 1.png') }}" 
+                        src="{{ asset('fotos/Recurso_1.png') }}" 
                         alt="" 
                         class="w-full h-full object-cover"
                     >

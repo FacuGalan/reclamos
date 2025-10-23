@@ -16,6 +16,7 @@ class ReporteConfirmacion extends Mailable
     public $reporte;
     public $persona;
     public $categoria;
+    public $domicilio;
 
     /**
      * Create a new message instance.
@@ -25,6 +26,7 @@ class ReporteConfirmacion extends Mailable
         $this->reporte = $reporte;
         $this->persona = $reporte->persona;
         $this->categoria = $reporte->categoria;
+        $this->domicilio = $reporte->domicilio;
     }
 
     /**

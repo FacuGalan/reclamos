@@ -13,6 +13,11 @@
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
             <button 
+                wire:click="exportarExcel"
+                class="w-full sm:w-auto px-4 py-2 bg-[#217346] hover:bg-[#2e8b5c] text-white rounded-lg transition-colors cursor-pointer text-sm">
+                Exportar Excel
+            </button>
+            <button 
                 wire:click="limpiarFiltros"
                 class="px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer">
                 Limpiar Filtros
@@ -22,7 +27,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
 
             <!-- Búsqueda general -->
-            <div >
+            <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Búsqueda</label>
                 <input 
                     type="text" 
@@ -42,6 +47,33 @@
                         <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
                     @endforeach
                 </select>
+            </div>
+
+            <!-- Filtro por estado -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
+                <select 
+                    wire:model.live="filtro_estado"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                    <option value="">Todos los estados</option>
+                    @foreach($estados as $estado)
+                        <option value="{{ $estado->id }}">
+                            {{ $estado->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Toggle Mostrar finalizados -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mostrar finalizados</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" wire:model.live="mostrar_finalizados" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ $mostrar_finalizados ? 'Sí' : 'No' }}
+                    </span>
+                </label>
             </div>
 
             <!-- Fecha desde -->
@@ -95,6 +127,9 @@
                             Categoría
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Estado
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Dirección
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -130,6 +165,17 @@
                                     {{ $reporte->categoria->nombre }}
                                 </div>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($reporte->estado)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $reporte->estado->finalizacion ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' }}">
+                                        {{ $reporte->estado->nombre }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                        Sin estado
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900 dark:text-white">
                                     {{ Str::before($reporte->domicilio->direccion, ',') }}
@@ -144,26 +190,36 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <button 
-                                    wire:click="abrirModal({{ $reporte->id }})"
-                                    class="inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors duration-200"
-                                    title="Ver detalle del reporte">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </button>
+                                <div class="flex justify-center gap-2">
+                                    <button 
+                                        wire:click="abrirModal({{ $reporte->id }})"
+                                        class="inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors duration-200"
+                                        title="Ver detalle del reporte">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+                                    <button 
+                                        wire:click="abrirModalCambioEstado({{ $reporte->id }})"
+                                        class="inline-flex items-center justify-center p-2 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-full transition-colors duration-200"
+                                        title="Cambiar estado">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="7" class="px-6 py-12 text-center">
                                 <div class="text-gray-500 dark:text-gray-400">
                                     <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     <p class="text-lg font-medium">No se encontraron reportes</p>
-                                    <p class="text-sm">Intenta ajustar los filtros o crear un nuevo reporte.</p>
+                                    <p class="text-sm mt-1">Intenta ajustar los filtros de búsqueda</p>
                                 </div>
                             </td>
                         </tr>
@@ -172,269 +228,477 @@
             </table>
         </div>
 
-        <!-- Vista Móvil: Tarjetas -->
-        <div class="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+        <!-- Vista Mobile: Cards -->
+        <div class="md:hidden space-y-4 p-4">
             @forelse($reportes as $reporte)
-                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <!-- Header de la tarjeta -->
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    #{{ $reporte->id }}
-                                </span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $reporte->created_at->format('d/m/Y') }}
-                                </span>
-                            </div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ $reporte->categoria->nombre }}
-                            </h3>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <!-- Header del card -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">
+                                #{{ $reporte->id }}
+                            </span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                                {{ $reporte->created_at->format('d/m/Y') }}
+                            </span>
+                        </div>
+                        @if($reporte->estado)
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $reporte->estado->finalizacion ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' }}">
+                                {{ $reporte->estado->nombre }}
+                            </span>
+                        @else
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                Sin estado
+                            </span>
+                        @endif
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="space-y-2 text-sm">
+                        <div>
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Solicitante:</span>
+                            <span class="text-gray-900 dark:text-white">
+                                {{ $reporte->persona ? $reporte->persona->nombre : 'Anónimo' }}
+                                @if($reporte->persona && $reporte->persona->dni)
+                                    ({{ $reporte->persona->dni }})
+                                @endif
+                            </span>
                         </div>
                         
-                        <!-- Botón de ver detalle -->
+                        <div>
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Categoría:</span>
+                            <span class="text-gray-900 dark:text-white">{{ $reporte->categoria->nombre }}</span>
+                        </div>
+                        
+                        <div>
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Dirección:</span>
+                            <span class="text-gray-900 dark:text-white">
+                                {{ Str::before($reporte->domicilio->direccion, ',') }}
+                            </span>
+                        </div>
+                        
+                        <div>
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Descripción:</span>
+                            <p class="text-gray-900 dark:text-white mt-1">
+                                {{ strlen($reporte->observaciones) > 100 ? substr($reporte->observaciones, 0, 100) . '...' : $reporte->observaciones }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="flex gap-2 mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
                         <button 
                             wire:click="abrirModal({{ $reporte->id }})"
-                            class="ml-3 inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
-                            title="Ver detalle">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
+                            <span class="text-sm font-medium">Ver</span>
                         </button>
-                    </div>
-
-                    <!-- Información adicional colapsable -->
-                    <div class="space-y-2 text-sm">
-                        @if($reporte->persona)
-                            <div class="flex items-center text-gray-600 dark:text-gray-300">
-                                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                                <span class="truncate">{{ $reporte->persona->nombre }}</span>
-                            </div>
-                        @endif
-                        
-                        <div class="flex items-start text-gray-600 dark:text-gray-300">
-                            <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <button 
+                            wire:click="abrirModalCambioEstado({{ $reporte->id }})"
+                            class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
-                            <span class="truncate">{{ Str::limit(Str::before($reporte->domicilio->direccion, ','), 40) }}</span>
-                        </div>
-                        
-                        @if($reporte->observaciones)
-                            <div class="flex items-start text-gray-600 dark:text-gray-300">
-                                <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
-                                </svg>
-                                <span class="line-clamp-2">{{ $reporte->observaciones }}</span>
-                            </div>
-                        @endif
+                            <span class="text-sm font-medium">Estado</span>
+                        </button>
                     </div>
                 </div>
             @empty
-                <div class="px-6 py-12 text-center">
-                    <div class="text-gray-500 dark:text-gray-400">
-                        <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <p class="text-lg font-medium">No se encontraron reportes</p>
-                        <p class="text-sm">Intenta ajustar los filtros</p>
-                    </div>
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-gray-500 dark:text-gray-400">No se encontraron reportes</p>
                 </div>
             @endforelse
         </div>
 
         <!-- Paginación -->
-        @if($reportes->hasPages())
-            <div class="px-4 md:px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $reportes->links() }}
-            </div>
-        @endif
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            {{ $reportes->links() }}
+        </div>
     </div>
 
+    <!-- Modal de visualización -->
     @if($mostrarModal && $reporteSeleccionado)
-            <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <!-- Overlay -->
-                <div class="fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-opacity-80 transition-opacity" wire:click="cerrarModal"></div>
-
-                <!-- Contenedor de centrado -->
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <!-- Modal content -->
-                    <div class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all max-h-[90vh] overflow-y-auto">
-                        
-                        <!-- Header -->
-                        <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600 rounded-t-lg sticky top-0 z-10">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                    Detalles del Reporte #{{ $reporteSeleccionado->id }}
-                                </h3>
-                                <button 
-                                    wire:click="cerrarModal"
-                                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">
-                                    <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <!-- Overlay con menos opacidad -->
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" wire:click="cerrarModal"></div>
+            
+            <!-- Contenedor del modal -->
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Modal -->
+                <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full z-50">
+                    <!-- Header del Modal -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 px-6 py-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-white">
+                                Detalle del Reporte #{{ $reporteSeleccionado->id }}
+                            </h3>
+                            <button 
+                                wire:click="cerrarModal"
+                                class="text-white hover:text-gray-200 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- Contenido -->
-                        <div class="px-6 py-6">
-                            <div class="grid lg:grid-cols-2 gap-6">
-                                <!-- Columna Izquierda: Datos Personales -->
-                                <div>
-                                    <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
-                                        <svg class="w-5 h-5 inline-block mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Contenido del Modal -->
+                    <div class="px-6 py-4 max-h-[70vh] overflow-y-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Información General -->
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Información General
+                                    </h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Fecha del incidente:</span>
+                                            <span class="text-gray-900 dark:text-white block">
+                                                {{ \Carbon\Carbon::parse($reporteSeleccionado->fecha)->format('d/m/Y') }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Categoría:</span>
+                                            <span class="text-gray-900 dark:text-white block">
+                                                {{ $reporteSeleccionado->categoria->nombre ?? 'N/A' }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Estado:</span>
+                                            <div class="mt-1">
+                                                @if($reporteSeleccionado->estado)
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $reporteSeleccionado->estado->finalizacion ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' }}">
+                                                        {{ $reporteSeleccionado->estado->nombre }}
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                        Sin estado
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Habitual:</span>
+                                            <span class="text-gray-900 dark:text-white block">
+                                                {{ $reporteSeleccionado->habitual ? 'Sí' : 'No' }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">Creado el:</span>
+                                            <span class="text-gray-900 dark:text-white block">
+                                                {{ $reporteSeleccionado->created_at->format('d/m/Y H:i') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información del Denunciante -->
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                         </svg>
-                                        Datos Personales
+                                        Denunciante
                                     </h4>
-                                    
-                                    <div class="space-y-3">
+                                    <div class="space-y-2 text-sm">
                                         @if($reporteSeleccionado->persona)
-                                            <div class="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">DNI</label>
-                                                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->persona->dni ?? 'No especificado' }}</p>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Nombre</label>
-                                                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->persona->nombre ?? 'Anónimo' }}</p>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Apellido</label>
-                                                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->persona->apellido ?? 'Anónimo' }}</p>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Teléfono</label>
-                                                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->persona->telefono ?? 'No especificado' }}</p>
-                                                </div>
-                                            </div>
-                                            
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
-                                                <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->persona->email ?? 'No especificado' }}</p>
+                                                <span class="font-medium text-gray-700 dark:text-gray-300">Nombre:</span>
+                                                <span class="text-gray-900 dark:text-white block">
+                                                    {{ $reporteSeleccionado->persona->nombre }} {{ $reporteSeleccionado->persona->apellido }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-700 dark:text-gray-300">DNI:</span>
+                                                <span class="text-gray-900 dark:text-white block">
+                                                    {{ $reporteSeleccionado->persona->dni ?? 'N/A' }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-700 dark:text-gray-300">Teléfono:</span>
+                                                <span class="text-gray-900 dark:text-white block">
+                                                    {{ $reporteSeleccionado->persona->telefono ?? 'N/A' }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-700 dark:text-gray-300">Email:</span>
+                                                <span class="text-gray-900 dark:text-white block">
+                                                    {{ $reporteSeleccionado->persona->email ?? 'N/A' }}
+                                                </span>
                                             </div>
                                         @else
-                                            <p class="text-sm text-gray-500 dark:text-gray-400 italic">Reporte anónimo</p>
+                                            <p class="text-gray-500 dark:text-gray-400">Denuncia anónima</p>
                                         @endif
                                     </div>
                                 </div>
-
-                                <!-- Columna Derecha: Datos del Reporte -->
-                                <div>
-                                    <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
-                                        <svg class="w-5 h-5 inline-block mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Datos del Reporte
-                                    </h4>
-                                    
-                                    <div class="space-y-3">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Categoría</label>
-                                            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->categoria->nombre ?? 'N/A' }}</p>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Fecha del Incidente</label>
-                                            <p class="mt-1 text-sm text-gray-900 dark:text-white">
-                                                {{ $reporteSeleccionado->fecha ? \Carbon\Carbon::parse($reporteSeleccionado->fecha)->format('d/m/Y') : 'No especificada' }}
-                                            </p>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">¿Es habitual?</label>
-                                            <p class="mt-1 text-sm text-gray-900 dark:text-white">
-                                                {{ $reporteSeleccionado->habitual ? 'Sí' : 'No' }}
-                                            </p>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Registro</label>
-                                            <p class="mt-1 text-sm text-gray-900 dark:text-white">
-                                                {{ $reporteSeleccionado->created_at->format('d/m/Y H:i') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
 
-                            <!-- Sección de Ubicación -->
-                            <div class="mt-6">
-                                <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
-                                    <svg class="w-5 h-5 inline-block mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    Ubicación
-                                </h4>
-                                
-                                @if($reporteSeleccionado->domicilio)
-                                    <div class="grid md:grid-cols-2 gap-4 mb-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Dirección</label>
-                                            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->domicilio->direccion ?? 'No especificada' }}</p>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Entre Calles</label>
-                                            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->domicilio->entre_calles ?? 'No especificado' }}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    @if($reporteSeleccionado->domicilio->direccion_rural)
-                                        <div class="mb-4">
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Aclaraciones</label>
-                                            <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $reporteSeleccionado->domicilio->direccion_rural }}</p>
-                                        </div>
-                                    @endif
-                                    
-                                    @if($reporteSeleccionado->domicilio->coordenadas)
-                                        <!-- Mapa de solo lectura -->
-                                        <div class="mt-4">
-                                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Ubicación en el Mapa</label>
-                                            <div id="mapa-reporte-{{ $reporteSeleccionado->id }}" 
-                                                class="w-full h-64 bg-gray-200 dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600"
-                                                data-coordenadas="{{ $reporteSeleccionado->domicilio->coordenadas }}">
+                            <!-- Ubicación -->
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        Ubicación
+                                    </h4>
+                                    <div class="space-y-2 text-sm">
+                                        @if($reporteSeleccionado->domicilio)
+                                            <div>
+                                                <span class="font-medium text-gray-700 dark:text-gray-300">Dirección:</span>
+                                                <span class="text-gray-900 dark:text-white block">
+                                                    {{ $reporteSeleccionado->domicilio->direccion ?? 'N/A' }}
+                                                </span>
                                             </div>
-                                        </div>
-                                    @endif
-                                @else
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 italic">No hay información de ubicación disponible</p>
-                                @endif
+                                            @if($reporteSeleccionado->domicilio->entre_calles)
+                                                <div>
+                                                    <span class="font-medium text-gray-700 dark:text-gray-300">Entre calles:</span>
+                                                    <span class="text-gray-900 dark:text-white block">
+                                                        {{ $reporteSeleccionado->domicilio->entre_calles }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                            @if($reporteSeleccionado->domicilio->direccion_rural)
+                                                <div>
+                                                    <span class="font-medium text-gray-700 dark:text-gray-300">Aclaraciones:</span>
+                                                    <span class="text-gray-900 dark:text-white block">
+                                                        {{ $reporteSeleccionado->domicilio->direccion_rural }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                            @if($reporteSeleccionado->domicilio->barrio)
+                                                <div>
+                                                    <span class="font-medium text-gray-700 dark:text-gray-300">Barrio:</span>
+                                                    <span class="text-gray-900 dark:text-white block">
+                                                        {{ $reporteSeleccionado->domicilio->barrio->nombre }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        @else
+                                            <p class="text-gray-500 dark:text-gray-400">Sin información de domicilio</p>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Descripción -->
-                            <div class="mt-6">
-                                <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
-                                    Descripción del Reporte
-                                </h4>
+                            <div class="space-y-4">
                                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                    <p class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{{ $reporteSeleccionado->observaciones ?? 'Sin descripción' }}</p>
+                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                        </svg>
+                                        Descripción
+                                    </h4>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $reporteSeleccionado->observaciones ?? 'Sin descripción' }}
+                                    </p>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Footer -->
-                        <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
-                            <div class="flex justify-end">
-                                <button 
-                                    wire:click="cerrarModal"
-                                    class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer">
-                                    Cerrar
-                                </button>
-                            </div>
+                            <!-- Mapa -->
+                            @if($reporteSeleccionado->domicilio && $reporteSeleccionado->domicilio->coordenadas)
+                                <div class="md:col-span-2">
+                                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                                            </svg>
+                                            Ubicación en el Mapa
+                                        </h4>
+                                        <div id="mapa-reporte-{{ $reporteSeleccionado->id }}" class="w-full rounded-lg bg-gray-200 dark:bg-gray-600" style="height: 400px;"></div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
+                    </div>
+
+                    <!-- Footer del Modal -->
+                    <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex justify-end">
+                        <button 
+                            wire:click="cerrarModal"
+                            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                            Cerrar
+                        </button>
                     </div>
                 </div>
             </div>
-        @endif
+        </div>
+    @endif
+
+    <!-- Modal de Cambio de Estado -->
+    @if($mostrarModalEstado)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <!-- Overlay con menos opacidad -->
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" wire:click="cerrarModalEstado"></div>
+            
+            <!-- Contenedor del modal -->
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Modal -->
+                <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-50">
+                    <!-- Header del Modal -->
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 dark:from-yellow-600 dark:to-yellow-700 px-6 py-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                                Cambiar Estado - Reporte #{{ $reporteParaCambioEstado->id }}
+                            </h3>
+                            <button 
+                                wire:click="cerrarModalEstado"
+                                class="text-white hover:text-gray-200 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenido del Modal -->
+                    <div class="px-6 py-4">
+                        <!-- Estado Actual -->
+                        @if($reporteParaCambioEstado->estado)
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                                <span class="text-sm font-medium text-blue-800 dark:text-blue-300">Estado actual:</span>
+                                <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full {{ $reporteParaCambioEstado->estado->finalizacion ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' }}">
+                                    {{ $reporteParaCambioEstado->estado->nombre }}
+                                </span>
+                            </div>
+                        @else
+                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-4">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado actual:</span>
+                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Sin estado asignado</span>
+                            </div>
+                        @endif
+
+                        <!-- Select de Nuevo Estado -->
+                        <div class="mb-4">
+                            <label for="nuevoEstado" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Nuevo Estado <span class="text-red-500">*</span>
+                            </label>
+                            <select 
+                                wire:model="nuevoEstadoId" 
+                                id="nuevoEstado"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white @error('nuevoEstadoId') border-red-500 @enderror">
+                                <option value="">Seleccione un estado</option>
+                                @foreach(App\Models\ReporteEstado::orderBy('nombre')->get() as $estado)
+                                    <option value="{{ $estado->id }}">
+                                        {{ $estado->nombre }}
+                                        @if($estado->finalizacion)
+                                            (Finalizado)
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('nuevoEstadoId')
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="mb-4">
+                            <label for="observacionesCambio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Observaciones (opcional)
+                            </label>
+                            <textarea 
+                                wire:model="observacionesCambioEstado" 
+                                id="observacionesCambio"
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+                                placeholder="Agregue comentarios sobre el cambio de estado..."></textarea>
+                        </div>
+
+                        <!-- Historial de Cambios -->
+                        @if($reporteParaCambioEstado->estadoCambios->count() > 0)
+                            <div class="mt-6">
+                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Historial de Cambios
+                                </h4>
+                                <div class="max-h-60 overflow-y-auto space-y-3">
+                                    @foreach($reporteParaCambioEstado->estadoCambios()->latest()->get() as $cambio)
+                                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border-l-4 border-blue-500">
+                                            <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                {{ $cambio->created_at->format('d/m/Y H:i') }}
+                                                @if($cambio->usuario)
+                                                    <span class="mx-1">•</span>
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                    </svg>
+                                                    {{ $cambio->usuario->name }}
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                @if($cambio->estadoAnterior)
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200">
+                                                        {{ $cambio->estadoAnterior->nombre }}
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200">
+                                                        Sin estado
+                                                    </span>
+                                                @endif
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                                </svg>
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                                                    {{ $cambio->estadoNuevo->nombre }}
+                                                </span>
+                                            </div>
+                                            @if($cambio->observaciones)
+                                                <div class="mt-2 text-xs text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                                                    <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                                    </svg>
+                                                    <span>{{ $cambio->observaciones }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Footer del Modal -->
+                    <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex justify-end gap-3">
+                        <button 
+                            wire:click="cerrarModalEstado"
+                            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                            Cancelar
+                        </button>
+                        <button 
+                            wire:click="cambiarEstado"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Cambiar Estado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     @push('scripts')
 <script>

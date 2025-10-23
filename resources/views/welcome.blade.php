@@ -15,7 +15,7 @@
             <!-- VERSIÓN MOBILE: Logo arriba + Título abajo (todo centrado) -->
             <div class="flex md:hidden flex-col items-center gap-1">
                 <a href="{{ route('home') }}" class="w-22 -mt-6 h-22 -mb-4">
-                    <img src="{{ asset('fotos/Recurso 16.png') }}" alt="Logo" class="w-full h-full object-contain">
+                    <img src="{{ asset('fotos/Recurso_16.png') }}" alt="Logo" class="w-full h-full object-contain">
                 </a>
                 <h1 class="text-white text-xl font-black leading-tight text-center">
                     ATENCIÓN CIUDADANA
@@ -26,7 +26,7 @@
             <div class="w-full m-0 p-0 -mt-10 hidden md:block">
                 <a href="{{ route('home') }}"
                 class=" w-40 md:absolute md:left-67 hover:opacity-80 transition-opacity duration-200">
-                    <img src="{{ asset('fotos/Recurso 16.png') }}" alt="">
+                    <img src="{{ asset('fotos/Recurso_16.png') }}" alt="">
                 </a>
             </div>   
             
@@ -49,13 +49,13 @@
                             <p class="font-semibold text-xs">Municipalidad de Mercedes</p>
                             <div class="flex flex-col md:flex-row gap-2 mt-1">
                                 <a href="https://www.facebook.com/munimercedes/?locale=es_LA" target="_blank" rel="noopener noreferrer">
-                                    <img class="w-3 h-3" src="{{ asset('fotos/Recurso 11.png') }}" alt="">
+                                    <img class="w-3 h-3" src="{{ asset('fotos/Recurso_11.png') }}" alt="">
                                 </a>
                                 <a href="https://www.instagram.com/munimercedes/" target="_blank" rel="noopener noreferrer">
-                                    <img class="w-3 h-3" src="{{ asset('fotos/Recurso 10.png') }}" alt="">
+                                    <img class="w-3 h-3" src="{{ asset('fotos/Recurso_10.png') }}" alt="">
                                 </a>
                                 <a href="https://www.youtube.com/channel/UCUZfAvQDlze4sejKUNG-_Zg" target="_blank" rel="noopener noreferrer">
-                                    <img class="w-4 h-3" src="{{ asset('fotos/Recurso 9.png') }}" alt="">
+                                    <img class="w-4 h-3" src="{{ asset('fotos/Recurso_9.png') }}" alt="">
                                 </a>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                                 class="w-38 h-8 md:mr-44 md:w-44 px-2 py-2 rounded-full bg-[#bdd62f] hover:bg-[#b3d010] flex items-center gap-3 cursor-pointer"
                             >
                                 <!-- Ícono teléfono -->
-                                <img class="w-6 h-6" src="{{ asset('fotos/Recurso 6.png') }}" alt="Teléfono">
+                                <img class="w-6 h-6" src="{{ asset('fotos/Recurso_6.png') }}" alt="Teléfono">
 
                                 <!-- Texto -->
                                 <span class="flex-1 text-left text-xs font-black">

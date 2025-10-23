@@ -258,9 +258,45 @@ class AltaReporte extends Component
         }
     }
 
+    public function obtenerBarrioPorCoordenadas($coordenadas)
+    {
+        if (empty($coordenadas)) {
+            return null;
+        }
+        
+        $coords = explode(',', $coordenadas);
+        if (count($coords) != 2) {
+            return null;
+        }
+        
+        $lat = trim($coords[0]);
+        $lng = trim($coords[1]);
+        
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return null;
+        }
+        
+        // Construir el punto directamente en la consulta
+        $punto = "POINT({$lng} {$lat})";
+        
+        $barrio = DB::selectOne("
+            SELECT id 
+            FROM barrios 
+            WHERE ST_Contains(
+                ST_GeomFromText(poligono, 4326),
+                ST_GeomFromText(?, 4326)
+            )
+            LIMIT 1
+        ", [$punto]);
+        
+        return $barrio ? $barrio->id : null;
+    }
+
     public function save()
     {
         $this->validateStep();
+
+        $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);
 
         try {
             DB::beginTransaction();
@@ -286,7 +322,8 @@ class AltaReporte extends Component
                     'direccion' => $this->direccion,
                     'entre_calles' => $this->entre_calles, 
                     'direccion_rural' => $this->direccion_rural, 
-                    'coordenadas' => $this->coordenadas
+                    'coordenadas' => $this->coordenadas,
+                    'barrio_id' => $barrio_encontrado
                 ]);
             }
 
@@ -308,7 +345,7 @@ class AltaReporte extends Component
 
 
             try {
-                $reporteCompleto = Reporte::with(['persona', 'categoria'])
+                $reporteCompleto = Reporte::with(['persona', 'categoria','domicilio'])
                     ->find($this->reporteCreado->id);
                 
                 $destinatarios = [

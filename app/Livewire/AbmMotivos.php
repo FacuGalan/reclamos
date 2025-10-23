@@ -315,7 +315,7 @@ class AbmMotivos extends Component
                     'nombre' => $this->nombre,
                     'nombre_publico' => $this->nombre,
                     'area_id' => $this->area_id,
-                    'cuadrilla_id' => $this->cuadrilla_id,
+                    'cuadrilla_id' => $this->cuadrilla_id == '' ? null : $this->cuadrilla_id,
                     'privada' => $this->ver_privada ? 1 : 0,
                 ]);
                 
