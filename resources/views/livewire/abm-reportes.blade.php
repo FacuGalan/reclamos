@@ -10,18 +10,23 @@
 
     <!-- Filtros -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="flex justify-between items-center mb-4">
+        <!-- Header responsive -->
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
-            <button 
-                wire:click="exportarExcel"
-                class="w-full sm:w-auto px-4 py-2 bg-[#217346] hover:bg-[#2e8b5c] text-white rounded-lg transition-colors cursor-pointer text-sm">
-                Exportar Excel
-            </button>
-            <button 
-                wire:click="limpiarFiltros"
-                class="px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer">
-                Limpiar Filtros
-            </button>
+            
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row gap-2">
+                <button 
+                    wire:click="exportarExcel"
+                    class="px-4 py-2 bg-[#217346] hover:bg-[#2e8b5c] text-white rounded-lg transition-colors cursor-pointer text-sm">
+                    Exportar Excel
+                </button>
+                <button 
+                    wire:click="limpiarFiltros"
+                    class="px-4 py-2 bg-[#314158] hover:bg-[#4A5D76] text-white rounded-lg transition-colors cursor-pointer">
+                    Limpiar Filtros
+                </button>
+            </div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -35,7 +40,7 @@
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                     placeholder="Buscar por descripción, dirección, DNI o nombre...">
             </div>
-    
+
             <!-- Filtro por categoría -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría</label>
