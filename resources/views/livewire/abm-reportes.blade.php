@@ -595,11 +595,11 @@
                                 id="nuevoEstado"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white @error('nuevoEstadoId') border-red-500 @enderror">
                                 <option value="">Seleccione un estado</option>
-                                @foreach(App\Models\ReporteEstado::orderBy('nombre')->get() as $estado)
+                                @foreach(App\Models\ReporteEstado::orderBy('id')->get() as $estado)
                                     <option value="{{ $estado->id }}">
                                         {{ $estado->nombre }}
                                         @if($estado->finalizacion)
-                                            (Finalizado)
+                                            (Finalizar)
                                         @endif
                                     </option>
                                 @endforeach
