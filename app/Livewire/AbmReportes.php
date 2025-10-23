@@ -238,6 +238,7 @@ class AbmReportes extends Component
             'Barrio',
             'Fecha Creación',
             'Habitual',
+            'Estado',
             'Descripción'
         ];
         
@@ -258,6 +259,7 @@ class AbmReportes extends Component
                 $reporte->domicilio->barrio->nombre ?? 'N/A',
                 $reporte->created_at->format('d/m/Y H:i'),
                 $reporte->habitual ? 'Sí' : 'No',
+                $reporte->estado->nombre ?? 'Sin estado',
                 $reporte->observaciones,
             ];
         };
