@@ -244,19 +244,19 @@ class Estadisticas extends Component
                             $lng = trim($coords[1]);
                             
                             if (is_numeric($lat) && is_numeric($lng)) {
-                                $this->reclamosCoords[] = [
+                               $this->reclamosCoords[] = [
                                     'id' => $reclamo->id,
                                     'lat' => (float) $lat,
                                     'lng' => (float) $lng,
-                                    'descripcion' => substr($reclamo->descripcion, 0, 100),
-                                    'direccion' => $reclamo->direccion,
+                                    'descripcion' => mb_convert_encoding(substr($reclamo->descripcion ?? '', 0, 100), 'UTF-8', 'UTF-8'),
+                                    'direccion' => mb_convert_encoding($reclamo->direccion ?? '', 'UTF-8', 'UTF-8'),
                                     'fecha' => \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y'),
-                                    'categoria' => $reclamo->categoria->nombre ?? 'Sin categoría',
-                                    'area' => $reclamo->area->nombre ?? 'Sin área',
-                                    'barrio' => $reclamo->barrio->nombre ?? 'Sin barrio',
-                                    'cuadrilla' => $reclamo->categoria->cuadrilla->nombre ?? 'Sin cuadrilla',
-                                    'estado' => $reclamo->estado->nombre ?? 'Sin estado',
-                                    'edificio' => $reclamo->edificio->nombre ?? 'Sin edificio'
+                                    'categoria' => mb_convert_encoding($reclamo->categoria->nombre ?? 'Sin categoría', 'UTF-8', 'UTF-8'),
+                                    'area' => mb_convert_encoding($reclamo->area->nombre ?? 'Sin área', 'UTF-8', 'UTF-8'),
+                                    'barrio' => mb_convert_encoding($reclamo->barrio->nombre ?? 'Sin barrio', 'UTF-8', 'UTF-8'),
+                                    'cuadrilla' => mb_convert_encoding($reclamo->categoria->cuadrilla->nombre ?? 'Sin cuadrilla', 'UTF-8', 'UTF-8'),
+                                    'estado' => mb_convert_encoding($reclamo->estado->nombre ?? 'Sin estado', 'UTF-8', 'UTF-8'),
+                                    'edificio' => mb_convert_encoding($reclamo->edificio->nombre ?? 'Sin edificio', 'UTF-8', 'UTF-8')
                                 ];
                             }
                         }

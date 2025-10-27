@@ -432,24 +432,177 @@ window.EstadisticasMapas = window.EstadisticasMapas || {};
                google.maps.visualization.HeatmapLayer;
     }
     
-    // Función para inicializar ambos mapas
+    // Función para inicializar los mapas con datos
     namespace.inicializar = function(datosReclamos) {
-        console.log('Inicializando mapas con:', datosReclamos.length, 'reclamos');
+        console.log('Inicializando mapas con', datosReclamos.length, 'reclamos');
         
-        // Verificar que Google Maps esté disponible
-        if (!isGoogleMapsLoaded()) {
-            console.error('Google Maps no está completamente cargado');
+        if (!datosReclamos || datosReclamos.length === 0) {
+            console.warn('No hay datos de reclamos para mostrar en el mapa');
             return;
         }
-        
-        // Limpiar mapas anteriores
-        namespace.limpiar();
-        
-        // Inicializar mapa de calor
-        namespace.inicializarMapaCalor(datosReclamos);
-        
-        // Inicializar mapa de puntos
-        namespace.inicializarMapaPuntos(datosReclamos);
+
+        // Validar que Google Maps esté cargado
+        if (typeof google === 'undefined' || !google.maps) {
+            console.error('Google Maps no está disponible');
+            return;
+        }
+
+        // Procesar puntos de calor con pesos ajustados
+        puntos = [];
+        datosReclamos.forEach(function(reclamo) {
+            if (reclamo.lat && reclamo.lng) {
+                var location = new google.maps.LatLng(reclamo.lat, reclamo.lng);
+                // Ajustar peso según densidad
+                puntos.push({
+                    location: location,
+                    weight: 1.5 // Peso aumentado para mejor visibilidad
+                });
+            }
+        });
+
+        console.log('Procesados', puntos.length, 'puntos para el mapa de calor');
+
+        if (puntos.length === 0) {
+            console.warn('No hay puntos válidos para mostrar');
+            return;
+        }
+
+        // Calcular el centro y bounds
+        var bounds = new google.maps.LatLngBounds();
+        puntos.forEach(function(punto) {
+            bounds.extend(punto.location);
+        });
+        var centro = bounds.getCenter();
+
+        // ============================================
+        // MAPA DE CALOR MEJORADO
+        // ============================================
+        var contenedorCalor = document.getElementById('mapa-calor-container');
+        if (contenedorCalor && !inicializadoCalor) {
+            console.log('Inicializando mapa de calor');
+            
+            mapaCalor = new google.maps.Map(contenedorCalor, {
+                zoom: 13,
+                center: centro,
+                mapTypeId: 'roadmap',
+                styles: [
+                    {
+                        featureType: 'poi',
+                        elementType: 'labels',
+                        stylers: [{ visibility: 'off' }]
+                    }
+                ]
+            });
+
+            // Configuración mejorada del heatmap
+            capaCalor = new google.maps.visualization.HeatmapLayer({
+                data: puntos,
+                map: mapaCalor,
+                // ✅ Radio dinámico según zoom
+                radius: 25, // Radio inicial
+                // ✅ Opacidad mejorada
+                opacity: 0.8,
+                // ✅ Gradiente de colores personalizado (azul -> verde -> amarillo -> naranja -> rojo)
+                gradient: [
+                    'rgba(0, 0, 255, 0)',      // Transparente
+                    'rgba(0, 0, 255, 0.5)',    // Azul claro
+                    'rgba(0, 150, 255, 0.7)',  // Azul medio
+                    'rgba(0, 255, 255, 0.8)',  // Cyan
+                    'rgba(0, 255, 0, 0.85)',   // Verde
+                    'rgba(255, 255, 0, 0.9)',  // Amarillo
+                    'rgba(255, 150, 0, 0.95)', // Naranja
+                    'rgba(255, 0, 0, 1)'       // Rojo intenso
+                ],
+                // ✅ Intensidad máxima ajustada
+                maxIntensity: 15,
+                // ✅ Disipación para suavizado
+                dissipating: true
+            });
+
+            // ✅ AJUSTAR RADIO DINÁMICAMENTE SEGÚN EL ZOOM
+            google.maps.event.addListener(mapaCalor, 'zoom_changed', function() {
+                var zoom = mapaCalor.getZoom();
+                var nuevoRadio;
+                
+                // Ajustar radio según nivel de zoom
+                if (zoom <= 11) {
+                    nuevoRadio = 40;
+                } else if (zoom <= 13) {
+                    nuevoRadio = 25;
+                } else if (zoom <= 15) {
+                    nuevoRadio = 20;
+                } else if (zoom <= 17) {
+                    nuevoRadio = 15;
+                } else {
+                    nuevoRadio = 10;
+                }
+                
+                capaCalor.set('radius', nuevoRadio);
+                console.log('Zoom:', zoom, 'Nuevo radio:', nuevoRadio);
+            });
+
+            mapaCalor.fitBounds(bounds);
+            inicializadoCalor = true;
+            console.log('Mapa de calor inicializado exitosamente');
+        }
+
+        // ============================================
+        // MAPA DE PUNTOS (sin cambios importantes)
+        // ============================================
+        var contenedorPuntos = document.getElementById('mapa-puntos-container');
+        if (contenedorPuntos && !inicializadoPuntos) {
+            console.log('Inicializando mapa de puntos');
+            
+            mapaPuntos = new google.maps.Map(contenedorPuntos, {
+                zoom: 13,
+                center: centro,
+                mapTypeId: 'roadmap'
+            });
+
+            // Crear marcadores agrupados para mejor rendimiento
+            marcadores = [];
+            var infowindow = new google.maps.InfoWindow();
+
+            datosReclamos.forEach(function(reclamo) {
+                if (reclamo.lat && reclamo.lng) {
+                    var marcador = new google.maps.Marker({
+                        position: { lat: reclamo.lat, lng: reclamo.lng },
+                        map: mapaPuntos,
+                        title: reclamo.direccion || 'Sin dirección',
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 6,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.7,
+                            strokeColor: '#FFFFFF',
+                            strokeWeight: 2
+                        }
+                    });
+
+                    marcador.addListener('click', function() {
+                        var contenido = '<div style="padding: 10px; max-width: 300px;">' +
+                            '<h3 style="margin: 0 0 10px 0; color: #1a73e8;">#' + reclamo.id + '</h3>' +
+                            '<p style="margin: 5px 0;"><strong>Dirección:</strong> ' + (reclamo.direccion || 'N/A') + '</p>' +
+                            '<p style="margin: 5px 0;"><strong>Categoría:</strong> ' + (reclamo.categoria || 'N/A') + '</p>' +
+                            '<p style="margin: 5px 0;"><strong>Área:</strong> ' + (reclamo.area || 'N/A') + '</p>' +
+                            '<p style="margin: 5px 0;"><strong>Barrio:</strong> ' + (reclamo.barrio || 'N/A') + '</p>' +
+                            '<p style="margin: 5px 0;"><strong>Estado:</strong> ' + (reclamo.estado || 'N/A') + '</p>' +
+                            '<p style="margin: 5px 0;"><strong>Fecha:</strong> ' + reclamo.fecha + '</p>' +
+                            '<p style="margin: 5px 0; color: #666;">' + (reclamo.descripcion || '') + '</p>' +
+                            '</div>';
+                        
+                        infowindow.setContent(contenido);
+                        infowindow.open(mapaPuntos, marcador);
+                    });
+
+                    marcadores.push(marcador);
+                }
+            });
+
+            mapaPuntos.fitBounds(bounds);
+            inicializadoPuntos = true;
+            console.log('Mapa de puntos inicializado con', marcadores.length, 'marcadores');
+        }
     };
 
     // Función para inicializar el mapa de calor

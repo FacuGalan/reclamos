@@ -273,7 +273,7 @@ trait ManejadorEstadisticas
             $query->where('barrio_id', $barrio);
         }
 
-        if ($cuadrilla) {
+        if (!empty($cuadrilla)) {
             $query->whereHas('categoria', function ($q) use ($cuadrilla) {
                 $q->where('cuadrilla_id', $cuadrilla);
             });
