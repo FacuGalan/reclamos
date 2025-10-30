@@ -108,6 +108,10 @@ Route::view('reclamos', 'reclamos')
     ->middleware(['auth', 'verified'])
     ->name('reclamos');
 
+Route::view('admin-modelos-exportacion', 'admin-modelos-exportacion')
+    ->middleware(['auth', 'verified'])
+    ->name('admin-modelos-exportacion');
+
 Route::view('secretarias', 'secretarias')
     ->middleware(['auth', 'verified'])
     ->name('secretarias');

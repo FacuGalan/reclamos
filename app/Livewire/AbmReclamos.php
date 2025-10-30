@@ -12,6 +12,7 @@ use App\Models\Barrio;
 use App\Models\Edificio;
 use App\Models\User;
 use App\Models\Cuadrilla;
+use App\Models\ModeloExportacionReclamo;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Session;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -423,82 +424,144 @@ class AbmReclamos extends Component
     }
 
     // Método para exportar a Excel
-    public function exportarExcel()
-        {
-            // 1. Obtener los datos filtrados
-            $data = $this->getReclamos(true)->get();
-            
-            // 2. Definir encabezados
-            $headings = [
-                'ID',
-                'Fecha',
-                'Nombre',
-                'Apellido',
-                'DNI',
-                'Teléfono',
-                'Email',
-                'Categoría',
-                'Área',
-                'Tranquera',
-                'Dirección',
-                'Entre calles',
-                'Aclaración Dirección',
-                'Barrio',
-                'Estado',
-                'Usuario Creador',
-                'Responsable',
-                'Fecha Creación',
-                'Descripción'
-            ];
-            
-            // 3. Función de mapeo personalizada
-            $mappingCallback = function ($reclamo) {
-                return [
-                    $reclamo->id,
-                    \Carbon\Carbon::parse($reclamo->fecha)->format('d/m/Y'),
-                    $reclamo->persona->nombre,
-                    $reclamo->persona->apellido,
-                    $reclamo->persona->dni,
-                    $reclamo->persona->telefono ?? 'N/A',
-                    $reclamo->persona->email ?? 'N/A',
-                    $reclamo->categoria->nombre,
-                    $reclamo->area->nombre,
-                    $reclamo->numero_tranquera ?? 'N/A',
-                    $reclamo->direccion,
-                    $reclamo->entre_calles ?? 'N/A',
-                    $reclamo->direccion_rural,
-                    $reclamo->barrio->nombre ?? 'N/A',
-                    $reclamo->estado->nombre,
-                    $reclamo->usuario?->name ?? 'N/A',
-                    $reclamo->responsable?->name ?? 'Sin asignar',
-                    $reclamo->created_at->format('d/m/Y H:i'),
-                    $reclamo->descripcion,
-                ];
-            };
-            
-            // 4. Estilo personalizado para encabezados (tu color verde)
-            $headerStyle = [
-                'font' => [
-                    'bold' => true,
-                    'color' => ['rgb' => 'FFFFFF'],
-                ],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '77BF43'], // Tu color verde personalizado
-                ],
-            ];
-            
-            // 5. Crear y descargar la exportación
-            $export = new GenericExport(
-                $data,
-                $headings,
-                $mappingCallback,
-                'Reclamos - ' . date('d-m-Y'),
-                $headerStyle
-            );
-            
-            return $export->download();
+    public function exportarExcel($modeloId = null)
+    {
+        // 1. Obtener los datos filtrados
+        $data = $this->getReclamos(true)->get();
+
+        // Definir mapeo completo de campos disponibles
+        $camposDisponibles = [
+            'id' => [
+                'etiqueta' => 'ID',
+                'valor' => fn($r) => $r->id
+            ],
+            'fecha' => [
+                'etiqueta' => 'Fecha',
+                'valor' => fn($r) => \Carbon\Carbon::parse($r->fecha)->format('d/m/Y')
+            ],
+            'nombre_persona' => [
+                'etiqueta' => 'Nombre',
+                'valor' => fn($r) => $r->persona->nombre
+            ],
+            'apellido_persona' => [
+                'etiqueta' => 'Apellido',
+                'valor' => fn($r) => $r->persona->apellido
+            ],
+            'dni' => [
+                'etiqueta' => 'DNI',
+                'valor' => fn($r) => $r->persona->dni
+            ],
+            'telefono' => [
+                'etiqueta' => 'Teléfono',
+                'valor' => fn($r) => $r->persona->telefono ?? 'N/A'
+            ],
+            'email' => [
+                'etiqueta' => 'Email',
+                'valor' => fn($r) => $r->persona->email ?? 'N/A'
+            ],
+            'categoria' => [
+                'etiqueta' => 'Categoría',
+                'valor' => fn($r) => $r->categoria->nombre
+            ],
+            'area' => [
+                'etiqueta' => 'Área',
+                'valor' => fn($r) => $r->area->nombre
+            ],
+            'numero_tranquera' => [
+                'etiqueta' => 'Tranquera',
+                'valor' => fn($r) => $r->numero_tranquera ?? 'N/A'
+            ],
+            'direccion' => [
+                'etiqueta' => 'Dirección',
+                'valor' => fn($r) => $r->direccion
+            ],
+            'entre_calles' => [
+                'etiqueta' => 'Entre calles',
+                'valor' => fn($r) => $r->entre_calles ?? 'N/A'
+            ],
+            'direccion_rural' => [
+                'etiqueta' => 'Aclaración Dirección',
+                'valor' => fn($r) => $r->direccion_rural
+            ],
+            'barrio' => [
+                'etiqueta' => 'Barrio',
+                'valor' => fn($r) => $r->barrio->nombre ?? 'N/A'
+            ],
+            'estado' => [
+                'etiqueta' => 'Estado',
+                'valor' => fn($r) => $r->estado->nombre
+            ],
+            'usuario_creador' => [
+                'etiqueta' => 'Usuario Creador',
+                'valor' => fn($r) => $r->usuario?->name ?? 'N/A'
+            ],
+            'responsable' => [
+                'etiqueta' => 'Responsable',
+                'valor' => fn($r) => $r->responsable?->name ?? 'Sin asignar'
+            ],
+            'fecha_creacion' => [
+                'etiqueta' => 'Fecha Creación',
+                'valor' => fn($r) => $r->created_at->format('d/m/Y H:i')
+            ],
+            'descripcion' => [
+                'etiqueta' => 'Descripción',
+                'valor' => fn($r) => $r->descripcion
+            ],
+        ];
+
+        // 2. Determinar qué campos exportar
+        if ($modeloId) {
+            $modelo = ModeloExportacionReclamo::findOrFail($modeloId);
+            $camposAExportar = $modelo->campos;
+            $tituloExport = $modelo->nombre . ' - ' . date('d-m-Y');
+        } else {
+            // Exportar todos los campos (comportamiento por defecto)
+            $camposAExportar = array_keys($camposDisponibles);
+            $tituloExport = 'Reclamos - ' . date('d-m-Y');
         }
+
+        // 3. Construir encabezados dinámicamente
+        $headings = [];
+        foreach ($camposAExportar as $campo) {
+            if (isset($camposDisponibles[$campo])) {
+                $headings[] = $camposDisponibles[$campo]['etiqueta'];
+            }
+        }
+
+        // 4. Función de mapeo personalizada dinámica
+        $mappingCallback = function ($reclamo) use ($camposAExportar, $camposDisponibles) {
+            $fila = [];
+            foreach ($camposAExportar as $campo) {
+                if (isset($camposDisponibles[$campo])) {
+                    $fila[] = $camposDisponibles[$campo]['valor']($reclamo);
+                }
+            }
+            return $fila;
+        };
+
+        // 5. Estilo personalizado para encabezados (tu color verde)
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '77BF43'], // Tu color verde personalizado
+            ],
+        ];
+
+        // 6. Crear y descargar la exportación
+        $export = new GenericExport(
+            $data,
+            $headings,
+            $mappingCallback,
+            $tituloExport,
+            $headerStyle
+        );
+
+        return $export->download();
+    }
 
     public function contarFiltrosActivos()
     {
@@ -526,11 +589,17 @@ class AbmReclamos extends Component
     {
         // Solo obtener reclamos si estamos en la vista de lista
         $reclamos = $this->currentView === 'list' ? $this->getReclamos() : collect();
-        
+
         $this->contarFiltrosActivos();
 
+        // Obtener modelos de exportación disponibles para el área del usuario
+        $modelosExportacion = ModeloExportacionReclamo::whereIn('area_id', Auth::user()->areas->pluck('id'))
+            ->orderBy('nombre')
+            ->get();
+
         return view('livewire.abm-reclamos', [
-            'reclamos' => $reclamos
+            'reclamos' => $reclamos,
+            'modelosExportacion' => $modelosExportacion
         ]);
     }
 }

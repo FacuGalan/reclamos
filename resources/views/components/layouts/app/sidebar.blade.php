@@ -75,9 +75,14 @@
                     </flux:navlist.group>
                 @endif
 
-                @if(Auth::user()->rol->lUsuariosAbm)
+                @if(Auth::user()->rol->lUsuariosAbm || (Auth::user()->rol->lReclamosAlta && Auth::user()->rol_id <= 3))
                     <flux:navlist.group :heading="__('Administración')" class="grid">
-                        <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('usuarios')" :current="request()->routeIs('usuarios')" wire:navigate>Usuarios</flux:navlist.item>
+                        @if(Auth::user()->rol->lUsuariosAbm)
+                            <flux:navlist.item class="flux-nav-custom" icon="users" :href="route('usuarios')" :current="request()->routeIs('usuarios')" wire:navigate>Usuarios</flux:navlist.item>
+                        @endif
+                        @if(Auth::user()->rol->lReclamosAlta && Auth::user()->rol_id <= 3)
+                            <flux:navlist.item class="flux-nav-custom" icon="document-chart-bar" :href="route('admin-modelos-exportacion')" :current="request()->routeIs('admin-modelos-exportacion')" wire:navigate>Modelos de Exportación</flux:navlist.item>
+                        @endif
                     </flux:navlist.group>
                 @endif
             </div>

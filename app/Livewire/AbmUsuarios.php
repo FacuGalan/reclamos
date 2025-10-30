@@ -35,6 +35,7 @@ class AbmUsuarios extends Component
     public $userAreas = []; // Áreas del usuario autenticado
     public $puedeVerTodos = false; // Nueva propiedad para saber si puede ver todos
     public $ver_privada = false; // Nueva propiedad para controlar acceso a áreas privadas
+    public $tipo_acceso_reclamos = 1; // 1=Públicos, 2=Privados, 3=Ambos
 
     // Datos del formulario
     public $dni = '';
@@ -225,6 +226,7 @@ class AbmUsuarios extends Component
         $this->telefono = $usuario->telefono;
         $this->rol_id = $usuario->rol_id;
         $this->cuadrilla_id = $usuario->cuadrilla_id;
+        $this->tipo_acceso_reclamos = $usuario->tipo_acceso_reclamos ?? 1;
         $this->areas_asignadas = $usuario->areas->pluck('id')->toArray();
     }
 
@@ -236,6 +238,7 @@ class AbmUsuarios extends Component
         $this->telefono = '';
         $this->rol_id = '';
         $this->cuadrilla_id = '';
+        $this->tipo_acceso_reclamos = 1;
         $this->password = '';
         $this->password_confirmation = '';
         $this->areas_asignadas = [];
@@ -314,6 +317,9 @@ class AbmUsuarios extends Component
 
             if (!$this->isEditing) {
                 // Crear nuevo usuario
+                // Calcular ver_privada según tipo_acceso_reclamos
+                $verPrivadaCalculada = ($this->tipo_acceso_reclamos == 2 || $this->tipo_acceso_reclamos == 3) ? 1 : 0;
+
                 $usuario = User::create([
                     'dni' => $this->dni,
                     'name' => $this->name,
@@ -322,7 +328,8 @@ class AbmUsuarios extends Component
                     'rol_id' => $this->rol_id ?: null,
                     'cuadrilla_id' => $this->cuadrilla_id ?: null,
                     'password' => Hash::make($this->password),
-                    'ver_privada' => $this->ver_privada ? 1 : 0,
+                    'ver_privada' => $verPrivadaCalculada,
+                    'tipo_acceso_reclamos' => $this->tipo_acceso_reclamos,
                 ]);
 
                 // Sincronizar áreas
@@ -333,6 +340,9 @@ class AbmUsuarios extends Component
                 // Actualizar usuario existente
                 $usuario = User::find($this->selectedUsuarioId);
                 
+                // Calcular ver_privada según tipo_acceso_reclamos
+                $verPrivadaCalculada = ($this->tipo_acceso_reclamos == 2 || $this->tipo_acceso_reclamos == 3) ? 1 : 0;
+
                 $datosActualizacion = [
                     'dni' => $this->dni,
                     'name' => $this->name,
@@ -340,7 +350,8 @@ class AbmUsuarios extends Component
                     'telefono' => $this->telefono,
                     'rol_id' => $this->rol_id ?: null,
                     'cuadrilla_id' => $this->cuadrilla_id ?: null,
-                    'ver_privada' => $this->ver_privada ? 1 : 0,
+                    'ver_privada' => $verPrivadaCalculada,
+                    'tipo_acceso_reclamos' => $this->tipo_acceso_reclamos,
                 ];
 
                 // Solo actualizar la contraseña si se proporcionó una nueva
