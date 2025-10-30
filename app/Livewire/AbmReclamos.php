@@ -593,9 +593,15 @@ class AbmReclamos extends Component
         $this->contarFiltrosActivos();
 
         // Obtener modelos de exportación disponibles para el área del usuario
-        $modelosExportacion = ModeloExportacionReclamo::whereIn('area_id', Auth::user()->areas->pluck('id'))
-            ->orderBy('nombre')
-            ->get();
+        $userAreas = Auth::user()->areas;
+        if ($userAreas->isEmpty()) {
+            // Si el usuario no tiene áreas, mostrar todos los modelos
+            $modelosExportacion = ModeloExportacionReclamo::orderBy('nombre')->get();
+        } else {
+            $modelosExportacion = ModeloExportacionReclamo::whereIn('area_id', $userAreas->pluck('id'))
+                ->orderBy('nombre')
+                ->get();
+        }
 
         return view('livewire.abm-reclamos', [
             'reclamos' => $reclamos,

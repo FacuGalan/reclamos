@@ -47,16 +47,26 @@ class AdminModelosExportacion extends Component
             abort(403, 'No tienes permisos para administrar modelos de exportación.');
         }
 
-        // Cargar las áreas del usuario
-        $this->areasDisponibles = Auth::user()->areas;
+        // Cargar las áreas del usuario, o todas si no tiene áreas asignadas
+        $userAreas = Auth::user()->areas;
+        $this->areasDisponibles = $userAreas->isEmpty() ? Area::orderBy('nombre')->get() : $userAreas;
     }
 
     public function render()
     {
-        $modelos = ModeloExportacionReclamo::with(['area', 'usuarioCreador'])
-            ->whereIn('area_id', Auth::user()->areas->pluck('id'))
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $userAreas = Auth::user()->areas;
+
+        // Si el usuario no tiene áreas asignadas, mostrar todos los modelos
+        if ($userAreas->isEmpty()) {
+            $modelos = ModeloExportacionReclamo::with(['area', 'usuarioCreador'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $modelos = ModeloExportacionReclamo::with(['area', 'usuarioCreador'])
+                ->whereIn('area_id', $userAreas->pluck('id'))
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         return view('livewire.admin-modelos-exportacion', [
             'modelos' => $modelos
@@ -74,8 +84,10 @@ class AdminModelosExportacion extends Component
     {
         $modelo = ModeloExportacionReclamo::findOrFail($id);
 
-        // Verificar permisos
-        if (!Auth::user()->areas->pluck('id')->contains($modelo->area_id)) {
+        $userAreas = Auth::user()->areas;
+
+        // Verificar permisos solo si el usuario tiene áreas asignadas
+        if (!$userAreas->isEmpty() && !$userAreas->pluck('id')->contains($modelo->area_id)) {
             session()->flash('error', 'No tienes permisos para editar este modelo.');
             return;
         }
@@ -102,8 +114,10 @@ class AdminModelosExportacion extends Component
             'camposSeleccionados.min' => 'Debes seleccionar al menos un campo',
         ]);
 
-        // Verificar que el usuario tenga acceso al área seleccionada
-        if (!Auth::user()->areas->pluck('id')->contains($this->area_id)) {
+        $userAreas = Auth::user()->areas;
+
+        // Verificar que el usuario tenga acceso al área seleccionada (solo si tiene áreas asignadas)
+        if (!$userAreas->isEmpty() && !$userAreas->pluck('id')->contains($this->area_id)) {
             session()->flash('error', 'No tienes acceso al área seleccionada.');
             return;
         }
@@ -116,8 +130,8 @@ class AdminModelosExportacion extends Component
         if ($this->modoEdicion) {
             $modelo = ModeloExportacionReclamo::findOrFail($this->modeloEditandoId);
 
-            // Verificar permisos
-            if (!Auth::user()->areas->pluck('id')->contains($modelo->area_id)) {
+            // Verificar permisos (solo si el usuario tiene áreas asignadas)
+            if (!$userAreas->isEmpty() && !$userAreas->pluck('id')->contains($modelo->area_id)) {
                 session()->flash('error', 'No tienes permisos para editar este modelo.');
                 return;
             }
@@ -147,8 +161,10 @@ class AdminModelosExportacion extends Component
     {
         $modelo = ModeloExportacionReclamo::findOrFail($id);
 
-        // Verificar permisos
-        if (!Auth::user()->areas->pluck('id')->contains($modelo->area_id)) {
+        $userAreas = Auth::user()->areas;
+
+        // Verificar permisos (solo si el usuario tiene áreas asignadas)
+        if (!$userAreas->isEmpty() && !$userAreas->pluck('id')->contains($modelo->area_id)) {
             session()->flash('error', 'No tienes permisos para eliminar este modelo.');
             return;
         }
