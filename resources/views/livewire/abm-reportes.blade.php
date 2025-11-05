@@ -710,52 +710,78 @@
     // Variables globales
     let mapaReporteVista = null;
     let googleMapsLoadedReportes = false;
+    let googleMapsLoadPromise = null;
+
+    // Callback global que Google Maps llamará cuando esté listo
+    window.initGoogleMapsReportes = function() {
+        googleMapsLoadedReportes = true;
+    };
 
     // Función para cargar Google Maps
     function cargarGoogleMapsReportes() {
-        if (googleMapsLoadedReportes) {
+        // Si ya está cargado, resolver inmediatamente
+        if (googleMapsLoadedReportes && typeof google !== 'undefined' && google.maps && google.maps.Map) {
             return Promise.resolve();
         }
 
+        // Si ya hay una promesa de carga en progreso, retornarla
+        if (googleMapsLoadPromise) {
+            return googleMapsLoadPromise;
+        }
+
+        // Verificar si ya existe el objeto google.maps
         if (typeof google !== 'undefined' && google.maps && google.maps.Map) {
             googleMapsLoadedReportes = true;
             return Promise.resolve();
         }
 
+        // Verificar si ya existe un script cargándose
         const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
         if (existingScript) {
-            return new Promise((resolve) => {
+            googleMapsLoadPromise = new Promise((resolve) => {
                 const checkLoaded = setInterval(() => {
                     if (typeof google !== 'undefined' && google.maps && google.maps.Map) {
                         clearInterval(checkLoaded);
                         googleMapsLoadedReportes = true;
                         resolve();
                     }
-                }, 100);
-            });
-        }
+                }, 50); // Check más frecuente
 
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyArpDAi1ugbTSLT4wlr4T_qMmBZLouBfxo&libraries=places&loading=async`;
-            script.async = true;
-            script.defer = true;
-            
-            script.onload = () => {
+                // Timeout de seguridad
                 setTimeout(() => {
+                    clearInterval(checkLoaded);
                     if (typeof google !== 'undefined' && google.maps && google.maps.Map) {
                         googleMapsLoadedReportes = true;
                         resolve();
-                    } else {
-                        reject(new Error('Google Maps no se cargó completamente'));
                     }
-                }, 300);
+                }, 10000); // 10 segundos máximo
+            });
+            return googleMapsLoadPromise;
+        }
+
+        // Crear y cargar el script con callback
+        googleMapsLoadPromise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyArpDAi1ugbTSLT4wlr4T_qMmBZLouBfxo&libraries=places&callback=initGoogleMapsReportes`;
+            script.async = true;
+            script.defer = true;
+
+            // El callback se ejecutará cuando Google Maps esté listo
+            const originalCallback = window.initGoogleMapsReportes;
+            window.initGoogleMapsReportes = function() {
+                originalCallback();
+                resolve();
             };
-            
-            script.onerror = () => reject(new Error('Error al cargar Google Maps API'));
-            
+
+            script.onerror = () => {
+                googleMapsLoadPromise = null;
+                reject(new Error('Error al cargar Google Maps API'));
+            };
+
             document.head.appendChild(script);
         });
+
+        return googleMapsLoadPromise;
     }
 
     // Función para inicializar el mapa
@@ -824,33 +850,49 @@
     // Escuchar el evento de Livewire
     document.addEventListener('livewire:init', () => {
         Livewire.on('inicializar-mapa-reporte', (event) => {
-            //console.log('🎯 Evento recibido:', event);
-            
             // Extraer datos - Livewire 3 pasa los parámetros como propiedades del objeto
             const reporteId = event.reporteId || event.detail?.reporteId;
             const coordenadas = event.coordenadas || event.detail?.coordenadas;
-            
-            //console.log('📍 ReporteId:', reporteId, 'Coordenadas:', coordenadas);
-            
+
             if (!reporteId || !coordenadas) {
-                console.error('❌ Faltan datos del evento');
+                console.error('Faltan datos del evento para inicializar el mapa');
                 return;
             }
-            
-            // Esperar a que el modal esté completamente renderizado
-            setTimeout(() => {
-                cargarGoogleMapsReportes()
-                    .then(() => {
+
+            // Pequeña espera para asegurar que el DOM del modal esté renderizado
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    const contenedor = document.getElementById(`mapa-reporte-${reporteId}`);
+                    if (!contenedor) {
+                        console.error('Contenedor del mapa no encontrado, reintentando...');
+                        // Reintentar una vez más si el contenedor no existe
                         setTimeout(() => {
-                            inicializarMapaReporte(reporteId, coordenadas);
-                        }, 300);
-                    })
-                    .catch(error => {
-                        console.error('Error cargando Google Maps:', error);
-                    });
-            }, 100);
+                            inicializarMapaConGoogle(reporteId, coordenadas);
+                        }, 100);
+                        return;
+                    }
+
+                    inicializarMapaConGoogle(reporteId, coordenadas);
+                }, 50);
+            });
         });
     });
+
+    // Función auxiliar que carga Google Maps y luego inicializa el mapa
+    function inicializarMapaConGoogle(reporteId, coordenadas) {
+        cargarGoogleMapsReportes()
+            .then(() => {
+                // Google Maps está garantizado estar cargado aquí
+                inicializarMapaReporte(reporteId, coordenadas);
+            })
+            .catch(error => {
+                console.error('Error cargando Google Maps:', error);
+                const contenedor = document.getElementById(`mapa-reporte-${reporteId}`);
+                if (contenedor) {
+                    contenedor.innerHTML = '<div class="flex items-center justify-center h-full text-red-500 dark:text-red-400"><p class="text-center">Error al cargar la API de Google Maps. Por favor, recarga la página.</p></div>';
+                }
+            });
+    }
 
     // Limpiar cuando se cierra el modal
     document.addEventListener('click', (e) => {

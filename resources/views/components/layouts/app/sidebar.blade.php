@@ -31,8 +31,8 @@
                     @endif
                    
                     @if(Auth::user()->rol->lReportesAbm)
-                        <flux:navlist.item class="flux-nav-custom" icon="exclamation-triangle" :href="route('reportes')" 
-                                        :current="request()->routeIs(['reportes'])" wire:navigate>
+                        <flux:navlist.item class="flux-nav-custom" icon="exclamation-triangle" :href="route('reportes')"
+                                        :current="request()->routeIs(['reportes'])">
                                         Reportes
                         </flux:navlist.item>
                     @endif
