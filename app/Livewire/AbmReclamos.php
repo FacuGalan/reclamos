@@ -50,6 +50,8 @@ class AbmReclamos extends Component
     public $filtro_responsable = '';
     #[Session]
     public $filtro_cuadrilla = '';
+    #[Session]
+    public $filtro_urgente = '';
 
     public $filtrosActivos = 0; // Contador de filtros activos
 
@@ -282,6 +284,11 @@ class AbmReclamos extends Component
             });
         }
 
+        if ($this->filtro_urgente !== '') {
+            $query->whereHas('categoria', function($q) {
+                $q->where('urgente', $this->filtro_urgente);
+            });
+        }
 
         // FILTRO POR CATEGORÍAS PRIVADAS
 
@@ -320,7 +327,7 @@ class AbmReclamos extends Component
         $this->filtro_usuario = '';
         $this->filtro_responsable = '';
         $this->filtro_cuadrilla = '';
-
+        $this->filtro_urgente = '';
 
         $this->resetPage();
     }
@@ -578,6 +585,7 @@ class AbmReclamos extends Component
             $this->filtro_usuario,
             $this->filtro_responsable,
             $this->filtro_cuadrilla,
+            $this->filtro_urgente,
         ];
 
         $this->filtrosActivos = collect($filtros)->filter(function($valor) {

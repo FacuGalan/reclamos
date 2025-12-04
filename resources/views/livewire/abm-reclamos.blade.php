@@ -398,6 +398,18 @@
                     </select>
                 </div>
 
+                <!-- Urgente -->
+                <div x-show="mostrarMas" x-cloak>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Urgente</label>
+                    <select 
+                        wire:model.live="filtro_urgente"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                        {{ $filtro_urgente !== '' ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
+                        <option value="">Todos</option>
+                        <option value="1">Urgentes</option>
+                        <option value="0">No urgentes</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Botón ver más -->
@@ -427,7 +439,7 @@
 
                 <!-- Línea derecha -->
                 <div class="flex-1 border-t border-gray-300 mx-4"></div>
-</div>
+            </div>
         </div>
 
 

@@ -36,6 +36,7 @@ class AbmMotivos extends Component
     public $nombre = '';
     public $area_id = '';
     public $cuadrilla_id = '';
+    public $urgente = false;
     public $privada = false;
 
     // Estado de guardado
@@ -160,6 +161,7 @@ class AbmMotivos extends Component
             $this->area_id = ''; // Dejar vacío para que el usuario seleccione
         }
         $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->get();
+        $this->urgente = false;
     }
 
     // Editar motivo
@@ -176,6 +178,7 @@ class AbmMotivos extends Component
         $this->isEditing = true;
         $this->cargarDatosMotivo($motivo);
         $this->showFormModal = true;
+        $this->urgente = $motivo->urgente;
     }
 
     public function cerrarModal()
@@ -192,6 +195,8 @@ class AbmMotivos extends Component
         $this->area_id = $motivo->area_id;
         $this->cuadrilla_id = $motivo->cuadrilla_id;
         $this->cuadrillas = Cuadrilla::where('area_id', $motivo->area_id)->get();
+        $this->urgente = (bool) $motivo->urgente;
+        
     }
 
     public function resetForm()
@@ -316,6 +321,7 @@ class AbmMotivos extends Component
                     'nombre_publico' => $this->nombre,
                     'area_id' => $this->area_id,
                     'cuadrilla_id' => $this->cuadrilla_id == '' ? null : $this->cuadrilla_id,
+                    'urgente' => $this->urgente,
                     'privada' => $this->ver_privada ? 1 : 0,
                 ]);
                 
@@ -334,7 +340,8 @@ class AbmMotivos extends Component
                     'nombre' => $this->nombre,
                     'nombre_publico' => $this->nombre,
                     'area_id' => $this->area_id,
-                    'cuadrilla_id' => $this->cuadrilla_id
+                    'cuadrilla_id' => $this->cuadrilla_id,
+                    'urgente' => $this->urgente,
                 ]);
                 
                 $mensaje = 'Motivo actualizado exitosamente';
