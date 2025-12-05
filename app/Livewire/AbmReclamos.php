@@ -105,6 +105,7 @@ class AbmReclamos extends Component
         'reclamo-saved' => 'volverALista',
         'reclamo-deleted' => 'volverALista',
         'reclamo-actualizado' => 'volverAListaConDelay',
+        'nuevo-reclamo-detectado' => '$refresh',
     ];
 
     public function mount()
@@ -306,10 +307,14 @@ class AbmReclamos extends Component
         $this->contadorTotales = $query->count();
         $this->contadorSinProcesar = (clone $query)->where('responsable_id', null)->count();
 
-        // Contar urgentes (sin el filtro de urgente aplicado, excluyendo finalizados y cancelados)
+        // Contar urgentes: (pendiente sin procesar) O (reitera)
         $queryUrgentes = Reclamo::whereIn('area_id', $this->userAreas)
-            ->whereNot('estado_id', 5)
-            ->whereNot('estado_id', 4)
+            ->where(function($q) {
+                $q->where(function($q2) {
+                    $q2->where('estado_id', 1) // Pendiente
+                       ->whereNull('responsable_id'); // Sin procesar
+                })->orWhere('estado_id', 6); // Reitera
+            })
             ->whereHas('categoria', function($q) {
                 $q->where('urgente', true);
                 if(Auth::user()->rol->id > 1){

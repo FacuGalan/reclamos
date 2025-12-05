@@ -514,18 +514,41 @@
             </div>
         </div>    
 
-        <div class="grid grid-cols-1 gap-10 mt-4">
-            <div>
+        <div class="grid grid-cols-1 {{ $reclamo->imagen ? 'md:grid-cols-2' : '' }} gap-6 mt-4">
+            <div class="flex flex-col">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Descripción del reclamo *
                 </label>
-                <textarea 
+                <textarea
                     wire:model="descripcion"
-                    rows="2"
-                    class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
+                    rows="{{ $reclamo->imagen ? '6' : '2' }}"
+                    class="w-full flex-1 bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white"
                     placeholder="Describa detalladamente el reclamo"></textarea>
                 @error('descripcion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
+
+            <!-- Imagen adjunta del reclamo -->
+            @if($reclamo->imagen)
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Imagen adjunta
+                    </label>
+                    <a href="{{ asset('storage/' . $reclamo->imagen) }}" target="_blank" class="block relative group">
+                        <img
+                            src="{{ asset('storage/' . $reclamo->imagen) }}"
+                            alt="Imagen del reclamo"
+                            class="w-full max-h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 rounded-lg pointer-events-none">
+                            <span class="text-white text-sm font-medium flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                </svg>
+                                Click para ampliar
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            @endif
         </div>
         <div class="flex flex-col md:flex-row gap-4 items-center justify-between pt-6 dark:border-gray-600" >
             @if(Auth::user()->rol->lReclamosDeriva && !$reclamo->categoria->privada)

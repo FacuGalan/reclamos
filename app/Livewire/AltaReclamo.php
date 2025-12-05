@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\Reclamo;
 use App\Models\Area;
 use App\Models\Categoria;
@@ -29,6 +30,8 @@ use Illuminate\Support\Facades\Log;
 
 class AltaReclamo extends Component
 {
+    use WithFileUploads;
+
     public $contexto = 'publico';
     public $datosPrecargados = [];
 
@@ -39,6 +42,7 @@ class AltaReclamo extends Component
 
     // Datos del reclamo
     public $descripcion = '';
+    public $imagen;
     public $direccion = '';
     public $entre_calles = '';
     public $direccion_rural = '';
@@ -124,6 +128,7 @@ class AltaReclamo extends Component
         'persona_telefono' => 'required|numeric|digits:10',
         'persona_email' => 'nullable|email|max:255',
         'descripcion' => 'nullable|string|max:1000',
+        'imagen' => 'nullable|image|max:5120', // 5MB máximo
         'direccion' => 'required|string|max:255',
         'entre_calles' => 'required|string|max:255',
         'direccion_rural' => 'nullable|string|max:255,',
@@ -146,6 +151,8 @@ class AltaReclamo extends Component
         'direccion.required' => 'La dirección es obligatoria',
         'coordenadas.required' => 'Dirección no validada - Use el mapa para mayor precisión',
         'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
+        'imagen.image' => 'El archivo debe ser una imagen (jpg, png, gif, etc.)',
+        'imagen.max' => 'La imagen no puede superar los 5MB',
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'edificio_id.required' => 'Debe seleccionar un edificio',
         'entre_calles' => 'Debe indicar entre calles',
@@ -923,10 +930,17 @@ class AltaReclamo extends Component
                 }
             }
          
+            // Guardar imagen si existe
+            $imagenPath = null;
+            if ($this->imagen) {
+                $imagenPath = $this->imagen->store('reclamos', 'public');
+            }
+
             // Crear el reclamo
             $this->reclamoCreado = Reclamo::create([
                 'fecha' => now()->toDateString(),
                 'descripcion' => $this->descripcion,
+                'imagen' => $imagenPath,
                 'direccion' => $this->direccion,
                 'entre_calles' => $this->entre_calles ?: '', // Puede estar vacío para tranqueras
                 'direccion_rural' => $this->direccion_rural,
@@ -982,7 +996,8 @@ class AltaReclamo extends Component
 
             DB::commit();
 
-            $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
+            // Notificar a todos los componentes que escuchan este evento
+            $this->dispatch('nuevo-reclamo-detectado');
             
             if ($this->contexto === 'externo') {
                  $this->isSaving = false;
@@ -1038,7 +1053,7 @@ class AltaReclamo extends Component
     public function resetForm()
     {
         $this->reset([
-            'descripcion', 'direccion', 'entre_calles', 'direccion_rural', 'coordenadas',
+            'descripcion', 'imagen', 'direccion', 'entre_calles', 'direccion_rural', 'coordenadas',
             'area_id', 'categoria_id', 'persona_dni', 'persona_nombre',
             'persona_apellido', 'persona_telefono', 'persona_email',
             'tipo_ubicacion', 'numero_tranquera'
