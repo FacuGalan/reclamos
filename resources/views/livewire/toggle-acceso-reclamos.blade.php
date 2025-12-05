@@ -1,6 +1,6 @@
 <div>
     @if($tipoAcceso === 3)
-        <div class="fixed bottom-6 right-6 z-50">
+        <div class="fixed bottom-1 right-6 z-50">
             <button
                 wire:click="toggleAcceso"
                 class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 group">

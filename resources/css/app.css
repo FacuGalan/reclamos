@@ -146,3 +146,34 @@ input[type="number"] {
 .no-spinner {
     -moz-appearance: textfield;
 }
+
+/* Animación para el notificador de urgentes */
+@keyframes urgente-pulse {
+    0%, 100% {
+        background-color: #fef2f2; /* red-50 */
+        border-color: #f87171; /* red-400 */
+    }
+    50% {
+        background-color: #fecaca; /* red-200 */
+        border-color: #dc2626; /* red-600 */
+    }
+}
+
+.animate-urgente-pulse {
+    animation: urgente-pulse 2s ease-in-out infinite;
+}
+
+.dark .animate-urgente-pulse {
+    animation: urgente-pulse-dark 2s ease-in-out infinite;
+}
+
+@keyframes urgente-pulse-dark {
+    0%, 100% {
+        background-color: rgba(127, 29, 29, 0.3); /* red-900/30 */
+        border-color: #f87171; /* red-400 */
+    }
+    50% {
+        background-color: rgba(185, 28, 28, 0.5); /* red-700/50 */
+        border-color: #ef4444; /* red-500 */
+    }
+}

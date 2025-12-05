@@ -58,6 +58,7 @@ class AbmReclamos extends Component
     // Contadores
     public $contadorTotales = 0;
     public $contadorSinProcesar = 0;
+    public $contadorUrgentes = 0;
 
     // Propiedades para navegación entre vistas
     public $currentView = 'list'; // 'list', 'create', 'edit'
@@ -305,6 +306,18 @@ class AbmReclamos extends Component
         $this->contadorTotales = $query->count();
         $this->contadorSinProcesar = (clone $query)->where('responsable_id', null)->count();
 
+        // Contar urgentes (sin el filtro de urgente aplicado, excluyendo finalizados y cancelados)
+        $queryUrgentes = Reclamo::whereIn('area_id', $this->userAreas)
+            ->whereNot('estado_id', 5)
+            ->whereNot('estado_id', 4)
+            ->whereHas('categoria', function($q) {
+                $q->where('urgente', true);
+                if(Auth::user()->rol->id > 1){
+                    $q->where('privada', $this->ver_privada);
+                }
+            });
+        $this->contadorUrgentes = $queryUrgentes->count();
+
         // Condicional según el parámetro
         if ($forExport) {
             return $query; // Devuelve Collection para exportar
@@ -328,6 +341,28 @@ class AbmReclamos extends Component
         $this->filtro_responsable = '';
         $this->filtro_cuadrilla = '';
         $this->filtro_urgente = '';
+
+        $this->resetPage();
+    }
+
+    public function filtrarUrgentes()
+    {
+        // Limpiar todos los filtros
+        $this->busqueda = '';
+        $this->busqueda_id = '';
+        $this->filtro_barrio = '';
+        $this->filtro_estado = '';
+        $this->filtro_area = '';
+        $this->filtro_categoria = '';
+        $this->filtro_fecha_desde = '';
+        $this->filtro_fecha_hasta = '';
+        $this->filtro_edificio = '';
+        $this->filtro_usuario = '';
+        $this->filtro_responsable = '';
+        $this->filtro_cuadrilla = '';
+
+        // Aplicar solo el filtro de urgentes
+        $this->filtro_urgente = '1';
 
         $this->resetPage();
     }

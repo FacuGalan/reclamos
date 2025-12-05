@@ -497,11 +497,12 @@
                             <tr class="
                                     {{ $reclamo->estado_id == 6
     ? 'bg-orange-100 hover:bg-orange-200 dark:bg-orange-900/20 dark:hover:bg-orange-900/30'
-    : (is_null($reclamo->responsable_id) 
-        ? 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30' 
+    : (is_null($reclamo->responsable_id)
+        ? 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30'
         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
     )
 }}
+                                    {{ $reclamo->categoria->urgente ? 'border-l-4 border-l-red-500' : '' }}
                                     transition-colors
                                 ">
                                 <td class="px-6 py-4">
@@ -631,6 +632,183 @@
                 </div>
             @endif
         </div>
+
+        <!-- Notificador flotante de urgentes -->
+        @if($contadorUrgentes > 0 && $filtro_urgente !== '1')
+            <div class="fixed top-3 left-1/2 -translate-x-1/2 z-50">
+                <button
+                    id="btn-urgentes"
+                    wire:click="filtrarUrgentes"
+                    class="flex items-center gap-3 px-4 py-3 bg-red-50 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 group animate-urgente-pulse cursor-pointer">
+
+                    <!-- Icono de alerta -->
+                    <div class="relative w-10 h-10 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <!-- Badge con contador -->
+                        <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {{ $contadorUrgentes > 99 ? '99+' : $contadorUrgentes }}
+                        </span>
+                    </div>
+
+                    <!-- Texto -->
+                    <div class="flex flex-col items-start">
+                        <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Reclamos</span>
+                        <span class="text-sm font-bold text-red-600 dark:text-red-400">
+                            URGENTES
+                        </span>
+                    </div>
+
+                    <!-- Flecha indicando acción -->
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+        @endif
+
+        <!-- Script de sonido de alerta para urgentes (siempre cargado) -->
+        <script>
+            (function() {
+                // Evitar múltiples inicializaciones
+                if (window.urgenteSoundInitialized) return;
+                window.urgenteSoundInitialized = true;
+
+                let audioContext = null;
+                let intervalId = null;
+                let checkIntervalId = null;
+
+                // Si llegamos por navegación Livewire, ya hubo interacción del usuario
+                let userInteracted = window.livewireNavigated || false;
+
+                // Detectar primera interacción del usuario para habilitar audio (solo si F5)
+                function enableAudioOnInteraction() {
+                    if (userInteracted) return;
+                    userInteracted = true;
+
+                    // Crear/resumir contexto de audio
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+
+                    // Remover listeners una vez habilitado
+                    document.removeEventListener('click', enableAudioOnInteraction);
+                    document.removeEventListener('keydown', enableAudioOnInteraction);
+                }
+
+                // Solo agregar listeners si no hubo navegación previa
+                if (!userInteracted) {
+                    document.addEventListener('click', enableAudioOnInteraction);
+                    document.addEventListener('keydown', enableAudioOnInteraction);
+                }
+
+                // Marcar que hubo navegación para futuras cargas
+                document.addEventListener('livewire:navigated', () => {
+                    window.livewireNavigated = true;
+                    userInteracted = true;
+                });
+
+                function playAlertSound() {
+                    const botonUrgentes = document.getElementById('btn-urgentes');
+                    if (!botonUrgentes) {
+                        stopAlertSound();
+                        return;
+                    }
+
+                    if (!userInteracted) return;
+
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+
+                    const time = audioContext.currentTime;
+
+                    // Primer beep agudo
+                    const osc1 = audioContext.createOscillator();
+                    const gain1 = audioContext.createGain();
+                    osc1.connect(gain1);
+                    gain1.connect(audioContext.destination);
+                    osc1.frequency.setValueAtTime(1000, time);
+                    gain1.gain.setValueAtTime(0.15, time);
+                    gain1.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                    osc1.start(time);
+                    osc1.stop(time + 0.1);
+
+                    // Segundo beep más agudo
+                    const osc2 = audioContext.createOscillator();
+                    const gain2 = audioContext.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioContext.destination);
+                    osc2.frequency.setValueAtTime(1200, time + 0.15);
+                    gain2.gain.setValueAtTime(0.15, time + 0.15);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+                    osc2.start(time + 0.15);
+                    osc2.stop(time + 0.25);
+
+                    // Tercer beep aún más agudo
+                    const osc3 = audioContext.createOscillator();
+                    const gain3 = audioContext.createGain();
+                    osc3.connect(gain3);
+                    gain3.connect(audioContext.destination);
+                    osc3.frequency.setValueAtTime(1400, time + 0.3);
+                    gain3.gain.setValueAtTime(0.18, time + 0.3);
+                    gain3.gain.exponentialRampToValueAtTime(0.01, time + 0.45);
+                    osc3.start(time + 0.3);
+                    osc3.stop(time + 0.45);
+                }
+
+                function stopAlertSound() {
+                    if (intervalId) {
+                        clearInterval(intervalId);
+                        intervalId = null;
+                    }
+                }
+
+                function startAlertSound() {
+                    if (intervalId) return;
+
+                    setTimeout(() => playAlertSound(), 500);
+
+                    intervalId = setInterval(() => {
+                        playAlertSound();
+                    }, 3000);
+                }
+
+                // Verificar periódicamente si el botón existe
+                checkIntervalId = setInterval(() => {
+                    const botonUrgentes = document.getElementById('btn-urgentes');
+                    if (botonUrgentes && !intervalId) {
+                        startAlertSound();
+                    } else if (!botonUrgentes && intervalId) {
+                        stopAlertSound();
+                    }
+                }, 1000);
+
+                // Limpiar al navegar con Livewire
+                document.addEventListener('livewire:navigating', () => {
+                    stopAlertSound();
+                    if (checkIntervalId) {
+                        clearInterval(checkIntervalId);
+                        checkIntervalId = null;
+                    }
+                    window.urgenteSoundInitialized = false;
+                });
+
+                // Iniciar si el botón ya existe
+                if (document.getElementById('btn-urgentes')) {
+                    startAlertSound();
+                }
+            })();
+        </script>
 
     @elseif($currentView === 'edit')
         
