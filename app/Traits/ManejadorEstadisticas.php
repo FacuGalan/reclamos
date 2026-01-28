@@ -12,23 +12,25 @@ trait ManejadorEstadisticas
     /**
      * Generar estadísticas de reclamos por categoría
      */
-    protected function estadisticasPorCategoria(Collection $reclamos, int $limite = 10): Collection
+    protected function estadisticasPorCategoria(Collection $reclamos, ?int $limite = null): Collection
     {
-        return $reclamos->groupBy('categoria.nombre')
+        $resultado = $reclamos->groupBy('categoria.nombre')
                       ->map->count()
-                      ->sortDesc()
-                      ->take($limite);
+                      ->sortDesc();
+
+        return $limite ? $resultado->take($limite) : $resultado;
     }
 
     /**
      * Generar estadísticas de reclamos por área
      */
-    protected function estadisticasPorArea(Collection $reclamos, int $limite = 10): Collection
+    protected function estadisticasPorArea(Collection $reclamos, ?int $limite = null): Collection
     {
-        return $reclamos->groupBy('area.nombre')
+        $resultado = $reclamos->groupBy('area.nombre')
                       ->map->count()
-                      ->sortDesc()
-                      ->take($limite);
+                      ->sortDesc();
+
+        return $limite ? $resultado->take($limite) : $resultado;
     }
 
     /**
@@ -56,13 +58,14 @@ trait ManejadorEstadisticas
     /**
      * Generar estadísticas de reclamos por cuadrilla
      */
-    protected function estadisticasPorCuadrilla(Collection $reclamos, int $limite = 10): Collection
+    protected function estadisticasPorCuadrilla(Collection $reclamos, ?int $limite = null): Collection
     {
-        return $reclamos->filter(fn($r) => $r->categoria && $r->categoria->cuadrilla)
+        $resultado = $reclamos->filter(fn($r) => $r->categoria && $r->categoria->cuadrilla)
                       ->groupBy('categoria.cuadrilla.nombre')
                       ->map->count()
-                      ->sortDesc()
-                      ->take($limite);
+                      ->sortDesc();
+
+        return $limite ? $resultado->take($limite) : $resultado;
     }   
 
     /**
@@ -199,8 +202,8 @@ trait ManejadorEstadisticas
         }
 
         // Estadísticas básicas
-        $porCategoria = $this->estadisticasPorCategoria($reclamos, 5);
-        $porArea = $this->estadisticasPorArea($reclamos, 5);
+        $porCategoria = $this->estadisticasPorCategoria($reclamos);
+        $porArea = $this->estadisticasPorArea($reclamos);
         $porEstado = $this->estadisticasPorEstado($reclamos);
         $porMes = $this->estadisticasTemporales($reclamos);
         $porEdificio = $this->estadisticasPorEdificio($reclamos);
@@ -210,8 +213,7 @@ trait ManejadorEstadisticas
         $porBarrio = $reclamos->filter(fn($r) => $r->barrio)
                             ->groupBy('barrio.nombre')
                             ->map->count()
-                            ->sortDesc()
-                            ->take(5);
+                            ->sortDesc();
 
         // Calcular promedios
         $fechas = $reclamos->pluck('fecha')->map(fn($f) => \Carbon\Carbon::parse($f));
@@ -245,7 +247,7 @@ trait ManejadorEstadisticas
      * Obtener estadísticas de rendimiento
      */
     protected function estadisticasRendimiento(array $userAreas, ?string $fechaDesde = null, ?string $fechaHasta = null,
-                                           ?string $categoria, ?string $area, ?string $barrio, ?string $cuadrilla, ?string $edificio): array
+                                           ?string $categoria, ?string $area, ?string $barrio, ?string $cuadrilla, ?string $edificio, ?string $estado = null): array
     {
         $query = Reclamo::with(['categoria'])
             ->whereHas('categoria', function ($q) {
@@ -281,6 +283,10 @@ trait ManejadorEstadisticas
 
         if ($edificio) {
             $query->where('edificio_id', $edificio);
+        }
+
+        if ($estado) {
+            $query->where('estado_id', $estado);
         }
 
         // Usar consultas agregadas para mejor rendimiento

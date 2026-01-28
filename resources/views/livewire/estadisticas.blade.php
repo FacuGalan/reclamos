@@ -68,12 +68,25 @@
             <!-- Filtro por categoría -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría</label>
-                <select 
+                <select
                     wire:model.live="filtro_categoria"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
                     <option value="">Todas las categorías</option>
                     @foreach($categorias as $categoria)
                         <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filtro por estado -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
+                <select
+                    wire:model.live="filtro_estado"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                    <option value="">Todos los estados</option>
+                    @foreach($estados as $estado)
+                        <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
                     @endforeach
                 </select>
             </div>
@@ -229,28 +242,128 @@
                 
                 <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
                     <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                        {{ count($resumenEstadisticas['por_mes'] ?? []) }}
+                        {{ count($resumenEstadisticas['por_cuadrilla'] ?? []) }}
                     </div>
-                    <div class="text-sm text-purple-600 dark:text-purple-300">Meses con Actividad</div>
+                    <div class="text-sm text-purple-600 dark:text-purple-300">Cuadrillas Involucradas</div>
                 </div>
             </div>
 
             <!-- Gráficos estadísticos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Top Categorías -->
+                <!-- Categorías -->
                 @if(isset($resumenEstadisticas['por_categoria']) && count($resumenEstadisticas['por_categoria']) > 0)
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">Top Categorías</h4>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4" x-data="{ expandedCategorias: false }">
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">Categorías</h4>
                         @foreach($resumenEstadisticas['por_categoria'] as $categoria => $cantidad)
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm text-gray-600 dark:text-gray-300 truncate">{{ $categoria }}</span>
-                                <span class="text-sm font-medium text-gray-800 dark:text-white">{{ $cantidad }}</span>
-                            </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-3">
-                                <div class="bg-blue-600 h-2 rounded-full" 
-                                     style="width: {{ ($cantidad / $totalReclamos) * 100 }}%"></div>
+                            <div x-show="expandedCategorias || {{ $loop->index }} < 6" x-collapse>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300 truncate">{{ $categoria }}</span>
+                                    <span class="text-sm font-medium text-gray-800 dark:text-white">{{ $cantidad }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-3">
+                                    <div class="bg-blue-600 h-2 rounded-full"
+                                         style="width: {{ ($cantidad / $totalReclamos) * 100 }}%"></div>
+                                </div>
                             </div>
                         @endforeach
+                        @if(count($resumenEstadisticas['por_categoria']) > 6)
+                            <div class="flex justify-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                <button
+                                    @click="expandedCategorias = !expandedCategorias"
+                                    class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors cursor-pointer">
+                                    <span x-show="!expandedCategorias">
+                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        Ver más ({{ count($resumenEstadisticas['por_categoria']) - 6 }})
+                                    </span>
+                                    <span x-show="expandedCategorias">
+                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        </svg>
+                                        Ver menos
+                                    </span>
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                <!-- Áreas -->
+                @if(isset($resumenEstadisticas['por_area']) && count($resumenEstadisticas['por_area']) > 0)
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4" x-data="{ expandedAreas: false }">
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">Áreas</h4>
+                        @foreach($resumenEstadisticas['por_area'] as $area => $cantidad)
+                            <div x-show="expandedAreas || {{ $loop->index }} < 6" x-collapse>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300 truncate">{{ $area }}</span>
+                                    <span class="text-sm font-medium text-gray-800 dark:text-white">{{ $cantidad }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-3">
+                                    <div class="bg-yellow-500 h-2 rounded-full"
+                                         style="width: {{ ($cantidad / $totalReclamos) * 100 }}%"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                        @if(count($resumenEstadisticas['por_area']) > 6)
+                            <div class="flex justify-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                <button
+                                    @click="expandedAreas = !expandedAreas"
+                                    class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors cursor-pointer">
+                                    <span x-show="!expandedAreas">
+                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        Ver más ({{ count($resumenEstadisticas['por_area']) - 6 }})
+                                    </span>
+                                    <span x-show="expandedAreas">
+                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        </svg>
+                                        Ver menos
+                                    </span>
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                <!-- Cuadrillas -->
+                @if(isset($resumenEstadisticas['por_cuadrilla']) && count($resumenEstadisticas['por_cuadrilla']) > 0)
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4" x-data="{ expandedCuadrillas: false }">
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">Cuadrillas</h4>
+                        @foreach($resumenEstadisticas['por_cuadrilla'] as $cuadrilla => $cantidad)
+                            <div x-show="expandedCuadrillas || {{ $loop->index }} < 6" x-collapse>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300 truncate">{{ $cuadrilla }}</span>
+                                    <span class="text-sm font-medium text-gray-800 dark:text-white">{{ $cantidad }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-3">
+                                    <div class="bg-purple-500 h-2 rounded-full"
+                                         style="width: {{ ($cantidad / $totalReclamos) * 100 }}%"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                        @if(count($resumenEstadisticas['por_cuadrilla']) > 6)
+                            <div class="flex justify-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                <button
+                                    @click="expandedCuadrillas = !expandedCuadrillas"
+                                    class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors cursor-pointer">
+                                    <span x-show="!expandedCuadrillas">
+                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        Ver más ({{ count($resumenEstadisticas['por_cuadrilla']) - 6 }})
+                                    </span>
+                                    <span x-show="expandedCuadrillas">
+                                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        </svg>
+                                        Ver menos
+                                    </span>
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 @endif
 

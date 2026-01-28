@@ -9,6 +9,7 @@ use App\Models\Area;
 use App\Models\Barrio;
 use App\Models\Cuadrilla;
 use App\Models\Edificio;
+use App\Models\Estado;
 use App\Models\User;
 use App\Traits\ManejadorEstadisticas;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,7 @@ class Estadisticas extends Component
     public $filtro_barrio = '';
     public $filtro_edificio = '';
     public $filtro_cuadrilla = '';
+    public $filtro_estado = '';
 
     // Datos para selects
     public $categorias = [];
@@ -33,6 +35,7 @@ class Estadisticas extends Component
     public $cuadrillas = [];
     public $userAreas = [];
     public $edificios = [];
+    public $estados = [];
     
     // Datos del mapa de calor
     public $reclamosCoords = [];
@@ -63,23 +66,23 @@ class Estadisticas extends Component
         $this->barrios = Barrio::orderBy('nombre')->get();
         $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
         $this->edificios = Edificio::orderBy('nombre')->get();
-        
-        
+        $this->estados = Estado::orderBy('nombre')->get();
+
         // Establecer fechas por defecto (último mes)
         $this->filtro_fecha_hasta = now()->format('Y-m-d');
         $this->filtro_fecha_desde = now()->subMonth()->format('Y-m-d');
 
         // Cargar estadísticas de rendimiento iniciales
         $this->estadisticasRendimiento = $this->estadisticasRendimiento(
-            $this->userAreas, 
-            $this->filtro_fecha_desde, 
+            $this->userAreas,
+            $this->filtro_fecha_desde,
             $this->filtro_fecha_hasta,
             $this->filtro_categoria,
             $this->filtro_area,
             $this->filtro_barrio,
             $this->filtro_cuadrilla,
-            $this->filtro_edificio
-            
+            $this->filtro_edificio,
+            $this->filtro_estado
         );
 
         $this->generarResumenInicial();
@@ -122,6 +125,10 @@ class Estadisticas extends Component
 
             if ($this->filtro_edificio) {
                 $query->where('edificio_id', $this->filtro_edificio);
+            }
+
+            if ($this->filtro_estado) {
+                $query->where('estado_id', $this->filtro_estado);
             }
 
             if(!$this->ver_privada){
@@ -206,6 +213,10 @@ class Estadisticas extends Component
                 $query->where('edificio_id', $this->filtro_edificio);
             }
 
+            if ($this->filtro_estado) {
+                $query->where('estado_id', $this->filtro_estado);
+            }
+
             if(!$this->ver_privada){
                 $query->whereNotNull('coordenadas')
                       ->where('coordenadas', '!=', '');
@@ -223,14 +234,15 @@ class Estadisticas extends Component
 
             // Actualizar estadísticas de rendimiento
             $this->estadisticasRendimiento = $this->estadisticasRendimiento(
-                $this->userAreas, 
-                $this->filtro_fecha_desde, 
+                $this->userAreas,
+                $this->filtro_fecha_desde,
                 $this->filtro_fecha_hasta,
                 $this->filtro_categoria,
                 $this->filtro_area,
                 $this->filtro_barrio,
                 $this->filtro_cuadrilla,
-                $this->filtro_edificio
+                $this->filtro_edificio,
+                $this->filtro_estado
             );
 
             if($generarMapa){
@@ -309,20 +321,22 @@ class Estadisticas extends Component
         $this->filtro_barrio = '';
         $this->filtro_cuadrilla = '';
         $this->filtro_edificio = '';
+        $this->filtro_estado = '';
         $this->mostrarMapaCalor = false;
         $this->reclamosCoords = [];
         $this->resumenEstadisticas = [];
         
         // Recargar estadísticas básicas
         $this->estadisticasRendimiento = $this->estadisticasRendimiento(
-            $this->userAreas, 
-            $this->filtro_fecha_desde, 
+            $this->userAreas,
+            $this->filtro_fecha_desde,
             $this->filtro_fecha_hasta,
             $this->filtro_categoria,
             $this->filtro_area,
             $this->filtro_barrio,
             $this->filtro_cuadrilla,
-            $this->filtro_edificio
+            $this->filtro_edificio,
+            $this->filtro_estado
         );
 
          $this->generarResumenInicial();
@@ -414,6 +428,11 @@ class Estadisticas extends Component
         $this->generarMapaCalor(false);
     }
 
+    public function updatedFiltroEstado()
+    {
+        $this->generarMapaCalor(false);
+    }
+
     // Método para obtener datos de comparación temporal
     public function obtenerComparacionTemporal(): array
     {
@@ -426,25 +445,27 @@ class Estadisticas extends Component
         $fechaFinAnterior = $fechaInicio->copy()->subDay();
 
         $estadisticasActuales = $this->estadisticasRendimiento(
-            $this->userAreas, 
-            $this->filtro_fecha_desde, 
+            $this->userAreas,
+            $this->filtro_fecha_desde,
             $this->filtro_fecha_hasta,
             $this->filtro_categoria,
             $this->filtro_area,
             $this->filtro_barrio,
             $this->filtro_cuadrilla,
-            $this->filtro_edificio
+            $this->filtro_edificio,
+            $this->filtro_estado
         );
 
         $estadisticasAnteriores = $this->estadisticasRendimiento(
-            $this->userAreas, 
-            $fechaInicioAnterior->format('Y-m-d'), 
+            $this->userAreas,
+            $fechaInicioAnterior->format('Y-m-d'),
             $fechaFinAnterior->format('Y-m-d'),
             $this->filtro_categoria,
             $this->filtro_area,
             $this->filtro_barrio,
             $this->filtro_cuadrilla,
-            $this->filtro_edificio
+            $this->filtro_edificio,
+            $this->filtro_estado
         );
 
         return [
@@ -487,6 +508,7 @@ class Estadisticas extends Component
                 'categoria' => $this->filtro_categoria ? $this->categorias->find($this->filtro_categoria)?->nombre : 'Todas',
                 'barrio' => $this->filtro_barrio ? $this->barrios->find($this->filtro_barrio)?->nombre : 'Todos',
                 'cuadrilla' => $this->filtro_cuadrilla ? $this->cuadrillas->find($this->filtro_cuadrilla)?->nombre : 'Todas',
+                'estado' => $this->filtro_estado ? $this->estados->find($this->filtro_estado)?->nombre : 'Todos',
                 'edificio' => $this->filtro_edificio ? $this->edificios->find($this->filtro_edificio)?->nombre : 'Todos',
             ],
             'estadisticas_rendimiento' => $this->estadisticasRendimiento,
