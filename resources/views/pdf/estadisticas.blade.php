@@ -235,12 +235,10 @@
                 <span class="filtro-label">Cuadrilla:</span>
                 <span class="filtro-value">{{ $filtros_aplicados['cuadrilla'] }}</span>
             </div>
-            @if(isset($filtros_aplicados['edificio']))
             <div class="filtro-item">
-                <span class="filtro-label">Edificio:</span>
-                <span class="filtro-value">{{ $filtros_aplicados['edificio'] }}</span>
+                <span class="filtro-label">Estado:</span>
+                <span class="filtro-value">{{ $filtros_aplicados['estado'] ?? 'Todos' }}</span>
             </div>
-            @endif
         </div>
     </div>
 
@@ -301,9 +299,9 @@
             <!-- Top Categorías -->
             @if(isset($resumen['por_categoria']) && count($resumen['por_categoria']) > 0)
             <div class="column">
-                <h3 style="font-size: 12px; margin: 0 0 10px 0;">Top Categorías</h3>
+                <h3 style="font-size: 12px; margin: 0 0 10px 0;">Top 6 Categorías</h3>
                 <div class="bar-chart">
-                    @foreach(array_slice($resumen['por_categoria'], 0, 5, true) as $categoria => $cantidad)
+                    @foreach(array_slice($resumen['por_categoria'], 0, 6, true) as $categoria => $cantidad)
                     <div class="bar-item">
                         <div class="bar-label">
                             <span>{{ $categoria }}</span>
@@ -356,6 +354,31 @@
                 @foreach($resumen['por_area'] as $area => $cantidad)
                 <tr>
                     <td>{{ $area }}</td>
+                    <td style="text-align: center;">{{ $cantidad }}</td>
+                    <td style="text-align: center;">{{ round(($cantidad / $total_reclamos) * 100, 1) }}%</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    <!-- Tabla de Cuadrillas -->
+    @if(isset($resumen['por_cuadrilla']) && count($resumen['por_cuadrilla']) > 0)
+    <div class="section">
+        <div class="section-title">Distribución por Cuadrilla</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cuadrilla</th>
+                    <th style="text-align: center;">Cantidad</th>
+                    <th style="text-align: center;">Porcentaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($resumen['por_cuadrilla'] as $cuadrilla => $cantidad)
+                <tr>
+                    <td>{{ $cuadrilla }}</td>
                     <td style="text-align: center;">{{ $cantidad }}</td>
                     <td style="text-align: center;">{{ round(($cantidad / $total_reclamos) * 100, 1) }}%</td>
                 </tr>
