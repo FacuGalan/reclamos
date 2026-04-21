@@ -52,6 +52,11 @@ class AltaReclamo extends Component
     public $edificio_id = '';
     public $userAreas = []; // Áreas del usuario autenticado
 
+    // Reclamo por oficio (panel logueado, no-interno)
+    public $por_oficio = false;
+    public $areasConOficio = [];
+    public $tieneAreasConOficio = false;
+
     // Nueva propiedad para el historial de reclamos
     public $reclamosPersona = [];
     public $personaId = null; // ID de la persona encontrada
@@ -177,13 +182,17 @@ class AltaReclamo extends Component
         } else {
             $this->userAreas = Area::pluck('id')->toArray(); // Todas las áreas si no está autenticado
         }
-        $this->categorias = Categoria::where('privada', $this->isPrivateArea)
-                                    ->whereIn('area_id', $this->userAreas)
-                                    ->where('activo', true)
-                                    ->orderBy($this->contexto === 'publico' ? 'nombre_publico' : 'nombre')
-                                    ->get();
+        // Áreas del usuario configuradas para recibir "reclamos por oficio".
+        // Solo aplica al panel logueado en contexto NO interno (privateArea=false).
+        if (!$this->isPrivateArea && Auth::check()) {
+            $this->areasConOficio = Area::whereIn('id', $this->userAreas)
+                ->where('recibe_oficio', true)
+                ->pluck('id')
+                ->toArray();
+            $this->tieneAreasConOficio = !empty($this->areasConOficio);
+        }
 
-        $this->categoriasFiltradas = $this->categorias;
+        $this->cargarCategorias();
 
         $this->edificios = Edificio::orderBy('nombre')->get();
         $this->edificiosFiltrados = $this->edificios;
@@ -741,6 +750,44 @@ class AltaReclamo extends Component
         $this->movimientosDetalle = []; // Limpiar movimientos
     }
 
+    public function cargarCategorias()
+    {
+        $query = Categoria::where('privada', $this->isPrivateArea)
+            ->where('activo', true);
+
+        if ($this->por_oficio && $this->tieneAreasConOficio) {
+            $query->whereIn('area_id', $this->areasConOficio);
+        } else {
+            $query->whereIn('area_id', $this->userAreas);
+        }
+
+        $this->categorias = $query
+            ->orderBy($this->contexto === 'publico' ? 'nombre_publico' : 'nombre')
+            ->get();
+
+        $this->categoriasFiltradas = $this->categorias;
+    }
+
+    public function updatedPorOficio($value)
+    {
+        // Al cambiar el modo oficio, limpiar categoría seleccionada si ya no aplica y recargar lista
+        $this->cargarCategorias();
+
+        if ($this->categoria_id) {
+            $existe = $this->categorias->firstWhere('id', $this->categoria_id);
+            if (!$existe) {
+                $this->categoria_id = '';
+                $this->categoriaSeleccionada = null;
+                $this->categoriaBusqueda = '';
+            }
+        }
+
+        // Limpiar errores de persona cuando se activa oficio
+        if ($value) {
+            $this->resetErrorBag(['persona_dni', 'persona_nombre', 'persona_apellido', 'persona_telefono', 'persona_email']);
+        }
+    }
+
     public function nextStep()
     {
         if ($this->step == 1) {
@@ -761,6 +808,11 @@ class AltaReclamo extends Component
 
     public function validateStep1()
     {
+        // Reclamo por oficio: no se requieren datos de la persona
+        if ($this->por_oficio) {
+            return;
+        }
+
         if ($this->showPersonaForm) {
             $this->validate([
                 'persona_dni' => $this->rules['persona_dni'],
@@ -865,42 +917,48 @@ class AltaReclamo extends Component
                 $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);
             }
 
-            // Buscar o crear la persona
-            $persona = Persona::where('dni', $this->persona_dni)->first();
-            
-            if (!$persona) {
-                $persona = Persona::create([
-                    'dni' => $this->persona_dni,
-                    'nombre' => mb_convert_case($this->persona_nombre, MB_CASE_TITLE, "UTF-8"),
-                    'apellido' =>  mb_convert_case($this->persona_apellido, MB_CASE_TITLE, "UTF-8"),
-                    'telefono' => $this->persona_telefono,
-                    'email' => $this->persona_email,
-                ]);
-            } else {
-                // Actualizar datos si la persona ya existe
-                $persona->update([
-                    'nombre' => mb_convert_case($this->persona_nombre, MB_CASE_TITLE, "UTF-8"),
-                    'apellido' => mb_convert_case($this->persona_apellido, MB_CASE_TITLE, "UTF-8"),
-                    'telefono' => $this->persona_telefono,
-                    'email' => $this->persona_email,
-                ]);
-            }
+            // Reclamo por oficio: no hay persona ni domicilio asociados
+            $persona = null;
+            $domicilio = null;
 
-            // Buscar domicilio por coordenadas (funciona tanto para tranqueras como para mapa)
-            $domicilio = Domicilios::where('coordenadas', $this->coordenadas)
-                ->where('persona_id', $persona->id)
-                ->first();
-            
-            if (!$domicilio) {
-                $domicilio = Domicilios::create([
-                    'persona_id' => $persona->id,
-                    'direccion' => $this->direccion,
-                    'entre_calles' => $this->entre_calles ?: '', // Para tranqueras puede estar vacío
-                    'direccion_rural' => $this->direccion_rural,
-                    'numero_tranquera' => $this->numero_tranquera,
-                    'coordenadas' => $this->coordenadas,
-                    'barrio_id' => $barrio_encontrado
-                ]);
+            if (!$this->por_oficio) {
+                // Buscar o crear la persona
+                $persona = Persona::where('dni', $this->persona_dni)->first();
+
+                if (!$persona) {
+                    $persona = Persona::create([
+                        'dni' => $this->persona_dni,
+                        'nombre' => mb_convert_case($this->persona_nombre, MB_CASE_TITLE, "UTF-8"),
+                        'apellido' =>  mb_convert_case($this->persona_apellido, MB_CASE_TITLE, "UTF-8"),
+                        'telefono' => $this->persona_telefono,
+                        'email' => $this->persona_email,
+                    ]);
+                } else {
+                    // Actualizar datos si la persona ya existe
+                    $persona->update([
+                        'nombre' => mb_convert_case($this->persona_nombre, MB_CASE_TITLE, "UTF-8"),
+                        'apellido' => mb_convert_case($this->persona_apellido, MB_CASE_TITLE, "UTF-8"),
+                        'telefono' => $this->persona_telefono,
+                        'email' => $this->persona_email,
+                    ]);
+                }
+
+                // Buscar domicilio por coordenadas (funciona tanto para tranqueras como para mapa)
+                $domicilio = Domicilios::where('coordenadas', $this->coordenadas)
+                    ->where('persona_id', $persona->id)
+                    ->first();
+
+                if (!$domicilio) {
+                    $domicilio = Domicilios::create([
+                        'persona_id' => $persona->id,
+                        'direccion' => $this->direccion,
+                        'entre_calles' => $this->entre_calles ?: '',
+                        'direccion_rural' => $this->direccion_rural,
+                        'numero_tranquera' => $this->numero_tranquera,
+                        'coordenadas' => $this->coordenadas,
+                        'barrio_id' => $barrio_encontrado
+                    ]);
+                }
             }
 
             // Resto del método save permanece igual...
@@ -942,7 +1000,7 @@ class AltaReclamo extends Component
                 'descripcion' => $this->descripcion,
                 'imagen' => $imagenPath,
                 'direccion' => $this->direccion,
-                'entre_calles' => $this->entre_calles ?: '', // Puede estar vacío para tranqueras
+                'entre_calles' => $this->entre_calles ?: '',
                 'direccion_rural' => $this->direccion_rural,
                 'numero_tranquera' => $this->numero_tranquera,
                 'coordenadas' => $this->coordenadas,
@@ -950,17 +1008,23 @@ class AltaReclamo extends Component
                 'categoria_id' => $this->categoria_id,
                 'edificio_id' => $this->edificio_id === '' ? null : $this->edificio_id,
                 'estado_id' => $estadoInicial->id,
-                'persona_id' => $persona->id,
-                'domicilio_id' => $domicilio->id,
+                'persona_id' => $persona?->id,
+                'domicilio_id' => $domicilio?->id,
                 'barrio_id' => $barrio_encontrado,
                 'usuario_id' => Auth::id() ?? 1,
-                'responsable_id' => null
+                'responsable_id' => null,
+                'por_oficio' => (bool) $this->por_oficio,
             ]);
+
+            $obsMovimiento = $this->por_oficio ? 'Inicio del reclamo (por oficio)' : 'Inicio del reclamo';
+            if ($this->tipo_ubicacion === 'tranquera') {
+                $obsMovimiento .= ' - Tranquera N° ' . $this->numero_tranquera;
+            }
 
             Movimiento::create([
                 'reclamo_id' => $this->reclamoCreado->id,
                 'tipo_movimiento_id' => 1,
-                'observaciones' => 'Inicio del reclamo' . ($this->tipo_ubicacion === 'tranquera' ? ' - Tranquera N° ' . $this->numero_tranquera : ''),
+                'observaciones' => $obsMovimiento,
                 'fecha' => now()->toDateString(),
                 'usuario_id' => Auth::id() ?? 1,
                 'estado_id' => 1
@@ -969,7 +1033,7 @@ class AltaReclamo extends Component
 
 
             // NUEVO: Enviar email de confirmación si la persona tiene email
-            if (!empty($persona->email) && filter_var($persona->email, FILTER_VALIDATE_EMAIL)) {
+            if ($persona && !empty($persona->email) && filter_var($persona->email, FILTER_VALIDATE_EMAIL)) {
                 try {
                     // Cargar el reclamo con todas sus relaciones para el email
                     $reclamoCompleto = Reclamo::with(['persona', 'categoria', 'estado', 'edificio'])

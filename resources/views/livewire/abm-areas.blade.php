@@ -229,9 +229,27 @@
                                 <option value="{{ $secretaria->id }}">{{ $secretaria->nombre }}</option>
                             @endforeach
                         </select>
-                        @error('secretaria_id') 
-                            <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                        @error('secretaria_id')
+                            <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span>
                         @enderror
+                    </div>
+
+                    <!-- Recibe reclamos por oficio -->
+                    <div class="pt-2">
+                        <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <input
+                                type="checkbox"
+                                wire:model="recibe_oficio"
+                                class="mt-0.5 h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43] border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                            <div>
+                                <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Recibe reclamos por oficio
+                                </span>
+                                <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    Permite cargar reclamos sin datos del denunciante
+                                </span>
+                            </div>
+                        </label>
                     </div>
 
                     <!-- Botones -->

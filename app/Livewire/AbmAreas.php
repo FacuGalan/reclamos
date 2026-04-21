@@ -29,6 +29,7 @@ class AbmAreas extends Component
     // Datos del formulario
     public $nombre = '';
     public $secretaria_id = '';
+    public $recibe_oficio = false;
 
     // Estado de guardado
     public $mostrarNotificacion = false;
@@ -133,12 +134,14 @@ class AbmAreas extends Component
     {
         $this->nombre = $area->nombre;
         $this->secretaria_id = $area->secretaria_id;
+        $this->recibe_oficio = (bool) $area->recibe_oficio;
     }
 
     public function resetForm()
     {
         $this->nombre = '';
         $this->secretaria_id = '';
+        $this->recibe_oficio = false;
         $this->isSaving = false;
         $this->resetErrorBag();
     }
@@ -186,16 +189,18 @@ class AbmAreas extends Component
                 Area::create([
                     'nombre' => $this->nombre,
                     'secretaria_id' => $this->secretaria_id,
+                    'recibe_oficio' => (bool) $this->recibe_oficio,
                 ]);
-                
+
                 $mensaje = 'Área creada exitosamente';
             } else {
                 $area = Area::find($this->selectedAreaId);
                 $area->update([
                     'nombre' => $this->nombre,
                     'secretaria_id' => $this->secretaria_id,
+                    'recibe_oficio' => (bool) $this->recibe_oficio,
                 ]);
-                
+
                 $mensaje = 'Área actualizada exitosamente';
             }
 

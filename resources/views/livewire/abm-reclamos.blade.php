@@ -514,12 +514,21 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 ">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white " title="{{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}">
-                                        {{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400 ">
-                                        DNI: {{ $reclamo->persona->dni }}
-                                    </div>
+                                    @if($reclamo->por_oficio || !$reclamo->persona)
+                                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400 italic" title="Reclamo por oficio">
+                                            Por oficio
+                                        </div>
+                                        <div class="text-xs text-gray-400 dark:text-gray-500">
+                                            Sin denunciante
+                                        </div>
+                                    @else
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white " title="{{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}">
+                                            {{ $reclamo->persona->nombre }} {{ $reclamo->persona->apellido }}
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400 ">
+                                            DNI: {{ $reclamo->persona->dni }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900 dark:text-white" title="{{ $reclamo->categoria->nombre }}">

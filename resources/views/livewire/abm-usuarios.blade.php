@@ -43,18 +43,38 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Gestión de Usuarios</h1>
-            <p class="text-gray-600 dark:text-gray-300">Administra los usuarios del sistema</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">
+                {{ $mostrarEliminados ? 'Usuarios Dados de Baja' : 'Gestión de Usuarios' }}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-300">
+                {{ $mostrarEliminados ? 'Usuarios eliminados — puedes restaurarlos' : 'Administra los usuarios del sistema' }}
+            </p>
         </div>
-        
-        <button 
-            wire:click="nuevoUsuario"
-            class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Nuevo Usuario
-        </button>
+
+        <div class="flex items-center gap-2">
+            @if($esSuperUsuario)
+                <button
+                    wire:click="toggleMostrarEliminados"
+                    class="px-4 py-3 rounded-lg transition-colors flex items-center gap-2 cursor-pointer
+                        {{ $mostrarEliminados ? 'bg-[#314158] text-white hover:bg-[#4A5D76]' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M10 11v6m4-6v6M5 7l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"></path>
+                    </svg>
+                    {{ $mostrarEliminados ? 'Ver Activos' : 'Ver Dados de Baja' }}
+                </button>
+            @endif
+
+            @if(!$mostrarEliminados)
+                <button
+                    wire:click="nuevoUsuario"
+                    class="px-6 py-3 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors flex items-center gap-2 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Nuevo Usuario
+                </button>
+            @endif
+        </div>
     </div>
 
     <!-- Filtros -->
@@ -199,26 +219,44 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-2">
-                                    <!-- Editar -->
-                                    <button 
-                                        wire:click="editarUsuario({{ $usuario->id }})"
-                                        class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
-                                        title="Editar">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Eliminar -->
-                                    @if($usuario->id !== auth()->id())
-                                        <button 
-                                            wire:click="confirmarEliminacion({{ $usuario->id }})"
-                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                            title="Eliminar">
+                                    @if($mostrarEliminados)
+                                        <!-- Restaurar -->
+                                        <button
+                                            wire:click="confirmarRestauracion({{ $usuario->id }})"
+                                            class="flex items-center gap-1 px-3 py-1.5 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer text-sm"
+                                            title="Restaurar usuario">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                            </svg>
+                                            Restaurar
+                                        </button>
+                                        @if($usuario->deleted_at)
+                                            <span class="text-xs text-gray-500 dark:text-gray-400" title="Fecha de baja">
+                                                {{ \Carbon\Carbon::parse($usuario->deleted_at)->format('d/m/Y H:i') }}
+                                            </span>
+                                        @endif
+                                    @else
+                                        <!-- Editar -->
+                                        <button
+                                            wire:click="editarUsuario({{ $usuario->id }})"
+                                            class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
+                                            title="Editar">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
                                         </button>
+
+                                        <!-- Eliminar -->
+                                        @if($usuario->id !== auth()->id())
+                                            <button
+                                                wire:click="confirmarEliminacion({{ $usuario->id }})"
+                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                title="Eliminar">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -564,11 +602,58 @@
                         class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer">
                         Cancelar
                     </button>
-                    <button 
-                        wire:click="eliminarUsuario" 
-                        type="button" 
+                    <button
+                        wire:click="eliminarUsuario"
+                        type="button"
                         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
                         Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Modal de confirmación para restaurar -->
+    @if($showRestoreModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-80">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
+                <div class="flex items-start mb-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-[#77BF43]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                            Restaurar Usuario
+                        </h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            ¿Estás seguro de que deseas restaurar al usuario "{{ $selectedUsuario?->name }}"? Volverá a poder iniciar sesión y aparecer en el listado.
+                        </p>
+                        @if($selectedUsuario)
+                            <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <strong>DNI:</strong> {{ $selectedUsuario->dni }}<br>
+                                    <strong>Email:</strong> {{ $selectedUsuario->email }}<br>
+                                    <strong>Dado de baja:</strong> {{ $selectedUsuario->deleted_at ? \Carbon\Carbon::parse($selectedUsuario->deleted_at)->format('d/m/Y H:i') : '-' }}
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button
+                        wire:click="cerrarModalRestauracion"
+                        type="button"
+                        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button
+                        wire:click="restaurarUsuario"
+                        type="button"
+                        class="px-4 py-2 bg-[#77BF43] text-white rounded-lg hover:bg-[#5a9032] transition-colors cursor-pointer">
+                        Restaurar
                     </button>
                 </div>
             </div>
