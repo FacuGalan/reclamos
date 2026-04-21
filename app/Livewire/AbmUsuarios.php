@@ -20,13 +20,16 @@ class AbmUsuarios extends Component
     public $busqueda = '';
     public $filtro_rol = '';
     public $filtro_area = '';
-    
+    public $mostrarEliminados = false;
+
     // Propiedades para modales
     public $selectedUsuarioId = null;
     public $showDeleteModal = false;
     public $showFormModal = false;
+    public $showRestoreModal = false;
     public $isEditing = false;
     public $selectedUsuario = null;
+    public $esSuperUsuario = false;
     
     // Datos para los selects
     public $roles = [];
@@ -59,6 +62,7 @@ class AbmUsuarios extends Component
         'busqueda' => ['except' => ''],
         'filtro_rol' => ['except' => ''],
         'filtro_area' => ['except' => ''],
+        'mostrarEliminados' => ['except' => false],
     ];
 
     protected $rules = [
@@ -90,6 +94,7 @@ class AbmUsuarios extends Component
         // Obtener las áreas del usuario logueado
         $usuarioActual = Auth::user();
         $this->userAreas = $usuarioActual->areas->pluck('id')->toArray();
+        $this->esSuperUsuario = $usuarioActual->rol_id == 1;
 
         // CAMBIO PRINCIPAL: Verificar si el usuario puede ver todos los usuarios
         $this->puedeVerTodos = empty($this->userAreas);
@@ -133,10 +138,29 @@ class AbmUsuarios extends Component
         $this->resetPage();
     }
 
+    public function updatingMostrarEliminados()
+    {
+        $this->resetPage();
+    }
+
+    public function toggleMostrarEliminados()
+    {
+        if (!$this->esSuperUsuario) {
+            return;
+        }
+        $this->mostrarEliminados = !$this->mostrarEliminados;
+        $this->resetPage();
+    }
+
     public function getUsuarios()
     {
         $query = User::with(['areas', 'rol'])
             ->orderBy('name');
+
+        // Solo super-usuario puede ver los dados de baja
+        if ($this->mostrarEliminados && $this->esSuperUsuario) {
+            $query->onlyTrashed();
+        }
 
         // CAMBIO PRINCIPAL: Solo filtrar por áreas si el usuario NO puede ver todos
         if (!$this->puedeVerTodos) {
@@ -293,6 +317,58 @@ class AbmUsuarios extends Component
     public function cerrarModalEliminacion()
     {
         $this->showDeleteModal = false;
+        $this->selectedUsuario = null;
+    }
+
+    public function confirmarRestauracion($usuarioId)
+    {
+        if (!$this->esSuperUsuario) {
+            $this->mostrarNotificacionError('No tienes permisos para restaurar usuarios.');
+            return;
+        }
+
+        $usuario = User::withTrashed()->with('areas')->find($usuarioId);
+        if (!$usuario || !$usuario->trashed()) {
+            $this->mostrarNotificacionError('El usuario solicitado no existe o no está dado de baja.');
+            return;
+        }
+
+        $this->selectedUsuario = $usuario;
+        $this->showRestoreModal = true;
+    }
+
+    public function restaurarUsuario()
+    {
+        if (!$this->esSuperUsuario) {
+            $this->mostrarNotificacionError('No tienes permisos para restaurar usuarios.');
+            $this->showRestoreModal = false;
+            $this->selectedUsuario = null;
+            return;
+        }
+
+        if (!$this->selectedUsuario) {
+            return;
+        }
+
+        try {
+            $usuario = User::withTrashed()->find($this->selectedUsuario->id);
+            if (!$usuario || !$usuario->trashed()) {
+                $this->mostrarNotificacionError('El usuario no está dado de baja.');
+            } else {
+                $usuario->restore();
+                $this->mostrarNotificacionExito('Usuario restaurado exitosamente');
+            }
+        } catch (\Exception $e) {
+            $this->mostrarNotificacionError('Error al restaurar el usuario: ' . $e->getMessage());
+        }
+
+        $this->showRestoreModal = false;
+        $this->selectedUsuario = null;
+    }
+
+    public function cerrarModalRestauracion()
+    {
+        $this->showRestoreModal = false;
         $this->selectedUsuario = null;
     }
 

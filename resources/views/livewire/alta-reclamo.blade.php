@@ -216,8 +216,45 @@
             @if ($step == 1 )
                 <!-- Paso 1: Datos personales -->
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Datos Personales</h2>
-                
-                @if($isPrivateArea && empty($this->datosPrecargados))
+
+                @if(!$isPrivateArea && $tieneAreasConOficio)
+                    <!-- Toggle: Reclamo por oficio -->
+                    <div class="mb-6">
+                        <label class="flex items-start gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 transition-colors bg-white dark:bg-gray-700">
+                            <input
+                                type="checkbox"
+                                wire:model.live="por_oficio"
+                                class="mt-0.5 h-5 w-5 text-[#77BF43] rounded focus:ring-[#77BF43] border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                            <div>
+                                <span class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    Reclamo por oficio
+                                </span>
+                                <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    Marcá esta opción si es un reclamo interno del municipio sin datos del denunciante
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+                @endif
+
+                @if($por_oficio)
+                    <!-- Aviso: reclamo por oficio -->
+                    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-3">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                Este reclamo se registrará como "por oficio"
+                            </p>
+                            <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                No se requieren datos del denunciante. Podés continuar al siguiente paso.
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
+                @if(!$por_oficio && $isPrivateArea && empty($this->datosPrecargados))
                     <!-- Campo de búsqueda de empleado -->
                     <div class="md:col-span-2 mb-6">
                         <div x-data="{
@@ -362,13 +399,14 @@
                 @endif
 
 
+                @if(!$por_oficio)
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             DNI *
                         </label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             wire:model.live.debounce.300ms="persona_dni"
                             class="no-spinner w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
                                 {{ $personaEncontrada 
@@ -445,9 +483,10 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- NUEVA SECCIÓN: Historial de reclamos -->
-                @if($personaEncontrada && count($reclamosPersona) > 0)
+                @if(!$por_oficio && $personaEncontrada && count($reclamosPersona) > 0)
                     <div class="mt-8">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-800 dark:text-white">

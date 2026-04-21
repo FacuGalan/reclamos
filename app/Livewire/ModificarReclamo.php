@@ -84,6 +84,9 @@ class ModificarReclamo extends Component
     public $persona_telefono = '';
     public $persona_email = '';
 
+    // Reclamo por oficio (no tiene datos de persona)
+    public $por_oficio = false;
+
     //Historial
     public $historial = [];
     public $historialTimestamp; // NUEVO: para forzar re-renderización
@@ -425,6 +428,8 @@ class ModificarReclamo extends Component
             $this->persona_telefono = $persona->telefono;
             $this->persona_email = $persona->email;
         }
+
+        $this->por_oficio = (bool) ($this->reclamo->por_oficio ?? false);
     }
 
     // Método para filtrar categorías cuando se escribe en el input
@@ -527,6 +532,10 @@ class ModificarReclamo extends Component
 
     public function validateStep1()
     {
+        if ($this->por_oficio) {
+            return;
+        }
+
         $this->validate([
             'persona_dni' => $this->rules['persona_dni'],
             'persona_nombre' => $this->rules['persona_nombre'],
@@ -723,15 +732,16 @@ class ModificarReclamo extends Component
     {
         $this->isSaving = true; // Indicar que se está guardando
 
-        // Validar todos los campos
-        //$this->validate();
-        $this->validate([
-            'persona_dni' => $this->rules['persona_dni'],
-            'persona_nombre' => $this->rules['persona_nombre'],
-            'persona_apellido' => $this->rules['persona_apellido'],
-            'persona_telefono' => $this->rules['persona_telefono'],
-            'persona_email' => $this->rules['persona_email'],
-        ]);
+        // Validar todos los campos (excepto persona si es por oficio)
+        if (!$this->por_oficio) {
+            $this->validate([
+                'persona_dni' => $this->rules['persona_dni'],
+                'persona_nombre' => $this->rules['persona_nombre'],
+                'persona_apellido' => $this->rules['persona_apellido'],
+                'persona_telefono' => $this->rules['persona_telefono'],
+                'persona_email' => $this->rules['persona_email'],
+            ]);
+        }
         if($this->isPrivateArea){
             $this->validate([
                 'edificio_id' => $this->rules['edificio_id'],
@@ -756,15 +766,17 @@ class ModificarReclamo extends Component
         try {
             DB::beginTransaction();
 
-            // Actualizar datos de la persona
-            $persona = $this->reclamo->persona;
-            $persona->update([
-                'dni' => $this->persona_dni,
-                'nombre' => $this->persona_nombre,
-                'apellido' => $this->persona_apellido,
-                'telefono' => $this->persona_telefono,
-                'email' => $this->persona_email,
-            ]);
+            // Actualizar datos de la persona (solo si no es por oficio)
+            if (!$this->por_oficio && $this->reclamo->persona) {
+                $persona = $this->reclamo->persona;
+                $persona->update([
+                    'dni' => $this->persona_dni,
+                    'nombre' => $this->persona_nombre,
+                    'apellido' => $this->persona_apellido,
+                    'telefono' => $this->persona_telefono,
+                    'email' => $this->persona_email,
+                ]);
+            }
 
             // Actualizar domicilio
             $domicilio = $this->reclamo->domicilio;
@@ -863,8 +875,8 @@ class ModificarReclamo extends Component
             'motivo' => $reclamo->categoria->nombre ?? 'N/A',
             'numero_reclamo' => $reclamo->id,
             'fecha_reclamo' => $reclamo->created_at->format('Y-m-d - H:i:s'),
-            'persona_nombre' => $reclamo->persona->nombre . ' ' . $reclamo->persona->apellido,
-            'persona_telefono' => $reclamo->persona->telefono ?? 'N/A',
+            'persona_nombre' => $reclamo->persona ? trim($reclamo->persona->nombre . ' ' . $reclamo->persona->apellido) : ($reclamo->por_oficio ? 'Reclamo por oficio' : 'N/A'),
+            'persona_telefono' => $reclamo->persona?->telefono ?? 'N/A',
             'direccion' =>  Str::before($reclamo->direccion, ',') ?? 'N/A',
             'direccion_rural' => $reclamo->direccion_rural,
             'numero_tranquera' => $reclamo->numero_tranquera,

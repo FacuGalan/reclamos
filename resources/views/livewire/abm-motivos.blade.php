@@ -322,8 +322,8 @@
                         <!-- Urgente -->
                         <div>
                             <label class="flex items-center space-x-2 cursor-pointer">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     wire:model.live="urgente"
                                     class="w-4 h-4 text-[#77BF43] bg-gray-100 border-gray-300 rounded focus:ring-[#77BF43] focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -332,6 +332,27 @@
                             </label>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 Los reclamos con motivos urgentes tendrán prioridad
+                            </p>
+                        </div>
+
+                        <!-- Motivo privado -->
+                        <div>
+                            <label class="flex items-center space-x-2 {{ $puedeEditarPrivada ? 'cursor-pointer' : 'cursor-not-allowed' }}">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="privada"
+                                    @if(!$puedeEditarPrivada) disabled @endif
+                                    class="w-4 h-4 text-[#77BF43] bg-gray-100 border-gray-300 rounded focus:ring-[#77BF43] focus:ring-2 dark:bg-gray-700 dark:border-gray-600 {{ $puedeEditarPrivada ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Motivo privado (interno)
+                                </span>
+                            </label>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                @if($puedeEditarPrivada)
+                                    Los motivos privados solo se ven en reclamos internos
+                                @else
+                                    Se asigna automáticamente según tu tipo de acceso a reclamos
+                                @endif
                             </p>
                         </div>
 

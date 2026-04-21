@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Area extends Model
 {
-    protected $fillable = ['nombre','secretaria_id'];
+    protected $fillable = ['nombre','secretaria_id','recibe_oficio'];
+
+    protected $casts = [
+        'recibe_oficio' => 'boolean',
+    ];
     
     public function secretaria()
     {

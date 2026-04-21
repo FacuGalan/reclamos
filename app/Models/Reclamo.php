@@ -30,6 +30,13 @@ class Reclamo extends Model
         'domicilio_id',
         'barrio_id',
         'edificio_id',
+        'por_oficio',
+    ];
+
+    protected $casts = [
+        'por_oficio' => 'boolean',
+        'notificado' => 'boolean',
+        'no_aplica' => 'boolean',
     ];
     public function area()
     {

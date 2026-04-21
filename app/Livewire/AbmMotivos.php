@@ -47,6 +47,7 @@ class AbmMotivos extends Component
     public $notificacionTimestamp = null;
 
     public $ver_privada = false;
+    public $puedeEditarPrivada = false; // true si el usuario tiene tipo_acceso_reclamos == 3
 
     protected $queryString = [
         'busqueda' => ['except' => ''],
@@ -86,6 +87,7 @@ class AbmMotivos extends Component
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
         $this->ver_privada = Auth::user()->ver_privada;
+        $this->puedeEditarPrivada = (int) (Auth::user()->tipo_acceso_reclamos ?? 1) === 3;
 
         // Si el usuario no tiene áreas asignadas, mostrar todas (para casos especiales como admin)
         if (empty($this->userAreas)) {
@@ -162,6 +164,8 @@ class AbmMotivos extends Component
         }
         $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->get();
         $this->urgente = false;
+        // Precargar privada con el valor actual del usuario (ver_privada)
+        $this->privada = (bool) $this->ver_privada;
     }
 
     // Editar motivo
@@ -196,13 +200,14 @@ class AbmMotivos extends Component
         $this->cuadrilla_id = $motivo->cuadrilla_id;
         $this->cuadrillas = Cuadrilla::where('area_id', $motivo->area_id)->get();
         $this->urgente = (bool) $motivo->urgente;
-        
+        $this->privada = (bool) $motivo->privada;
     }
 
     public function resetForm()
     {
         $this->nombre = '';
         $this->area_id = '';
+        $this->privada = (bool) $this->ver_privada;
         $this->isSaving = false;
         $this->resetErrorBag();
     }
@@ -314,6 +319,10 @@ class AbmMotivos extends Component
                 return;
             }
 
+            // Guardia: si el usuario no puede editar "privada" (tipo_acceso_reclamos != 3),
+            // forzar el valor al ver_privada del usuario — evita manipulación del DOM.
+            $privadaFinal = $this->puedeEditarPrivada ? (bool) $this->privada : (bool) $this->ver_privada;
+
             // PASO 3: Lógica de guardado
             if (!$this->isEditing) {
                 Categoria::create([
@@ -322,28 +331,29 @@ class AbmMotivos extends Component
                     'area_id' => $this->area_id,
                     'cuadrilla_id' => $this->cuadrilla_id == '' ? null : $this->cuadrilla_id,
                     'urgente' => $this->urgente,
-                    'privada' => $this->ver_privada ? 1 : 0,
+                    'privada' => $privadaFinal ? 1 : 0,
                 ]);
-                
+
                 $mensaje = 'Motivo creado exitosamente';
             } else {
                 $motivo = Categoria::find($this->selectedMotivoId);
-                
+
                 // Verificar permisos antes de actualizar
                 if (!in_array($motivo->area_id, $this->userAreas)) {
                     $this->mostrarNotificacionError('No tienes permisos para editar este motivo.');
                     $this->isSaving = false;
                     return;
                 }
-                
+
                 $motivo->update([
                     'nombre' => $this->nombre,
                     'nombre_publico' => $this->nombre,
                     'area_id' => $this->area_id,
                     'cuadrilla_id' => $this->cuadrilla_id,
                     'urgente' => $this->urgente,
+                    'privada' => $privadaFinal ? 1 : 0,
                 ]);
-                
+
                 $mensaje = 'Motivo actualizado exitosamente';
             }
 
