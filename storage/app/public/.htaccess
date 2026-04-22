@@ -1,0 +1,34 @@
+# Defensa en profundidad: incluso si un atacante consigue escribir un archivo
+# ejecutable dentro de storage/app/public/ (o de cualquier subdirectorio),
+# Apache NO debe interpretarlo. Esto funciona porque public/storage es un
+# symlink a este directorio y todo el contenido se sirve vía Apache.
+
+# 1) Desactivar el engine de PHP por completo en este arbol
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# 2) Denegar el acceso a cualquier archivo que pueda ser interpretado como codigo.
+#    Aunque el engine este apagado, bloquear por extension es mas barato y
+#    cubre casos de malaconfiguracion (AddHandler residual, etc.).
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|phar|pl|py|jsp|asp|aspx|sh|cgi|cgi-bin|htaccess|htpasswd|env|ini|inc)$">
+    Require all denied
+</FilesMatch>
+
+# 3) Desactivar listado de directorios
+Options -Indexes -ExecCGI
+
+# 4) No permitir que un .htaccess dentro de subdirectorios sobrescriba estas reglas
+AllowOverride None
+
+# 5) Forzar que las respuestas se traten siempre como descarga/inerte (no
+#    se ejecute nada), enviando headers que evitan sniffing y XSS embebido.
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

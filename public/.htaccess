@@ -1,27 +1,62 @@
+# ------------------------------------------------------------
+# Bloqueos defensivos: archivos sensibles y shells conocidos
+# Estas reglas corren ANTES del rewrite y blindan accesos
+# directos aunque alguien consiga subir archivos al docroot.
+# ------------------------------------------------------------
+
+# Deny acceso a archivos sensibles (dotfiles, env, composer, logs, etc.)
+<FilesMatch "^\.|composer\.(json|lock)$|package(-lock)?\.json$|\.env.*$|\.(log|bak|backup|old|sql|sqlite|swp|swo|tmp)$">
+    Require all denied
+</FilesMatch>
+
+# En public/ SOLO deberia poder ejecutarse index.php. Cualquier otro .php
+# servido desde aca probablemente sea una shell o un archivo comprometido.
+<FilesMatch "\.(phtml|php3|php4|php5|php7|php8|phar|pl|py|jsp|asp|aspx|sh|cgi)$">
+    Require all denied
+</FilesMatch>
+
+# Solo permitir index.php como archivo .php servible desde public/
+<Files "index.php">
+    Require all granted
+</Files>
+<FilesMatch "^(?!index\.php$).+\.php$">
+    Require all denied
+</FilesMatch>
+
+# Headers de seguridad basicos
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(self), microphone=(), camera=()"
+    # HSTS - activar solo si el sitio ya corre 100% por HTTPS en produccion
+    # Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
-    
+
     RewriteEngine On
-    
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-    
+
     # Handle X-XSRF-Token Header (mejorado)
     RewriteCond %{HTTP:X-XSRF-TOKEN} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-TOKEN}]
-    
+
     # Handle X-Requested-With Header (agregado para Livewire)
     RewriteCond %{HTTP:X-Requested-With} .
     RewriteRule .* - [E=HTTP_X_REQUESTED_WITH:%{HTTP:X-Requested-With}]
-    
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
-    
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f

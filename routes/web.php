@@ -11,51 +11,66 @@ Route::get('/', function () {
     return view('welcome', ['slot' => view('home')]);
 })->name('home');
 
-Route::get('reclamos/crear-interno-publico', function (Request $request) {
-    // Validar que vengan los parámetros mínimos requeridos
-    $request->validate([
-        'user' => 'required|numeric|digits:8',
-        'nombre' => 'required|string|max:255',
-        'apellido' => 'required|string|max:255'
-    ]);
+// Rutas públicas (formularios de vecino). Se aplica throttle por IP para
+// mitigar abuso automatizado; el límite es por VENTANA de 1 minuto.
+Route::middleware('throttle:30,1')->group(function () {
 
-    // Guardar los datos en la sesión
-    session([
-        'datos_reclamo_externo' => [
-            'dni' => $request->get('user'),
-            'nombre' => $request->get('nombre'),
-            'apellido' => $request->get('apellido')
-        ]
-    ]);
+    Route::get('reclamos/crear-interno-publico', function (Request $request) {
+        // Validar que vengan los parámetros mínimos requeridos
+        $request->validate([
+            'user' => 'required|numeric|digits:8',
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255'
+        ]);
 
-    // Redirigir a una URL limpia
-    return redirect()->route('reclamos.crear-interno-publico.form');
-})
-    ->name('reclamos.crear-interno-publico');
+        // Guardar los datos en la sesión
+        session([
+            'datos_reclamo_externo' => [
+                'dni' => $request->get('user'),
+                'nombre' => $request->get('nombre'),
+                'apellido' => $request->get('apellido')
+            ]
+        ]);
 
-// Nueva ruta para mostrar el formulario con URL limpia (ESTO HACE QUE NO SE MUESTREN EN LA URL LOS DATOS DEL PARAMETRO GET)
-Route::get('reclamos/crear-interno-publico/formulario', function () {
-    // Recuperar los datos de la sesión
-    $datos = session('datos_reclamo_externo');
-    
-    // Si no hay datos, redirigir a algún lugar (opcional)
-    if (!$datos) {
-        return redirect()->route('reclamos')->with('error', 'No se encontraron datos para crear el reclamo');
-    }
+        // Redirigir a una URL limpia
+        return redirect()->route('reclamos.crear-interno-publico.form');
+    })
+        ->name('reclamos.crear-interno-publico');
 
-    // Limpiar los datos de la sesión después de usarlos (opcional)
-    session()->forget('datos_reclamo_externo');
+    // Nueva ruta para mostrar el formulario con URL limpia (ESTO HACE QUE NO SE MUESTREN EN LA URL LOS DATOS DEL PARAMETRO GET)
+    Route::get('reclamos/crear-interno-publico/formulario', function () {
+        // Recuperar los datos de la sesión
+        $datos = session('datos_reclamo_externo');
 
-    return view('welcome', [
-        'slot' => view('reclamos/crear-interno-publico', $datos)
-    ]);
-})
-    ->name('reclamos.crear-interno-publico.form');
+        // Si no hay datos, redirigir a algún lugar (opcional)
+        if (!$datos) {
+            return redirect()->route('reclamos')->with('error', 'No se encontraron datos para crear el reclamo');
+        }
 
-// Ruta para nuevo reclamo que carga la vista nuevo-reclamo en el slot
-Route::get('/nuevo-reclamo', function () {
-    return view('welcome', ['slot' => view('reclamos/nuevo-reclamo')]);
-})->name('nuevo-reclamo');
+        // Limpiar los datos de la sesión después de usarlos (opcional)
+        session()->forget('datos_reclamo_externo');
+
+        return view('welcome', [
+            'slot' => view('reclamos/crear-interno-publico', $datos)
+        ]);
+    })
+        ->name('reclamos.crear-interno-publico.form');
+
+    // Ruta para nuevo reclamo que carga la vista nuevo-reclamo en el slot
+    Route::get('/nuevo-reclamo', function () {
+        return view('welcome', ['slot' => view('reclamos/nuevo-reclamo')]);
+    })->name('nuevo-reclamo');
+
+    // Rutas públicas de reporte de seguridad
+    Route::get('/nuevo-reporte', function () {
+        return view('welcome', ['slot' => view('reportes/nuevo-reporte')]);
+    })->name('nuevo-reporte');
+
+    Route::get('/tramites', function () {
+        return view('welcome', ['slot' => view('tramites')]);
+    })->name('tramites');
+
+});
 
 Route::view('reclamos', 'reclamos')
     ->middleware(['auth', 'verified'])
@@ -83,21 +98,17 @@ Route::get('modificar-reclamo/{reclamo}', function ($reclamo) {
     ->middleware(['auth', 'verified'])
     ->name('modificar-reclamo');
 
-Route::get('/orden/imprimir', [OrdenImpresionController::class, 'imprimir'])->name('orden.imprimir');
+// Orden de impresión: lee datos de sesión seteados desde ModificarReclamo (panel logueado).
+// Se protege con auth para evitar que un visitante anónimo acceda a datos cargados
+// por otra sesión en servidores con file session driver.
+Route::get('/orden/imprimir', [OrdenImpresionController::class, 'imprimir'])
+    ->middleware(['auth', 'verified'])
+    ->name('orden.imprimir');
 
 // REPORTES
 Route::view('reportes', 'reportes')
     ->middleware(['auth', 'verified'])
     ->name('reportes');
-
-// Rutas para las otras secciones (las crearemos después)
-Route::get('/nuevo-reporte', function () {
-    return view('welcome', ['slot' => view('reportes/nuevo-reporte')]);
-})->name('nuevo-reporte');
-
-Route::get('/tramites', function () {
-    return view('welcome', ['slot' => view('tramites')]);
-})->name('tramites');
 
 // Rutas del dashboard (área privada)
 Route::view('dashboard', 'reclamos')

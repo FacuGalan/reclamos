@@ -271,24 +271,24 @@ class AltaReporte extends Component
         
         $lat = trim($coords[0]);
         $lng = trim($coords[1]);
-        
+
         if (!is_numeric($lat) || !is_numeric($lng)) {
             return null;
         }
-        
-        // Construir el punto directamente en la consulta
-        $punto = "POINT({$lng} {$lat})";
-        
+
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+
         $barrio = DB::selectOne("
-            SELECT id 
-            FROM barrios 
+            SELECT id
+            FROM barrios
             WHERE ST_Contains(
                 ST_GeomFromText(poligono, 4326),
-                ST_GeomFromText(?, 4326)
+                ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')'), 4326)
             )
             LIMIT 1
-        ", [$punto]);
-        
+        ", [$lng, $lat]);
+
         return $barrio ? $barrio->id : null;
     }
 

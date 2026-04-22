@@ -133,7 +133,14 @@ class AltaReclamo extends Component
         'persona_telefono' => 'required|numeric|digits:10',
         'persona_email' => 'nullable|email|max:255',
         'descripcion' => 'nullable|string|max:1000',
-        'imagen' => 'nullable|image|max:5120', // 5MB máximo
+        'imagen' => [
+            'nullable',
+            'image',
+            'mimes:jpg,jpeg,png,webp',
+            'mimetypes:image/jpeg,image/png,image/webp',
+            'max:5120',
+            'dimensions:max_width=6000,max_height=6000',
+        ],
         'direccion' => 'required|string|max:255',
         'entre_calles' => 'required|string|max:255',
         'direccion_rural' => 'nullable|string|max:255,',
@@ -156,8 +163,11 @@ class AltaReclamo extends Component
         'direccion.required' => 'La dirección es obligatoria',
         'coordenadas.required' => 'Dirección no validada - Use el mapa para mayor precisión',
         'descripcion.max' => 'La descripción no puede exceder los 1000 caracteres',
-        'imagen.image' => 'El archivo debe ser una imagen (jpg, png, gif, etc.)',
+        'imagen.image' => 'El archivo debe ser una imagen válida',
+        'imagen.mimes' => 'La imagen debe ser jpg, jpeg, png o webp',
+        'imagen.mimetypes' => 'El tipo de archivo no es una imagen permitida',
         'imagen.max' => 'La imagen no puede superar los 5MB',
+        'imagen.dimensions' => 'Las dimensiones de la imagen son demasiado grandes',
         'categoria_id.required' => 'Debe seleccionar una categoría',
         'edificio_id.required' => 'Debe seleccionar un edificio',
         'entre_calles' => 'Debe indicar entre calles',
@@ -237,6 +247,29 @@ class AltaReclamo extends Component
             $this->persona_telefono = $user->telefono;
             $this->persona_email = $user->email;
             $this->step = 2; // Saltar al paso 2
+        }
+    }
+
+    // Validar la imagen en el momento en que se sube (defensa en profundidad)
+    public function updatedImagen()
+    {
+        try {
+            $this->validateOnly('imagen');
+
+            // Verificación adicional: confirmar que el archivo realmente es una imagen
+            // leyendo sus bytes (getimagesize no se puede engañar solo con extensión).
+            if ($this->imagen) {
+                $realPath = $this->imagen->getRealPath();
+                if (!$realPath || @getimagesize($realPath) === false) {
+                    $this->imagen = null;
+                    $this->addError('imagen', 'El archivo subido no es una imagen válida.');
+                    return;
+                }
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Descartar el archivo temporal si falla la validación
+            $this->imagen = null;
+            throw $e;
         }
     }
 
@@ -831,6 +864,7 @@ class AltaReclamo extends Component
                 'descripcion' => $this->rules['descripcion'],
                 'categoria_id' => $this->rules['categoria_id'],
                 'edificio_id' => $this->rules['edificio_id'],
+                'imagen' => $this->rules['imagen'],
             ]);
         } else {
             // Validación diferente según el tipo de ubicación
@@ -838,6 +872,7 @@ class AltaReclamo extends Component
                 'descripcion' => $this->rules['descripcion'],
                 'categoria_id' => $this->rules['categoria_id'],
                 'tipo_ubicacion' => $this->rules['tipo_ubicacion'],
+                'imagen' => $this->rules['imagen'],
             ];
             
             if ($this->tipo_ubicacion === 'mapa') {
@@ -875,24 +910,25 @@ class AltaReclamo extends Component
         
         $lat = trim($coords[0]);
         $lng = trim($coords[1]);
-        
+
         if (!is_numeric($lat) || !is_numeric($lng)) {
             return null;
         }
-        
-        // Construir el punto directamente en la consulta
-        $punto = "POINT({$lng} {$lat})";
-        
+
+        // Casteo explícito a float — garantiza que nada que no sea numérico llegue al SQL.
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+
         $barrio = DB::selectOne("
-            SELECT id 
-            FROM barrios 
+            SELECT id
+            FROM barrios
             WHERE ST_Contains(
                 ST_GeomFromText(poligono, 4326),
-                ST_GeomFromText(?, 4326)
+                ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')'), 4326)
             )
             LIMIT 1
-        ", [$punto]);
-        
+        ", [$lng, $lat]);
+
         return $barrio ? $barrio->id : null;
     }
 
@@ -991,7 +1027,25 @@ class AltaReclamo extends Component
             // Guardar imagen si existe
             $imagenPath = null;
             if ($this->imagen) {
-                $imagenPath = $this->imagen->store('reclamos', 'public');
+                // Revalidar en el save como defensa en profundidad
+                $this->validate(['imagen' => $this->rules['imagen']]);
+
+                // Nunca confiar en la extensión que mandó el cliente: derivarla del MIME real.
+                $mime = $this->imagen->getMimeType();
+                $extension = match ($mime) {
+                    'image/jpeg' => 'jpg',
+                    'image/png'  => 'png',
+                    'image/webp' => 'webp',
+                    default      => null,
+                };
+
+                if ($extension === null) {
+                    throw new \RuntimeException('Tipo de imagen no permitido.');
+                }
+
+                // Nombre aleatorio — nada del nombre original llega al disco.
+                $nombreArchivo = bin2hex(random_bytes(16)) . '.' . $extension;
+                $imagenPath = $this->imagen->storeAs('reclamos', $nombreArchivo, 'public');
             }
 
             // Crear el reclamo
