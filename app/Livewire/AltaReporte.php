@@ -7,6 +7,7 @@ use App\Models\Reporte;
 use App\Models\Persona;
 use App\Models\Domicilios;
 use App\Models\ReporteCategoria;
+use App\Services\RecaptchaVerifier;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -48,7 +49,10 @@ class AltaReporte extends Component
     public $longitud = null;
     public $direccionCompleta = '';
     public $direccion_rural = '';
-   
+
+    // Token de Google reCAPTCHA v3 (captcha en formulario publico).
+    public $recaptchaToken = '';
+
     protected $listeners = [
         'confirmar-ubicacion-mapa' => 'confirmarUbicacionMapa'
     ];
@@ -295,6 +299,19 @@ class AltaReporte extends Component
     public function save()
     {
         $this->validateStep();
+
+        // Captcha (reCAPTCHA v3) — formulario publico sin auth.
+        $ok = RecaptchaVerifier::verify(
+            $this->recaptchaToken,
+            'crear_reporte',
+            request()->ip()
+        );
+
+        if (!$ok) {
+            $this->addError('recaptchaToken', 'No pudimos verificar que no seas un bot. Refrescá la página e intentá de nuevo.');
+            session()->flash('error', 'Verificación de seguridad fallida. Refrescá la página e intentá de nuevo.');
+            return;
+        }
 
         $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);
 

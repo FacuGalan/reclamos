@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Tranquera;
 
 use App\Mail\ReclamoConfirmacion;
+use App\Services\RecaptchaVerifier;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -105,6 +106,10 @@ class AltaReclamo extends Component
 
     // Nueva propiedad para el estado de guardado
     public $isSaving = false;
+
+    // Token de Google reCAPTCHA v3 (solo aplica en contexto publico/externo).
+    // Se setea desde el componente x-recaptcha via JS (wire.set, deferred).
+    public $recaptchaToken = '';
 
     // Propiedades para el mapa
     public $mostrarMapa = false;
@@ -936,6 +941,22 @@ class AltaReclamo extends Component
     {
         // Activar estado de guardado
         $this->isSaving = true;
+
+        // Captcha: solo en flujos publicos. El panel logueado ya tiene auth.
+        if (!$this->isPrivateArea) {
+            $ok = RecaptchaVerifier::verify(
+                $this->recaptchaToken,
+                'crear_reclamo',
+                request()->ip()
+            );
+
+            if (!$ok) {
+                $this->isSaving = false;
+                $this->addError('recaptchaToken', 'No pudimos verificar que no seas un bot. Refrescá la página e intentá de nuevo.');
+                session()->flash('error', 'Verificación de seguridad fallida. Refrescá la página e intentá de nuevo.');
+                return;
+            }
+        }
 
         try {
             DB::beginTransaction();

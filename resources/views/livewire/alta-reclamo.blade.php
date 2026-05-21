@@ -1156,6 +1156,13 @@
                             </div>
                         </div>
                     </div>
+
+                    @unless ($isPrivateArea)
+                        <x-recaptcha action="crear_reclamo" />
+                        @error('recaptchaToken')
+                            <p class="text-sm text-red-600 dark:text-red-400 text-center mt-1">{{ $message }}</p>
+                        @enderror
+                    @endunless
                 </div>
             @endif
 
@@ -1185,10 +1192,20 @@
                             Siguiente
                         </button>
                     @else
-                        <button 
+                        @php
+                            $recaptchaRequired = !$isPrivateArea
+                                && config('services.recaptcha.enabled')
+                                && filled(config('services.recaptcha.site_key'));
+                        @endphp
+                        <button
+                            x-data
+                            @if ($recaptchaRequired)
+                                :disabled="!$wire.recaptchaToken"
+                                :title="!$wire.recaptchaToken ? 'Verificando seguridad…' : ''"
+                            @endif
                             wire:click="save"
                             wire:loading.attr="disabled"
-                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer relative overflow-hidden">
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed">
                             <!-- Texto normal -->
                             <span wire:loading.remove>Crear Reclamo</span>
                             

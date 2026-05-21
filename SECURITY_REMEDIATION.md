@@ -341,10 +341,69 @@ tail -500 /var/log/apache2/access.log | grep -iE "storage/reclamos.*\.php|shell|
 Estos puntos NO se aplicaron automáticamente porque cambian UX o requieren
 credenciales externas. Cuando el usuario esté, preguntarle:
 
-### A. Captcha en formularios públicos
-Opciones: Cloudflare Turnstile (recomendada, gratis, sin tracking), hCaptcha,
-reCAPTCHA v3. Requiere crear keys en el proveedor, agregarlas al `.env` y
-modificar los componentes `AltaReclamo` y `AltaReporte`.
+### A. Captcha en formularios públicos — IMPLEMENTADO (Google reCAPTCHA v3)
+
+La integración ya viene en el código (`app/Services/RecaptchaVerifier.php`,
+`resources/views/components/recaptcha.blade.php`, hooks en `AltaReclamo::save()`
+y `AltaReporte::save()`). Cubre los tres formularios públicos:
+`/nuevo-reclamo`, `/nuevo-reporte`, `reclamos/crear-interno-publico/formulario`.
+
+reCAPTCHA v3 es **invisible**: no muestra puzzle ni checkbox. Devuelve un
+score 0.0-1.0 y el backend rechaza envíos por debajo del umbral configurado.
+
+Por defecto está **desactivado** (`RECAPTCHA_ENABLED=false`) para no romper
+dev local. **Para activarlo en producción:**
+
+1. **Sacar keys** desde https://www.google.com/recaptcha/admin/create:
+   - Login con cuenta de Google
+   - Label: `Reclamos Mercedes` (o lo que prefieras)
+   - reCAPTCHA type: **reCAPTCHA v3**
+   - Domains: agregar el dominio de producción sin `https://` ni `www.`
+     (ej: `reclamos.mercedes.gob.ar`). Para probar en local agregar `localhost`.
+   - Aceptar ToS y submit
+   - Copiar **Site Key** (pública) y **Secret Key** (privada)
+
+2. **Editar `.env` de producción:**
+   ```env
+   RECAPTCHA_ENABLED=true
+   RECAPTCHA_SITE_KEY=6Lc...          # Site Key del paso 1
+   RECAPTCHA_SECRET_KEY=6Lc...        # Secret Key del paso 1
+   RECAPTCHA_MIN_SCORE=0.5            # Subir a 0.7 si vemos abuso persistente
+   ```
+
+3. **Limpiar caché de config:**
+   ```bash
+   php artisan config:cache
+   php artisan view:clear
+   ```
+
+4. **Verificar:**
+   - Abrir `/nuevo-reclamo` en una ventana de incógnito
+   - Debe aparecer el badge flotante de reCAPTCHA en la esquina inferior derecha
+   - Al llegar al paso 3, el botón "Crear Reclamo" puede aparecer brevemente
+     deshabilitado (~500ms) hasta que llega el primer token, después se habilita
+   - El envío debe funcionar normalmente
+   - Verificar en `storage/logs/laravel.log` si aparecen líneas como
+     "reCAPTCHA rechazado" o "reCAPTCHA score bajo" — útil para tunear el threshold
+
+**Monitoreo del score:** entrar al admin de reCAPTCHA
+(https://www.google.com/recaptcha/admin) y revisar el dashboard. Si la mayoría
+del tráfico legítimo cae en 0.7+, podés subir `RECAPTCHA_MIN_SCORE` a 0.6-0.7
+para bloquear más bots. Si vecinos legítimos están siendo rechazados, bajarlo
+a 0.3.
+
+**Actions usadas:** `crear_reclamo` y `crear_reporte`. El backend valida que
+la action que viene en el token coincida con la esperada (defensa contra
+reutilización de tokens entre páginas).
+
+**Notas técnicas:**
+- Si la API de Google falla (timeout/error HTTP), el verificador permite el
+  envío (fail-open) para no bloquear vecinos por una caída transitoria. Se
+  loguea en `storage/logs/laravel.log`.
+- El token se renueva automáticamente cada 90s (vida útil del token v3: ~120s).
+- En el panel logueado (área privada) no se aplica captcha — auth ya cubre.
+- El disclaimer textual obligatorio por ToS de Google está en el componente
+  `x-recaptcha` (aparece al pie del formulario).
 
 ### B. Fuga de PII por enumeración de DNI
 En `AltaReclamo::buscarPersonaPorDni()` y `AltaReporte::buscarPersonaPorDni()`,

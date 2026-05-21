@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'recaptcha' => [
+        'enabled' => env('RECAPTCHA_ENABLED', false),
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+        // Score minimo aceptado (0.0 = bot, 1.0 = humano). 0.5 es el default
+        // recomendado por Google; subir a 0.7 si vemos abuso recurrente.
+        'min_score' => (float) env('RECAPTCHA_MIN_SCORE', 0.5),
+    ],
+
 ];

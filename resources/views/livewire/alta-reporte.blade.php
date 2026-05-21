@@ -482,6 +482,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <x-recaptcha action="crear_reporte" />
+                    @error('recaptchaToken')
+                        <p class="text-sm text-red-600 dark:text-red-400 text-center mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             @endif
 
@@ -505,10 +510,19 @@
                             Siguiente
                         </button>
                     @else
-                        <button 
+                        @php
+                            $recaptchaRequired = config('services.recaptcha.enabled')
+                                && filled(config('services.recaptcha.site_key'));
+                        @endphp
+                        <button
+                            x-data
+                            @if ($recaptchaRequired)
+                                :disabled="!$wire.recaptchaToken"
+                                :title="!$wire.recaptchaToken ? 'Verificando seguridad…' : ''"
+                            @endif
                             wire:click="save"
                             wire:loading.attr="disabled"
-                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer">
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                             <span wire:loading.remove>Enviar Reporte</span>
                             <span wire:loading class="flex items-center">
                                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
