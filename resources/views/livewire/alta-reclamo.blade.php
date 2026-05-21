@@ -1,5 +1,14 @@
 <div class="max-w-4xl mx-auto p-1">
 
+    {{-- Carga el script de Google reCAPTCHA en el <head> una vez por pagina,
+         desde el initial render (no espera a llegar al step final del wizard).
+         @assets solo funciona dentro de un componente Livewire. --}}
+    @if (!$isPrivateArea && config('services.recaptcha.enabled') && filled(config('services.recaptcha.site_key')))
+        @assets
+            <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}" async defer></script>
+        @endassets
+    @endif
+
      @if($isPrivateArea)
         <span x-data="{ show: false }" 
                 x-show="show"

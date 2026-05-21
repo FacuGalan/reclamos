@@ -1,4 +1,13 @@
 <div class="max-w-4xl mx-auto p-1">
+    {{-- Carga el script de Google reCAPTCHA en el <head> desde el initial
+         render. @assets dedupa por contenido si otro componente Livewire de
+         la misma pagina ya lo registro. --}}
+    @if (config('services.recaptcha.enabled') && filled(config('services.recaptcha.site_key')))
+        @assets
+            <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}" async defer></script>
+        @endassets
+    @endif
+
     <style>
         @keyframes progress {
             from { width: 100%; }
