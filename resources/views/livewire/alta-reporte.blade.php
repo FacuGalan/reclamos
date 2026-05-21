@@ -1,8 +1,9 @@
 <div class="max-w-4xl mx-auto p-1">
     {{-- Carga el script de Google reCAPTCHA en el <head> desde el initial
-         render. @assets dedupa por contenido si otro componente Livewire de
-         la misma pagina ya lo registro. --}}
-    @if (config('services.recaptcha.enabled') && filled(config('services.recaptcha.site_key')))
+         render. Solo para usuarios NO autenticados — la sesion logueada ya
+         valida que no es un bot. @assets dedupa por contenido si otro
+         componente Livewire de la misma pagina ya lo registro. --}}
+    @if (auth()->guest() && config('services.recaptcha.enabled') && filled(config('services.recaptcha.site_key')))
         @assets
             <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}" async defer></script>
         @endassets
@@ -492,10 +493,12 @@
                         </div>
                     </div>
 
-                    <x-recaptcha action="crear_reporte" />
-                    @error('recaptchaToken')
-                        <p class="text-sm text-red-600 dark:text-red-400 text-center mt-1">{{ $message }}</p>
-                    @enderror
+                    @guest
+                        <x-recaptcha action="crear_reporte" />
+                        @error('recaptchaToken')
+                            <p class="text-sm text-red-600 dark:text-red-400 text-center mt-1">{{ $message }}</p>
+                        @enderror
+                    @endguest
                 </div>
             @endif
 
@@ -520,7 +523,8 @@
                         </button>
                     @else
                         @php
-                            $recaptchaRequired = config('services.recaptcha.enabled')
+                            $recaptchaRequired = auth()->guest()
+                                && config('services.recaptcha.enabled')
                                 && filled(config('services.recaptcha.site_key'));
                         @endphp
                         <button

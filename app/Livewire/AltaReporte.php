@@ -8,6 +8,7 @@ use App\Models\Persona;
 use App\Models\Domicilios;
 use App\Models\ReporteCategoria;
 use App\Services\RecaptchaVerifier;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -300,17 +301,20 @@ class AltaReporte extends Component
     {
         $this->validateStep();
 
-        // Captcha (reCAPTCHA v3) — formulario publico sin auth.
-        $ok = RecaptchaVerifier::verify(
-            $this->recaptchaToken,
-            'crear_reporte',
-            request()->ip()
-        );
+        // Captcha (reCAPTCHA v3): solo si el usuario NO esta logueado. La
+        // sesion autenticada ya valida que no es un bot.
+        if (Auth::guest()) {
+            $ok = RecaptchaVerifier::verify(
+                $this->recaptchaToken,
+                'crear_reporte',
+                request()->ip()
+            );
 
-        if (!$ok) {
-            $this->addError('recaptchaToken', 'No pudimos verificar que no seas un bot. Refrescá la página e intentá de nuevo.');
-            session()->flash('error', 'Verificación de seguridad fallida. Refrescá la página e intentá de nuevo.');
-            return;
+            if (!$ok) {
+                $this->addError('recaptchaToken', 'No pudimos verificar que no seas un bot. Refrescá la página e intentá de nuevo.');
+                session()->flash('error', 'Verificación de seguridad fallida. Refrescá la página e intentá de nuevo.');
+                return;
+            }
         }
 
         $barrio_encontrado = $this->obtenerBarrioPorCoordenadas($this->coordenadas);

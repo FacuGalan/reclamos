@@ -942,8 +942,10 @@ class AltaReclamo extends Component
         // Activar estado de guardado
         $this->isSaving = true;
 
-        // Captcha: solo en flujos publicos. El panel logueado ya tiene auth.
-        if (!$this->isPrivateArea) {
+        // Captcha: solo si el usuario NO esta logueado. Si esta autenticado
+        // (sea creando un reclamo interno o publico desde el panel privado)
+        // la sesion ya valida que no es un bot.
+        if (Auth::guest()) {
             $ok = RecaptchaVerifier::verify(
                 $this->recaptchaToken,
                 'crear_reclamo',

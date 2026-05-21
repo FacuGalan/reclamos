@@ -2,8 +2,10 @@
 
     {{-- Carga el script de Google reCAPTCHA en el <head> una vez por pagina,
          desde el initial render (no espera a llegar al step final del wizard).
-         @assets solo funciona dentro de un componente Livewire. --}}
-    @if (!$isPrivateArea && config('services.recaptcha.enabled') && filled(config('services.recaptcha.site_key')))
+         Solo para usuarios NO autenticados — la sesion logueada ya valida
+         que no es un bot. @assets solo funciona dentro de un componente
+         Livewire. --}}
+    @if (auth()->guest() && config('services.recaptcha.enabled') && filled(config('services.recaptcha.site_key')))
         @assets
             <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}" async defer></script>
         @endassets
@@ -1166,12 +1168,12 @@
                         </div>
                     </div>
 
-                    @unless ($isPrivateArea)
+                    @guest
                         <x-recaptcha action="crear_reclamo" />
                         @error('recaptchaToken')
                             <p class="text-sm text-red-600 dark:text-red-400 text-center mt-1">{{ $message }}</p>
                         @enderror
-                    @endunless
+                    @endguest
                 </div>
             @endif
 
@@ -1202,7 +1204,7 @@
                         </button>
                     @else
                         @php
-                            $recaptchaRequired = !$isPrivateArea
+                            $recaptchaRequired = auth()->guest()
                                 && config('services.recaptcha.enabled')
                                 && filled(config('services.recaptcha.site_key'));
                         @endphp
