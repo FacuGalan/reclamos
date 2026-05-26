@@ -9,6 +9,13 @@
         @assets
             <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}" async defer></script>
         @endassets
+
+        {{-- Widget invisible: se monta una sola vez al inicio del wizard,
+             fuera de cualquier @if($step==X), para que x-init corra fiable
+             y no se pierda en morphs intermedios (p.ej. updatedDomicilioId
+             cambiando mostrar_inputs_direccion). Token listo antes de
+             llegar al paso 3. --}}
+        <x-recaptcha action="crear_reclamo" mode="widget" />
     @endif
 
      @if($isPrivateArea)
@@ -1169,7 +1176,7 @@
                     </div>
 
                     @guest
-                        <x-recaptcha action="crear_reclamo" />
+                        <x-recaptcha mode="disclaimer" />
                         @error('recaptchaToken')
                             <p class="text-sm text-red-600 dark:text-red-400 text-center mt-1">{{ $message }}</p>
                         @enderror

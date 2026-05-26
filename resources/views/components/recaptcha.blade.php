@@ -1,14 +1,22 @@
 @props([
     'action' => 'submit',
     'target' => 'recaptchaToken',
+    // widget   = solo el div oculto que fetchea el token (montar UNA vez al
+    //            inicio del wizard, fuera de @if($step==X), para evitar que
+    //            morphs intermedios pierdan el x-init).
+    // disclaimer = solo el texto legal de Google (mostrar cerca del submit).
+    // both     = ambos (compat con usos viejos).
+    'mode' => 'both',
 ])
 
 @php
     $siteKey = config('services.recaptcha.site_key');
     $enabled = config('services.recaptcha.enabled') && filled($siteKey);
+    $renderWidget = $enabled && in_array($mode, ['widget', 'both'], true);
+    $renderDisclaimer = $enabled && in_array($mode, ['disclaimer', 'both'], true);
 @endphp
 
-@if ($enabled)
+@if ($renderWidget)
     {{-- El <script src> de Google reCAPTCHA se inyecta via @@assets desde el
          componente Livewire padre (alta-reclamo / alta-reporte). @@assets no
          funciona en sub-componentes blade. --}}
@@ -19,6 +27,7 @@
     <div wire:ignore
          x-data="{
              intervalId: null,
+             retryTimeoutId: null,
              siteKey: @js($siteKey),
              action: @js($action),
              target: @js($target),
@@ -30,9 +39,15 @@
                  try {
                      window.grecaptcha.execute(this.siteKey, { action: this.action }).then(token => {
                          $wire.set(this.target, token, true);
-                     }).catch(err => console.warn('reCAPTCHA execute error', err));
+                     }).catch(err => {
+                         console.warn('reCAPTCHA execute error, reintentando en 5s', err);
+                         clearTimeout(this.retryTimeoutId);
+                         this.retryTimeoutId = setTimeout(() => this.fetchToken(), 5000);
+                     });
                  } catch (e) {
-                     console.warn('reCAPTCHA execute exception', e);
+                     console.warn('reCAPTCHA execute exception, reintentando en 5s', e);
+                     clearTimeout(this.retryTimeoutId);
+                     this.retryTimeoutId = setTimeout(() => this.fetchToken(), 5000);
                  }
              },
              start() {
@@ -54,7 +69,9 @@
          }"
          x-init="start()"
          style="display:none;"></div>
+@endif
 
+@if ($renderDisclaimer)
     {{-- Disclaimer requerido por ToS de Google reCAPTCHA --}}
     <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
         Protegido por reCAPTCHA — aplican la
