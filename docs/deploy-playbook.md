@@ -126,6 +126,15 @@ Si la migración falló a mitad de camino, restaurar el backup del paso 1.
 - **Verificar:**
   - [ ] En *Motivos*, editar un motivo público → aparece el tilde
         "Gestión personalizada". Marcarlo y guardar → se ve el badge en el listado.
-  - [ ] En `/nuevo-reclamo` (sin sesión) ese motivo **no** aparece.
+  - [ ] En `/nuevo-reclamo` ese motivo **no** aparece (tampoco si el navegador
+        tiene sesión iniciada en el panel).
   - [ ] Desde el panel logueado → *Nuevo Reclamo*, el motivo **sí** aparece y se
         puede dar de alta.
+
+### 2026-09-25 (fix) — Gestión personalizada visible en la web pública con sesión iniciada
+
+- Solo código PHP (`app/Livewire/AltaReclamo.php`): sin migración ni assets.
+  Alcanza con los pasos 3 y 7 (y reiniciar PHP-FPM si hay OPcache sin
+  revalidación: `sudo systemctl reload php*-fpm`).
+- **Verificar:** logueado en el panel, abrir `/nuevo-reclamo` en el mismo
+  navegador → el motivo de gestión personalizada **no** aparece.

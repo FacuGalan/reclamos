@@ -788,14 +788,23 @@ class AltaReclamo extends Component
         $this->movimientosDetalle = []; // Limpiar movimientos
     }
 
+    /**
+     * Motivos de gestión personalizada (requieren presencialidad): solo se
+     * ofrecen en el alta del panel de atención con un usuario logueado. En la
+     * web pública no aparecen aunque el navegador tenga sesión iniciada.
+     * Se exige Auth además del contexto porque $contexto es modificable desde el cliente.
+     */
+    private function permiteGestionPersonalizada(): bool
+    {
+        return $this->contexto === 'privado' && Auth::check();
+    }
+
     public function cargarCategorias()
     {
         $query = Categoria::where('privada', $this->isPrivateArea)
             ->where('activo', true);
 
-        // Motivos de gestión personalizada: solo los carga un usuario logueado
-        // desde el panel de atención (requieren presencialidad del ciudadano).
-        if (Auth::guest()) {
+        if (!$this->permiteGestionPersonalizada()) {
             $query->where('gestion_personalizada', false);
         }
 
@@ -964,14 +973,15 @@ class AltaReclamo extends Component
                 session()->flash('error', 'Verificación de seguridad fallida. Refrescá la página e intentá de nuevo.');
                 return;
             }
+        }
 
-            // Guardia server-side: un invitado no puede dar de alta un motivo
-            // de gestión personalizada aunque manipule el categoria_id.
-            if (Categoria::where('id', $this->categoria_id)->where('gestion_personalizada', true)->exists()) {
-                $this->isSaving = false;
-                $this->addError('categoria_id', 'Este motivo requiere atención presencial. Acercate a la municipalidad para iniciarlo.');
-                return;
-            }
+        // Guardia server-side: fuera del panel de atención no se puede dar de
+        // alta un motivo de gestión personalizada aunque se manipule el categoria_id.
+        if (!$this->permiteGestionPersonalizada()
+            && Categoria::where('id', $this->categoria_id)->where('gestion_personalizada', true)->exists()) {
+            $this->isSaving = false;
+            $this->addError('categoria_id', 'Este motivo requiere atención presencial. Acercate a la municipalidad para iniciarlo.');
+            return;
         }
 
         try {
