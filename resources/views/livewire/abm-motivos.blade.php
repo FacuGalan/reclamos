@@ -145,6 +145,11 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium {{ $motivo->activo ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500' }}">
                                     {{ $motivo->nombre }}
+                                    @if($motivo->gestion_personalizada)
+                                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                                            Gestión personalizada
+                                        </span>
+                                    @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -355,6 +360,24 @@
                                 @endif
                             </p>
                         </div>
+
+                        <!-- Gestión personalizada (solo motivos públicos) -->
+                        @if(!$privada)
+                            <div>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        wire:model.live="gestion_personalizada"
+                                        class="w-4 h-4 text-[#77BF43] bg-gray-100 border-gray-300 rounded focus:ring-[#77BF43] focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Gestión personalizada
+                                    </span>
+                                </label>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    Requiere presencialidad: no se muestra al ciudadano en la web pública, solo se carga desde el panel de atención
+                                </p>
+                            </div>
+                        @endif
 
                         <!-- Botones -->
                         <div class="flex justify-end space-x-3 pt-4">

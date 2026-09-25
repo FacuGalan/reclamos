@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Categoria extends Model
 {
-    protected $fillable = ['nombre','nombre_publico','area_id', 'privada', 'urgente', 'activo', 'cuadrilla_id'];
+    protected $fillable = ['nombre','nombre_publico','area_id', 'privada', 'urgente', 'gestion_personalizada', 'activo', 'cuadrilla_id'];
 
     public function area()
     {
@@ -19,6 +19,7 @@ class Categoria extends Model
 
     protected $casts = [
         'urgente' => 'boolean',
+        'gestion_personalizada' => 'boolean',
         'activo' => 'boolean',
         'privada' => 'boolean',
     ];

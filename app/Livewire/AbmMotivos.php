@@ -38,6 +38,7 @@ class AbmMotivos extends Component
     public $cuadrilla_id = '';
     public $urgente = false;
     public $privada = false;
+    public $gestion_personalizada = false;
 
     // Estado de guardado
     public $isSaving = false;
@@ -164,6 +165,7 @@ class AbmMotivos extends Component
         }
         $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->get();
         $this->urgente = false;
+        $this->gestion_personalizada = false;
         // Precargar privada con el valor actual del usuario (ver_privada)
         $this->privada = (bool) $this->ver_privada;
     }
@@ -201,6 +203,7 @@ class AbmMotivos extends Component
         $this->cuadrillas = Cuadrilla::where('area_id', $motivo->area_id)->get();
         $this->urgente = (bool) $motivo->urgente;
         $this->privada = (bool) $motivo->privada;
+        $this->gestion_personalizada = (bool) $motivo->gestion_personalizada;
     }
 
     public function resetForm()
@@ -208,6 +211,7 @@ class AbmMotivos extends Component
         $this->nombre = '';
         $this->area_id = '';
         $this->privada = (bool) $this->ver_privada;
+        $this->gestion_personalizada = false;
         $this->isSaving = false;
         $this->resetErrorBag();
     }
@@ -323,6 +327,9 @@ class AbmMotivos extends Component
             // forzar el valor al ver_privada del usuario — evita manipulación del DOM.
             $privadaFinal = $this->puedeEditarPrivada ? (bool) $this->privada : (bool) $this->ver_privada;
 
+            // Gestión personalizada solo aplica a motivos públicos (no privados).
+            $gestionPersonalizadaFinal = !$privadaFinal && (bool) $this->gestion_personalizada;
+
             // PASO 3: Lógica de guardado
             if (!$this->isEditing) {
                 Categoria::create([
@@ -331,6 +338,7 @@ class AbmMotivos extends Component
                     'area_id' => $this->area_id,
                     'cuadrilla_id' => $this->cuadrilla_id == '' ? null : $this->cuadrilla_id,
                     'urgente' => $this->urgente,
+                    'gestion_personalizada' => $gestionPersonalizadaFinal,
                     'privada' => $privadaFinal ? 1 : 0,
                 ]);
 
@@ -351,6 +359,7 @@ class AbmMotivos extends Component
                     'area_id' => $this->area_id,
                     'cuadrilla_id' => $this->cuadrilla_id,
                     'urgente' => $this->urgente,
+                    'gestion_personalizada' => $gestionPersonalizadaFinal,
                     'privada' => $privadaFinal ? 1 : 0,
                 ]);
 

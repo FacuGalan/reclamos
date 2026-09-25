@@ -793,6 +793,12 @@ class AltaReclamo extends Component
         $query = Categoria::where('privada', $this->isPrivateArea)
             ->where('activo', true);
 
+        // Motivos de gestión personalizada: solo los carga un usuario logueado
+        // desde el panel de atención (requieren presencialidad del ciudadano).
+        if (Auth::guest()) {
+            $query->where('gestion_personalizada', false);
+        }
+
         if ($this->por_oficio && $this->tieneAreasConOficio) {
             $query->whereIn('area_id', $this->areasConOficio);
         } else {
@@ -956,6 +962,14 @@ class AltaReclamo extends Component
                 $this->isSaving = false;
                 $this->addError('recaptchaToken', 'No pudimos verificar que no seas un bot. Refrescá la página e intentá de nuevo.');
                 session()->flash('error', 'Verificación de seguridad fallida. Refrescá la página e intentá de nuevo.');
+                return;
+            }
+
+            // Guardia server-side: un invitado no puede dar de alta un motivo
+            // de gestión personalizada aunque manipule el categoria_id.
+            if (Categoria::where('id', $this->categoria_id)->where('gestion_personalizada', true)->exists()) {
+                $this->isSaving = false;
+                $this->addError('categoria_id', 'Este motivo requiere atención presencial. Acercate a la municipalidad para iniciarlo.');
                 return;
             }
         }
