@@ -1,15 +1,34 @@
 # Playbook de deploy — Reclamos
 
-Pasos para actualizar el servidor de producción con lo último de `main`.
+Pasos para actualizar un servidor con lo último de `main`. En el server lo
+ejecuta Claude Code con el skill `/actualizar` (`.claude/skills/actualizar`).
 
 > Reemplazar `/ruta/al/proyecto` por la ruta real del proyecto en el servidor
 > y `www-data` por el usuario del servidor web si es otro.
+
+## Entornos
+
+| Entorno | Dónde | Qué corre | Quién lo actualiza |
+|---|---|---|---|
+| Local | PC de cada dev (XAMPP) | su rama de trabajo | la sesión de Claude local |
+| **Prueba** | servidor de prueba | último `main` | Claude del server de prueba (`/actualizar`) |
+| **Producción** | servidor oficial | un commit de `main` **ya validado en prueba** | Claude del server oficial (`/actualizar`) |
+
+- Todo cambio entra a `main` por PR (lo crea y mergea la sesión local).
+- Orden fijo: **merge → deploy a prueba → validar → deploy a producción**.
+  Nunca deployar a producción algo que no pasó por prueba.
+- Para producción se deploya el **commit exacto** que se validó en prueba
+  (`git rev-parse HEAD` en prueba), no "lo último de main": si entró otro PR
+  después, ese todavía no fue validado.
+- Cada server tiene su propio `.env` y su propia base: nunca copiar `.env` ni
+  bases entre prueba y producción.
 
 ---
 
 ## 0. Antes de empezar
 
 - Confirmar que `main` en GitHub tiene los cambios a deployar.
+- Producción: tener el hash del commit validado en prueba.
 - Revisar si el deploy trae **migraciones** (carpeta `database/migrations`) o
   cambios en **dependencias** (`composer.lock`, `package-lock.json`).
 - Si hay migraciones: hacer **backup de la base** (paso 1).
@@ -32,8 +51,17 @@ php artisan down --retry=60
 ```bash
 git fetch origin
 git status              # no debería haber cambios locales en el servidor
+git log --oneline HEAD..origin/main   # qué baja
+
+# Prueba:
 git pull origin main
+# Producción (commit validado en prueba; debe estar en origin/main):
+git merge --ff-only <hash_validado_en_prueba>
 ```
+
+Verificar después que el server quedó en el commit esperado
+(`git rev-parse HEAD`). Un `200` en el navegador **no** prueba que el deploy
+haya corrido.
 
 Si `git status` muestra archivos modificados en el servidor, **no pisarlos a
 ciegas**: revisar qué son (ver `SECURITY_REMEDIATION.md` por archivos
