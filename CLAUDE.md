@@ -70,62 +70,75 @@ php artisan serve
 7. Cambios de esquema siempre vía migración nueva (nunca editar una migración ya
    deployada), con default que no rompa datos existentes.
 
-## Entornos
+## Con quién estás trabajando
 
-1. **Local**: PC de cada dev (Facundo, Flor), XAMPP + base local propia.
-2. **Prueba**: servidor de prueba, corre el último `main`.
-3. **Producción**: servidor oficial, corre un commit de `main` ya validado en prueba.
+Mirá `gh api user --jq .login` (o `git config user.name`):
 
-Orden fijo: **PR mergeado → deploy a prueba → validar → deploy a producción.**
-Los deploys los corre Claude Code **en cada servidor** con `/actualizar`; la
-sesión local no tiene acceso a los servers y no ofrece deployar desde acá.
+- **FacuGalan (Facundo)**: dueño del proyecto, técnico. Maneja Git, GitHub y
+  los deploys. Con él se puede hablar de ramas, PRs, migraciones y servidores.
+- **Cualquier otra persona (ej. Flor)**: **no es técnica en Git/GitHub ni en
+  deploys.** Con ella:
+  - Hablar solo de lo funcional: qué cambió, qué ver en pantalla, qué probar.
+  - **Nunca** mencionar ramas, commits, PRs, merges, conflictos, CI, servidores,
+    entornos ni deploys, ni pedirle decisiones sobre eso. Todo lo de Git lo
+    resuelve Claude solo, en silencio.
+  - No frenar ni trabar el trabajo por temas de Git/GitHub/deploy. Si algo de
+    eso no se puede resolver solo (ej. conflicto ambiguo con cambios de
+    Facundo, error de permisos en GitHub), decirle en una línea simple
+    "esto lo tiene que ver Facundo" y seguir con lo demás.
 
-## Flujo de trabajo: todo cambio por PR (OBLIGATORIO, para todos)
+## Entornos (contexto interno; no explicárselo a Flor)
 
-Nunca commitear ni pushear directo a `main`. No hay CI: el PR es para dejar
-registro de cada cambio y no pisarse entre devs. **La propia sesión crea el PR
-y lo mergea sola**, sin esperar aprobación ni checks.
+1. **Local**: PC de cada dev, XAMPP + base local propia. Acá se desarrolla.
+2. **Prueba** y 3. **Producción**: servidores. Los deploya **Facundo** a partir
+   de lo que está en `main` en GitHub (con el skill `/actualizar` en cada
+   server). La sesión local **nunca** deploya ni ofrece deployar.
 
-1. **Al empezar una tarea** (antes de tocar código):
-   - `git status` y rama actual. Si hay trabajo sin commitear o una rama en
-     curso, preguntar antes de moverse.
-   - `gh pr list --state open`: si hay PRs abiertos (propios o del otro dev),
-     avisar y preguntar si se mergean primero o se sigue igual.
-   - `git checkout main && git pull origin main`; si cambiaron
-     `composer.lock` / `package-lock.json` / migraciones: `composer install`,
-     `npm install`, `php artisan migrate`.
-   - Rama nueva: `feat/<descripcion-corta>`, `fix/<...>` o `docs/<...>`.
-2. **Implementar y probar** en el navegador (web pública **y** panel si toca
-   `AltaReclamo`). Pedirle a la persona que lo pruebe en vivo cuando sea UI.
-3. **Commit**: mensajes en español, imperativo y descriptivo
-   (ej.: "Fix captcha: discriminar por usuario logueado, no por isPrivateArea").
-   Antes de `git add -A`, revisar `git status`: no commitear `.env`, dumps,
-   zips ni borrados (`D`) que no se hicieron a propósito.
-4. **Si el cambio necesita algo en el deploy** (migración, `npm run build`,
-   variable de `.env` nueva, pasos manuales): agregar la nota en
-   `docs/deploy-playbook.md` → "Notas por release", **en el mismo PR**.
-5. **PR + merge**, todo seguido y sin pedir confirmación:
+## Flujo de trabajo (para todos)
+
+Nunca commitear ni pushear directo a `main`: todo entra por PR, que la propia
+sesión crea y mergea. No hay CI ni revisión: no esperar checks ni aprobaciones.
+
+1. **Al empezar una tarea**, en silencio:
+   - `git status`. Si estás en `main` limpio: `git pull origin main` y crear
+     rama `feat/<descripcion-corta>` o `fix/<...>`. Si ya hay una rama de
+     trabajo en curso con cambios sin subir, seguir en ella.
+   - Si el pull trajo cambios en `composer.lock` / `package-lock.json` /
+     migraciones: `composer install`, `npm install`, `php artisan migrate`.
+2. **Desarrollar en local** aplicando los cambios a medida que se piden.
+   Pedirle a la persona que pruebe en el navegador (web pública **y** panel
+   si toca `AltaReclamo`). Commitear en la rama a medida que se avanza, con
+   mensajes en español, imperativo y descriptivo. Antes de `git add -A`,
+   revisar `git status`: no commitear `.env`, dumps, zips ni borrados (`D`)
+   que no se hicieron a propósito.
+3. **No subir nada a GitHub hasta que la persona lo pida** ("subilo",
+   "mergealo", "subí los cambios", "ya está, mandalo"). Ahí, sin pedir
+   confirmación:
    ```bash
+   git fetch origin && git merge origin/main      # traer lo de Facundo; resolver conflictos
    git push -u origin <rama>
-   gh pr create --base main --title "<titulo>" --body "<qué cambia, cómo probarlo, notas de deploy>"
+   gh pr create --base main --title "<titulo>" --body "<qué cambia, cómo probarlo, notas para el deploy>"
    gh pr merge --squash --delete-branch
    git checkout main && git pull origin main
    ```
-   Pushear **todos** los commits antes de mergear (lo que se pushee después
-   queda huérfano).
-6. **Cerrar** con un resumen: número de PR, qué probar, y si hay deploy
-   pendiente "queda para correr `/actualizar` en el server de prueba" (con las
-   migraciones / variables de `.env` que trae).
+   - Pushear **todos** los commits antes de mergear.
+   - Si el merge con `origin/main` trajo cambios, probar rápido que lo
+     tocado siga andando antes de subir.
+   - A Flor confirmarle solo "listo, los cambios quedaron subidos".
+4. **Notas para el deploy** (siempre, en silencio): si el cambio trae
+   migración, clases Tailwind nuevas / JS / CSS, variables de `.env` nuevas o
+   pasos manuales, agregarlo en `docs/deploy-playbook.md` → "Notas por
+   release" dentro del mismo PR, y también en el cuerpo del PR. Así Facundo
+   sabe qué hacer al deployar.
 
 Además:
-- Nunca `git push --force`, `git reset --hard` ni borrar ramas ajenas sin
-  confirmarlo con la persona.
-- Si el merge da conflicto: `git merge origin/main` en la rama, resolver,
-  probar de nuevo y recién ahí mergear. Si el conflicto es con trabajo del
-  otro dev y no es obvio, preguntar.
+- Nunca `git push --force`, `git reset --hard`, ni borrar ramas o trabajo
+  ajeno.
+- Si `gh` no está logueado o no hay permisos sobre el repo: no insistir; con
+  Flor, "esto lo tiene que ver Facundo".
 
-## Deploy
+## Deploy (solo Facundo / Claude en los servidores)
 
-- Seguir `docs/deploy-playbook.md` (lo usa el skill `/actualizar` en los servers).
-- Las notas por release tienen que ser autocontenidas: las lee un Claude en el
-  servidor que no vio la sesión de desarrollo.
+- Seguir `docs/deploy-playbook.md` (lo usa el skill `/actualizar`).
+- Orden: `main` → servidor de prueba → validar → servidor oficial con el commit
+  validado en prueba.

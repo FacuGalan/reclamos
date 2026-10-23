@@ -12,6 +12,7 @@
       "Bash(git add*)",
       "Bash(git commit*)",
       "Bash(git merge origin/main*)",
+      "Bash(gh api user*)",
       "Bash(git push -u origin *)",
       "Bash(git push origin *)",
       "Bash(gh pr *)",
