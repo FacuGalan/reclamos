@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Claude Code: settings personales de cada dev
+/.claude/settings.local.json
