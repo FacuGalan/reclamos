@@ -24,6 +24,7 @@ class Reclamo extends Model
         'area_id',
         'categoria_id',
         'responsable_id',
+        'contacto_agenda_id',
         'notificado',
         'no_aplica',
         'persona_id',
@@ -57,6 +58,12 @@ class Reclamo extends Model
     public function responsable()
     {
         return $this->belongsTo(User::class, 'responsable_id');
+    }
+    // Contacto de la agenda que se hace cargo (solo reclamos internos, informativo).
+    // withTrashed: si el contacto se borra de la agenda, el reclamo lo sigue mostrando.
+    public function contactoAgenda()
+    {
+        return $this->belongsTo(ContactoAgenda::class, 'contacto_agenda_id')->withTrashed();
     }
     public function movimientos()
     {

@@ -327,7 +327,7 @@
         <strong>Historial del reclamo</strong>
         @foreach($datos['historial'] as $item)
             <div class="historial-item">
-                <strong>{{ $item['fecha'] }}</strong> - {{ $item['descripcion'] }} <em>({{ $item['usuario'] }})</em>
+                <strong>{{ $item['fecha'] }}</strong> - {{ $item['descripcion'] }}
             </div>
         @endforeach
     </div>

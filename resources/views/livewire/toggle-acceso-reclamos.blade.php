@@ -34,13 +34,5 @@
                 </svg>
             </button>
         </div>
-
-        <script>
-            document.addEventListener('livewire:init', () => {
-                Livewire.on('acceso-cambiado', () => {
-                    window.location.reload();
-                });
-            });
-        </script>
     @endif
 </div>

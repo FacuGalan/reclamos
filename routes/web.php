@@ -159,6 +159,10 @@ Route::view('edificios', 'edificios')
     ->middleware(['auth', 'verified'])
     ->name('edificios');
 
+Route::view('agenda', 'agenda')
+    ->middleware(['auth', 'verified'])
+    ->name('agenda');
+
 Route::view('mapa-barrios', 'mapa-barrios')
     ->middleware(['auth', 'verified'])
     ->name('mapa-barrios');

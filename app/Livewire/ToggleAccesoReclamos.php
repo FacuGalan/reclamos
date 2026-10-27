@@ -31,8 +31,13 @@ class ToggleAccesoReclamos extends Component
         $user->ver_privada = $this->verPrivada;
         $user->save();
 
-        // Refrescar la página para aplicar los cambios
-        $this->dispatch('acceso-cambiado');
+        // Recargar la página actual (sin query string, para no arrastrar página ni
+        // filtros del modo anterior) así se actualizan listado, filtros y menú.
+        // Antes se recargaba con un listener JS en 'livewire:init', que no se
+        // registraba al llegar a la página por wire:navigate.
+        // Solo se toma el path del Referer, así nunca redirige a otro dominio.
+        $path = parse_url((string) request()->header('Referer'), PHP_URL_PATH);
+        $this->redirect($path ? request()->getSchemeAndHttpHost() . $path : route('reclamos'));
     }
 
     public function render()
