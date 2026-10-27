@@ -539,6 +539,30 @@
                                 @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
 
+                            <!-- Responsable de la agenda (informativo, se guarda al elegirlo) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Responsable (Agenda)
+                                </label>
+                                <select
+                                    wire:model.live="contacto_agenda_id"
+                                    @if(!$editable) disabled @endif
+                                    class="w-full bg-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#77BF43] focus:border-[#77BF43] dark:bg-gray-700 dark:text-white disabled:opacity-70">
+                                    <option value="">Sin asignar</option>
+                                    @foreach($contactosAgenda as $contacto)
+                                        <option value="{{ $contacto->id }}">
+                                            {{ $contacto->nombre }}{{ $contacto->ocupacion ? ' - ' . $contacto->ocupacion : '' }}{{ $contacto->trashed() ? ' (eliminado de la agenda)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @php($contactoActual = $contactosAgenda->firstWhere('id', $contacto_agenda_id))
+                                @if($contactoActual?->telefono)
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                        Tel.: <a href="tel:{{ $contactoActual->telefono }}" class="font-medium hover:underline">{{ $contactoActual->telefono }}</a>
+                                    </p>
+                                @endif
+                            </div>
+
                         @endif
                     </div>
                 </div>

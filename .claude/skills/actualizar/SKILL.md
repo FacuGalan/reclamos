@@ -21,6 +21,11 @@ que no se pueden saltear.
 4. `git fetch origin` y mostrar `git log --oneline HEAD..origin/main`.
    Leer en `docs/deploy-playbook.md` → "Notas por release" lo que corresponda
    a esos commits (migraciones, assets, variables de `.env` nuevas).
+   Si esos commits agregan o tocan archivos en `docs/releases/`
+   (`git diff --name-only HEAD origin/main -- docs/releases`), leerlos
+   completos con `git show origin/main:<archivo>` **antes** de bajar el
+   código: traen problemas conocidos y cómo resolverlos. Ante cualquier
+   duda durante el deploy, buscar primero ahí.
 
 ## 2. Qué se deploya
 

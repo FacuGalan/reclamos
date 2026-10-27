@@ -7,6 +7,7 @@ use App\Models\Reclamo;
 use App\Models\Area;
 use App\Models\Categoria;
 use App\Models\Edificio;
+use App\Models\ContactoAgenda;
 use Illuminate\Support\Collection;
 use App\Models\Estado;
 use App\Models\Persona;
@@ -73,6 +74,7 @@ class ModificarReclamo extends Component
     public $categoria_id = '';
     public $estado_id = '';
     public $edificio_id = '';
+    public $contacto_agenda_id = ''; // Responsable de la agenda (solo internos, informativo)
 
     public $tranqueraEncontrada = null; // Para almacenar los datos de la tranquera encontrada
     public $tranqueraValida = false; // Para indicar si la tranquera es válida
@@ -101,6 +103,7 @@ class ModificarReclamo extends Component
     public $estados = [];
     public $areas = [];
     public $edificios = [];
+    public $contactosAgenda = [];
     public $edificioBusqueda = '';
     public $edificioSeleccionado = null;
     public $edificiosFiltrados = [];
@@ -195,6 +198,9 @@ class ModificarReclamo extends Component
         $this->estados = Estado::orderBy('nombre')->get();
         $this->areas = Area::orderBy('nombre')->get();
         $this->edificios = Edificio::orderBy('nombre')->get();
+        if ($this->isPrivateArea) {
+            $this->contactosAgenda = ContactoAgenda::orderBy('nombre')->get();
+        }
 
         // Cargar datos del reclamo
         $this->cargarDatosReclamo();
@@ -396,6 +402,15 @@ class ModificarReclamo extends Component
         $this->noAplica = $this->reclamo->no_aplica;
         $this->notificado = $this->reclamo->notificado; // Asignar valor de notificado si existe
         $this->edificio_id = $this->reclamo->edificio_id;
+        $this->contacto_agenda_id = $this->reclamo->contacto_agenda_id;
+
+        // Si el contacto asignado se borró de la agenda, sumarlo a la lista para que se siga viendo
+        if ($this->isPrivateArea && $this->contacto_agenda_id && !$this->contactosAgenda->contains('id', $this->contacto_agenda_id)) {
+            $borrado = ContactoAgenda::withTrashed()->find($this->contacto_agenda_id);
+            if ($borrado) {
+                $this->contactosAgenda->push($borrado);
+            }
+        }
 
         if ($this->numero_tranquera) {
             $this->tipo_ubicacion = 'tranquera';
@@ -430,6 +445,28 @@ class ModificarReclamo extends Component
         }
 
         $this->por_oficio = (bool) ($this->reclamo->por_oficio ?? false);
+    }
+
+    // Asignar responsable de la agenda: se guarda al momento, es solo informativo
+    public function updatedContactoAgendaId($valor)
+    {
+        if (!$this->isPrivateArea || !$this->editable) {
+            $this->contacto_agenda_id = $this->reclamo->contacto_agenda_id;
+            return;
+        }
+
+        $valor = $valor ?: null;
+        if ($valor && !ContactoAgenda::whereKey($valor)->exists()) {
+            $this->contacto_agenda_id = $this->reclamo->contacto_agenda_id;
+            return;
+        }
+
+        $this->reclamo->update(['contacto_agenda_id' => $valor]);
+
+        $this->dispatch('mensaje-toast', [
+            'icon' => 'success',
+            'text' => $valor ? 'Responsable de la agenda asignado' : 'Responsable de la agenda quitado',
+        ]);
     }
 
     // Método para filtrar categorías cuando se escribe en el input
@@ -803,6 +840,11 @@ class ModificarReclamo extends Component
                 'estado_id' => $this->estado_id,
             ]);
 
+            // El edificio solo aplica a reclamos internos (antes no se guardaba al editar)
+            if ($this->isPrivateArea) {
+                $this->reclamo->update(['edificio_id' => $this->edificio_id ?: null]);
+            }
+
             DB::commit();
 
             $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
@@ -860,7 +902,7 @@ class ModificarReclamo extends Component
         $reclamo = Reclamo::with([
             'persona', 'categoria', 'area', 'estado', 'edificio',
             'movimientos' => function($query) {
-                $query->with(['tipoMovimiento', 'usuario'])->orderBy('created_at', 'desc');
+                $query->with(['tipoMovimiento'])->orderBy('created_at', 'desc');
             }
         ])->find($this->reclamoId);
 
@@ -887,7 +929,6 @@ class ModificarReclamo extends Component
                 return [
                     'fecha' => $mov->created_at->format('Y-m-d (H:i)'),
                     'descripcion' => $mov->observaciones ?? 'Sin observaciones',
-                    'usuario' => $mov->usuario->name ?? 'Sistema'
                 ];
             })->toArray()
         ]]);

@@ -144,6 +144,11 @@ Si la migración falló a mitad de camino, restaurar el backup del paso 1.
 
 ## Notas por release
 
+Cada release con algo especial tiene acá un resumen. Si el release es grande,
+además hay una guía propia en `docs/releases/AAAA-MM-DD-<tema>.md` con
+contexto, problemas conocidos y cómo resolverlos: el Claude del servidor la lee
+antes de deployar.
+
 ### 2026-09-25 — Motivos de "gestión personalizada"
 
 - **Migración:** `2026_09_25_120000_add_gestion_personalizada_to_categorias_table`
@@ -166,3 +171,26 @@ Si la migración falló a mitad de camino, restaurar el backup del paso 1.
   revalidación: `sudo systemctl reload php*-fpm`).
 - **Verificar:** logueado en el panel, abrir `/nuevo-reclamo` en el mismo
   navegador → el motivo de gestión personalizada **no** aparece.
+
+### 2026-10-27 — Agenda de contactos, responsable en reclamos internos, fix toggle
+
+> Guía completa (qué puede fallar y cómo resolverlo):
+> `docs/releases/2026-10-27-agenda-contactos.md`. **Leerla antes de deployar.**
+
+- **Migración:** `2026_10_27_120000_create_contactos_agenda_table` (crea
+  `contactos_agenda` con soft delete, agrega `reclamos.contacto_agenda_id`
+  nullable con índice —sin FK a propósito, por datos viejos inconsistentes— y
+  **precarga 6 contactos**: Torres, Bernárdez, Defelippe, Cortessi, Tarulla,
+  Otros). Correr el paso 6.
+- **Assets:** clases Tailwind nuevas (listado de reclamos) → correr el paso 5.
+- **Verificar:**
+  - [ ] Usuario con acceso a internos → menú *Agenda* con los 6 contactos;
+        crear/editar/eliminar.
+  - [ ] Reclamo interno → campo "Responsable (Agenda)" en el alta (panel) y
+        dentro del reclamo (se guarda solo); aparece en el listado (columna
+        Categoría) y en el filtro de búsqueda avanzada.
+  - [ ] Editar un reclamo interno y cambiar el edificio → queda guardado
+        (antes no se guardaba).
+  - [ ] Usuario con acceso a ambos: el botón Internos/Públicos recarga el
+        listado y el menú al instante (también entrando a Reclamos desde el menú).
+  - [ ] *Imprimir Orden*: el historial ya no muestra el nombre del operador.

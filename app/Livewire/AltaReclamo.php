@@ -8,6 +8,7 @@ use App\Models\Reclamo;
 use App\Models\Area;
 use App\Models\Categoria;
 use App\Models\Edificio;
+use App\Models\ContactoAgenda;
 use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\Domicilios;
@@ -51,6 +52,8 @@ class AltaReclamo extends Component
     public $area_id = '';
     public $categoria_id = '';
     public $edificio_id = '';
+    public $contacto_agenda_id = ''; // Responsable de la agenda (solo internos del panel, informativo)
+    public $contactosAgenda = [];
     public $userAreas = []; // Áreas del usuario autenticado
 
     // Reclamo por oficio (panel logueado, no-interno)
@@ -211,6 +214,10 @@ class AltaReclamo extends Component
 
         $this->edificios = Edificio::orderBy('nombre')->get();
         $this->edificiosFiltrados = $this->edificios;
+
+        if ($this->puedeAsignarContactoAgenda()) {
+            $this->contactosAgenda = ContactoAgenda::orderBy('nombre')->get();
+        }
 
         if ($this->isPrivateArea) {
             try {
@@ -799,6 +806,16 @@ class AltaReclamo extends Component
         return $this->contexto === 'privado' && Auth::check();
     }
 
+    /**
+     * El responsable de la agenda solo se asigna en el alta de reclamos internos
+     * del panel. El formulario interno público (contexto 'externo', sin sesión)
+     * también usa isPrivateArea, por eso se mira el contexto y Auth.
+     */
+    public function puedeAsignarContactoAgenda(): bool
+    {
+        return $this->isPrivateArea && $this->contexto === 'privado' && Auth::check();
+    }
+
     public function cargarCategorias()
     {
         $query = Categoria::where('privada', $this->isPrivateArea)
@@ -1108,6 +1125,10 @@ class AltaReclamo extends Component
                 'area_id' => $this->area_id,
                 'categoria_id' => $this->categoria_id,
                 'edificio_id' => $this->edificio_id === '' ? null : $this->edificio_id,
+                'contacto_agenda_id' => $this->puedeAsignarContactoAgenda() && $this->contacto_agenda_id
+                    && ContactoAgenda::whereKey($this->contacto_agenda_id)->exists()
+                    ? $this->contacto_agenda_id
+                    : null,
                 'estado_id' => $estadoInicial->id,
                 'persona_id' => $persona?->id,
                 'domicilio_id' => $domicilio?->id,
@@ -1221,7 +1242,7 @@ class AltaReclamo extends Component
             'descripcion', 'imagen', 'direccion', 'entre_calles', 'direccion_rural', 'coordenadas',
             'area_id', 'categoria_id', 'persona_dni', 'persona_nombre',
             'persona_apellido', 'persona_telefono', 'persona_email',
-            'tipo_ubicacion', 'numero_tranquera'
+            'tipo_ubicacion', 'numero_tranquera', 'contacto_agenda_id'
         ]);
 
         // Resetear propiedades específicas de tranqueras

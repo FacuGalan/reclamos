@@ -30,6 +30,13 @@
                         </flux:navlist.item>
                     @endif
                    
+                    @if(Auth::user()->rol->lReclamosAbm && Auth::user()->ver_privada)
+                        <flux:navlist.item class="flux-nav-custom" icon="book-open" :href="route('agenda')"
+                                        :current="request()->routeIs('agenda')" wire:navigate>
+                                        Agenda
+                        </flux:navlist.item>
+                    @endif
+
                     @if(Auth::user()->rol->lReportesAbm)
                         <flux:navlist.item class="flux-nav-custom" icon="exclamation-triangle" :href="route('reportes')"
                                         :current="request()->routeIs(['reportes'])">

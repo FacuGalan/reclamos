@@ -12,6 +12,7 @@ use App\Models\Barrio;
 use App\Models\Edificio;
 use App\Models\User;
 use App\Models\Cuadrilla;
+use App\Models\ContactoAgenda;
 use App\Models\ModeloExportacionReclamo;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Session;
@@ -52,6 +53,8 @@ class AbmReclamos extends Component
     public $filtro_cuadrilla = '';
     #[Session]
     public $filtro_urgente = '';
+    #[Session]
+    public $filtro_contacto_agenda = '';
 
     public $filtrosActivos = 0; // Contador de filtros activos
 
@@ -76,6 +79,7 @@ class AbmReclamos extends Component
     public $edificios = [];
     public $usuarios = [];
     public $cuadrillas = [];
+    public $contactosAgenda = [];
 
     public $listaTimestamp; // NUEVO: para forzar re-renderización
 
@@ -97,6 +101,7 @@ class AbmReclamos extends Component
         'filtro_usuario' => ['except' => ''],
         'filtro_responsable' => ['except' => ''],
         'filtro_cuadrilla' => ['except' => ''],
+        'filtro_contacto_agenda' => ['except' => ''],
         'currentView' => ['except' => 'list'],              // ← AGREGAR ESTO
         'selectedReclamoId' => ['except' => null, 'as' => 'reclamo'], // ← AGREGAR ESTO
     ];
@@ -113,6 +118,7 @@ class AbmReclamos extends Component
         // Obtener las áreas del usuario logueado
         $this->userAreas = Auth::user()->areas->pluck('id')->toArray();
         $this->ver_privada = Auth::user()->ver_privada; // Verificar si el usuario puede ver categorías privadas
+        $this->limpiarFiltrosDeOtroModo();
 
         $this->listaTimestamp = microtime(true); // Inicializar timestamp
 
@@ -129,6 +135,7 @@ class AbmReclamos extends Component
         $this->edificios = Edificio::orderBy('nombre')->get();
         $this->usuarios = User::getUsuariosDeAreas();
         $this->cuadrillas = Cuadrilla::whereIn('area_id', $this->userAreas)->orderBy('nombre')->get();
+        $this->contactosAgenda = ContactoAgenda::orderBy('nombre')->get();
 
         // Validación: Si está en modo edit, verificar que el reclamo existe y pertenece a las áreas del usuario
         if ($this->currentView === 'edit' && $this->selectedReclamoId) {
@@ -209,9 +216,14 @@ class AbmReclamos extends Component
         $this->resetPage();
     }
 
+    public function updatedFiltroContactoAgenda()
+    {
+        $this->resetPage();
+    }
+
     public function getReclamos($forExport = false)
     {
-        $query = Reclamo::with(['persona', 'categoria', 'area', 'estado','barrio','edificio', 'usuario', 'responsable'])
+        $query = Reclamo::with(['persona', 'categoria', 'area', 'estado','barrio','edificio', 'usuario', 'responsable', 'contactoAgenda'])
             ->whereIn('area_id', $this->userAreas) // ← FILTRO PRINCIPAL: Solo reclamos de áreas del usuario
             ->orderByRaw('CASE WHEN estado_id = 6 THEN 0 ELSE 1 END')
             ->orderBy('created_at', 'desc');
@@ -286,6 +298,11 @@ class AbmReclamos extends Component
             });
         }
 
+        // Responsable de la agenda: solo aplica a reclamos internos
+        if ($this->filtro_contacto_agenda && $this->ver_privada) {
+            $query->where('contacto_agenda_id', $this->filtro_contacto_agenda);
+        }
+
         if ($this->filtro_urgente !== '') {
             $query->whereHas('categoria', function($q) {
                 $q->where('urgente', $this->filtro_urgente);
@@ -346,6 +363,7 @@ class AbmReclamos extends Component
         $this->filtro_responsable = '';
         $this->filtro_cuadrilla = '';
         $this->filtro_urgente = '';
+        $this->filtro_contacto_agenda = '';
 
         $this->resetPage();
     }
@@ -365,6 +383,7 @@ class AbmReclamos extends Component
         $this->filtro_usuario = '';
         $this->filtro_responsable = '';
         $this->filtro_cuadrilla = '';
+        $this->filtro_contacto_agenda = '';
 
         // Aplicar solo el filtro de urgentes
         $this->filtro_urgente = '1';
@@ -610,6 +629,23 @@ class AbmReclamos extends Component
         return $export->download();
     }
 
+    // Los filtros se guardan en sesión: al cambiar entre internos/públicos con el
+    // toggle pueden quedar filtros del otro modo que ya no se ven en pantalla
+    // (barrio, edificio, motivo, responsable de agenda) y vaciarían el listado.
+    public function limpiarFiltrosDeOtroModo()
+    {
+        if ($this->ver_privada) {
+            $this->filtro_barrio = '';
+        } else {
+            $this->filtro_edificio = '';
+            $this->filtro_contacto_agenda = '';
+        }
+
+        if ($this->filtro_categoria && !Categoria::whereKey($this->filtro_categoria)->where('privada', $this->ver_privada)->exists()) {
+            $this->filtro_categoria = '';
+        }
+    }
+
     public function contarFiltrosActivos()
     {
         $filtros = [
@@ -626,6 +662,7 @@ class AbmReclamos extends Component
             $this->filtro_responsable,
             $this->filtro_cuadrilla,
             $this->filtro_urgente,
+            $this->filtro_contacto_agenda,
         ];
 
         $this->filtrosActivos = collect($filtros)->filter(function($valor) {

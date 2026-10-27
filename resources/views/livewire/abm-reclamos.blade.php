@@ -410,6 +410,22 @@
                         <option value="0">No urgentes</option>
                     </select>
                 </div>
+
+                @if($this->ver_privada)
+                    <!-- Responsable de la agenda (solo internos) -->
+                    <div x-show="mostrarMas" x-cloak>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0">Responsable (Agenda)</label>
+                        <select
+                            wire:model.live="filtro_contacto_agenda"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
+                            {{ $filtro_contacto_agenda ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}">
+                            <option value="">Todos</option>
+                            @foreach($contactosAgenda as $contacto)
+                                <option value="{{ $contacto->id }}">{{ $contacto->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
             </div>
 
             <!-- Botón ver más -->
@@ -537,6 +553,14 @@
                                     @if (!$reclamo->categoria->privada)
                                         <div class="text-sm text-gray-500 dark:text-gray-400" title="{{ $reclamo->area->nombre }}">
                                             {{ $reclamo->area->nombre }}
+                                        </div>
+                                    @elseif ($reclamo->contactoAgenda)
+                                        <div class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-indigo-700 dark:text-indigo-300"
+                                             title="Responsable: {{ $reclamo->contactoAgenda->nombre }}{{ $reclamo->contactoAgenda->telefono ? ' - Tel. ' . $reclamo->contactoAgenda->telefono : '' }}">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            <span>{{ $reclamo->contactoAgenda->nombre }}</span>
                                         </div>
                                     @endif
                                 </td>
