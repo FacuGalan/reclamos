@@ -1035,6 +1035,23 @@
                                     placeholder="Entre qué calles se encuentra">
                                 @error('direccion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
+
+                            @if($this->puedeAsignarContactoAgenda())
+                                <!-- Responsable de la agenda (opcional, informativo) -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Responsable (Agenda)
+                                    </label>
+                                    <select
+                                        wire:model="contacto_agenda_id"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white">
+                                        <option value="">Sin asignar</option>
+                                        @foreach($contactosAgenda as $contacto)
+                                            <option value="{{ $contacto->id }}">{{ $contacto->nombre }}{{ $contacto->ocupacion ? ' - ' . $contacto->ocupacion : '' }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                         </div>
                     @endif
                  
@@ -1169,6 +1186,9 @@
                                     @else
                                         <p><strong>Edificio:</strong> {{ $edificios->find($edificio_id)->nombre ?? 'Edificio no encontrado' }}</p>
                                         <p><strong>Dirección:</strong> {{ $direccion}}</p>
+                                        @if($this->puedeAsignarContactoAgenda() && $contacto_agenda_id)
+                                            <p><strong>Responsable:</strong> {{ $contactosAgenda->firstWhere('id', $contacto_agenda_id)?->nombre }}</p>
+                                        @endif
                                     @endif
                                 <p><strong>Descripción:</strong> {{ $descripcion }}</p>
                             </div>

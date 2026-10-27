@@ -840,6 +840,11 @@ class ModificarReclamo extends Component
                 'estado_id' => $this->estado_id,
             ]);
 
+            // El edificio solo aplica a reclamos internos (antes no se guardaba al editar)
+            if ($this->isPrivateArea) {
+                $this->reclamo->update(['edificio_id' => $this->edificio_id ?: null]);
+            }
+
             DB::commit();
 
             $this->dispatch('nuevo-reclamo-detectado')->to('contador-notificaciones-reclamos');
