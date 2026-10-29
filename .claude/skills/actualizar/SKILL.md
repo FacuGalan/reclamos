@@ -34,12 +34,17 @@ que no se pueden saltear.
   `git rev-parse HEAD` en el server de prueba). Verificar que esté en
   `origin/main` y hacer `git merge --ff-only <hash>`. Si no hay hash
   validado, NO deployar.
+- **Si no hay server de prueba** (hoy no existe): deployar `origin/main` a
+  producción solo con OK explícito de Facundo, nombrando el hash.
 
 ## 3. Resto del deploy
 
-Pasos 1, 2 y 4–9 del playbook: backup de la base si hay migraciones,
-`php artisan down`, composer, `npm ci && npm run build` si cambiaron
-vistas/JS/CSS, `php artisan migrate --force`, cachés, permisos y `php artisan up`.
+Pasos 1, 2 y 4–9 del playbook: backup de la base si hay migraciones
+(credenciales vía `php artisan tinker`, no `mysqldump -u root`),
+`php artisan down`, composer **solo si cambió `composer.lock`**,
+`npm ci && npm run build` si cambiaron vistas/JS/CSS,
+`php artisan migrate --force`, cachés, verificar ACL de permisos (no `chown`)
+y `php artisan up`. No tocar `public/.htaccess` (cambios solo por PR).
 Si una migración falla: dejar el sitio en mantenimiento, mostrar el error
 completo y preguntar (restaurar backup o corregir).
 

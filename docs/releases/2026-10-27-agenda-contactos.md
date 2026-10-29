@@ -112,7 +112,7 @@ Con un usuario que vea reclamos internos:
 | No aparece *Agenda* en el menú | usuario sin `lReclamosAbm` o viendo públicos | idem; revisar rol del usuario |
 | El responsable se ve sin estilos / íconos gigantes | no se recompilaron assets | paso 5 (`npm ci && npm run build`) |
 | Error `Unknown column 'contacto_agenda_id'` | migración no corrió | paso 6 |
-| Error `Class "App\Models\ContactoAgenda" not found` | autoload/OPcache viejo | `composer dump-autoload -o` y `sudo systemctl reload php*-fpm` |
+| Error `Class "App\Models\ContactoAgenda" not found` | autoload/OPcache viejo | `composer dump-autoload -o`; si sigue, `systemctl reload apache2` (pedir OK, afecta todo el server; no hay php-fpm) |
 | El botón Internos/Públicos no recarga | JS/vista cacheada vieja | `php artisan view:clear`, recargar con Ctrl+F5 |
 
 ## Rollback de este release
