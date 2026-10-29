@@ -240,6 +240,9 @@ antes de deployar.
 - **composer.lock alineado con producción** (Livewire 3.8.11, Laravel
   12.70.1 y ~50 dependencias del `composer update` hecho en el server el
   2026-10-22). En el server `composer install` no cambia nada.
+- **Requiere PHP ≥ 8.4.1** (Symfony 8.1 vía Carbon 3.15). Producción ya
+  tiene 8.4; las PCs de desarrollo con XAMPP en PHP 8.2 tienen que pasar a
+  8.4 para poder hacer `composer install`.
 - Playbook y skill `/actualizar` corregidos según el deploy del 2026-10-29
   (backup con credenciales vía artisan, permisos con ACL, OPcache con
   mod_php, sin server de prueba, Node, `public/.htaccess`).
