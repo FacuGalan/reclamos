@@ -5,7 +5,11 @@ Contexto para Claude Code. Leelo antes de tocar código.
 ## Stack
 
 - Laravel 12 + Livewire 3 (Volt + Flux free), Tailwind 4 vía Vite, MySQL (XAMPP en dev).
-- PHP ^8.2. Entorno de dev: Windows + XAMPP, proyecto en `C:\xampp\htdocs\reclamos`.
+- **PHP 8.4** (lo exige el `composer.lock`; producción corre 8.4). Entorno de
+  dev: Windows + XAMPP, proyecto en `C:\xampp\htdocs\reclamos`. El PHP del
+  XAMPP es 8.2 y lo usan otros proyectos: para Reclamos usar `C:\php84\php.exe`
+  (`C:\php84\php.exe artisan ...`, `C:\php84\php.exe C:\composer\composer.phar ...`)
+  y no reemplazar el del XAMPP.
 - Todo el código, comentarios, UI y mensajes de commit van **en español**.
 
 ## Setup local (primera vez)
@@ -18,7 +22,7 @@ php artisan key:generate
 php artisan migrate         # la BD debe existir (crearla en phpMyAdmin)
 php artisan storage:link
 npm run build               # o `npm run dev` mientras se trabaja
-php artisan serve
+php artisan serve           # en todos: C:\php84\php.exe en vez de php (ver Stack)
 ```
 
 - `RECAPTCHA_ENABLED=false` en dev (sin keys el verificador hace bypass).
