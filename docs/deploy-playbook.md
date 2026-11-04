@@ -252,6 +252,7 @@ antes de deployar.
 
 - Exportar daba error 500 si el listado incluía un reclamo "por oficio"
   (`persona_id` NULL, es un valor válido). Ahora esas filas salen con `N/A`.
+  También salen con `N/A` categoría, área, estado o fecha de creación si faltan.
 - El export sube `memory_limit` a 512M y el tiempo a 120 s solo para ese request.
 - Sin migraciones, sin assets y sin variables de `.env` nuevas.
 - **Verificar:**

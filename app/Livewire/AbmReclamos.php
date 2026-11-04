@@ -532,11 +532,11 @@ class AbmReclamos extends Component
             ],
             'categoria' => [
                 'etiqueta' => 'Categoría',
-                'valor' => fn($r) => $r->categoria->nombre
+                'valor' => fn($r) => $r->categoria?->nombre ?? 'N/A'
             ],
             'area' => [
                 'etiqueta' => 'Área',
-                'valor' => fn($r) => $r->area->nombre
+                'valor' => fn($r) => $r->area?->nombre ?? 'N/A'
             ],
             'numero_tranquera' => [
                 'etiqueta' => 'Tranquera',
@@ -560,7 +560,7 @@ class AbmReclamos extends Component
             ],
             'estado' => [
                 'etiqueta' => 'Estado',
-                'valor' => fn($r) => $r->estado->nombre
+                'valor' => fn($r) => $r->estado?->nombre ?? 'N/A'
             ],
             'usuario_creador' => [
                 'etiqueta' => 'Usuario Creador',
@@ -572,7 +572,7 @@ class AbmReclamos extends Component
             ],
             'fecha_creacion' => [
                 'etiqueta' => 'Fecha Creación',
-                'valor' => fn($r) => $r->created_at->format('d/m/Y H:i')
+                'valor' => fn($r) => $r->created_at?->format('d/m/Y H:i') ?? 'N/A'
             ],
             'descripcion' => [
                 'etiqueta' => 'Descripción',
