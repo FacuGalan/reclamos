@@ -492,6 +492,11 @@ class AbmReclamos extends Component
     // Método para exportar a Excel
     public function exportarExcel($modeloId = null)
     {
+        // PhpSpreadsheet arma el archivo completo en memoria: con listados grandes
+        // no alcanza el límite por defecto del servidor. Aplica solo a este request.
+        ini_set('memory_limit', '512M');
+        set_time_limit(120);
+
         // 1. Obtener los datos filtrados
         $data = $this->getReclamos(true)->get();
 
@@ -507,15 +512,15 @@ class AbmReclamos extends Component
             ],
             'nombre_persona' => [
                 'etiqueta' => 'Nombre',
-                'valor' => fn($r) => $r->persona->nombre
+                'valor' => fn($r) => $r->persona?->nombre ?? 'N/A'
             ],
             'apellido_persona' => [
                 'etiqueta' => 'Apellido',
-                'valor' => fn($r) => $r->persona->apellido
+                'valor' => fn($r) => $r->persona?->apellido ?? 'N/A'
             ],
             'dni' => [
                 'etiqueta' => 'DNI',
-                'valor' => fn($r) => $r->persona->dni
+                'valor' => fn($r) => $r->persona?->dni ?? 'N/A'
             ],
             'telefono' => [
                 'etiqueta' => 'Teléfono',

@@ -247,3 +247,14 @@ antes de deployar.
   (backup con credenciales vía artisan, permisos con ACL, OPcache con
   mod_php, sin server de prueba, Node, `public/.htaccess`).
 - Sin migraciones ni assets.
+
+### 2026-11-04 — Fix del export de reclamos a Excel
+
+- Exportar daba error 500 si el listado incluía un reclamo "por oficio"
+  (`persona_id` NULL, es un valor válido). Ahora esas filas salen con `N/A`.
+- El export sube `memory_limit` a 512M y el tiempo a 120 s solo para ese request.
+- Sin migraciones, sin assets y sin variables de `.env` nuevas.
+- **Verificar:**
+  - [ ] Exportar un listado con un reclamo por oficio, con "exportar todo" y
+        con un modelo de exportación: descarga el Excel con `N/A` en esa fila.
+  - [ ] Exportar un listado grande (más de 2.000 filas): descarga sin error.
