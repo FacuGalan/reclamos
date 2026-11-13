@@ -716,12 +716,12 @@
                                                         </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $hist->usuario->name }}
+                                    {{ $hist->usuario?->name ?? 'Usuario no encontrado' }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ $hist->tipoMovimiento->nombre }}
+                                {{ $hist->tipoMovimiento?->nombre ?? '-' }}
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -731,10 +731,12 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <!-- CLAVE CORREGIDA: Incluye el timestamp para forzar re-renderización -->
-                                <livewire:estado-badge 
-                                    :estado-id="$hist->estado->id" 
-                                    size="small" 
+                                @if($hist->estado)
+                                <livewire:estado-badge
+                                    :estado-id="$hist->estado->id"
+                                    size="small"
                                     wire:key="estado-hist-{{ $hist->id }}-{{ $historialTimestamp }}" />
+                                @endif
                             </td>
                         </tr>
                     @empty

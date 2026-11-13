@@ -18,7 +18,8 @@ class Movimiento extends Model
     }
     public function usuario()
     {
-        return $this->belongsTo(User::class, 'usuario_id');
+        // Incluye usuarios dados de baja: el historial tiene que seguir mostrando quién hizo el movimiento
+        return $this->belongsTo(User::class, 'usuario_id')->withTrashed();
     }
     public function reclamo()
     {
